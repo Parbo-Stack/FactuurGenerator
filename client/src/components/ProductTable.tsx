@@ -11,7 +11,8 @@ interface ProductTableProps {
 }
 
 const formatCurrency = (amount: number, currency: string): string => {
-  const formatter = new Intl.NumberFormat('en-US', {
+  const locale = currency === 'EUR' ? 'nl-NL' : 'en-US';
+  const formatter = new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: currency,
     minimumFractionDigits: 2,
