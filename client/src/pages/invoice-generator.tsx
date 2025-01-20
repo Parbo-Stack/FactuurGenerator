@@ -4,7 +4,6 @@ import InvoiceForm from "@/components/InvoiceForm";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import Ads from "@/components/Ads";
-import AffiliateBanner from "@/components/AffiliateBanner";
 
 export default function InvoiceGenerator() {
   const { t, i18n } = useTranslation();
@@ -17,6 +16,11 @@ export default function InvoiceGenerator() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Top Ad */}
+      <div className="w-full max-w-4xl mx-auto pt-4">
+        <Ads slot="top-ad" className="min-h-[90px]" />
+      </div>
+
       <div className="flex gap-8 p-8">
         {/* Main Content */}
         <div className="flex-1 max-w-4xl">
@@ -45,10 +49,11 @@ export default function InvoiceGenerator() {
           </div>
         </div>
 
-        {/* Sidebar */}
+        {/* Sidebar Ads */}
         <div className="w-80 space-y-6 hidden lg:block">
-          <AffiliateBanner />
-          <Ads slot="sidebar-ad" className="min-h-[600px]" />
+          <Ads slot="sidebar-top" className="min-h-[300px]" />
+          <Ads slot="sidebar-middle" className="min-h-[300px]" />
+          <Ads slot="sidebar-bottom" className="min-h-[300px]" />
         </div>
       </div>
     </div>
