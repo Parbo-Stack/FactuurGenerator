@@ -16,12 +16,18 @@ export default function InvoiceGenerator() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Top Ad */}
+      {/* Header Ad */}
       <div className="w-full max-w-4xl mx-auto pt-4">
-        <Ads slot="top-ad" className="min-h-[90px]" />
+        <Ads slot="header-banner" className="min-h-[90px]" />
       </div>
 
       <div className="flex gap-8 p-8">
+        {/* Left Sidebar Ads */}
+        <div className="w-64 space-y-6 hidden xl:block">
+          <Ads slot="left-sidebar-top" className="min-h-[600px]" />
+          <Ads slot="left-sidebar-bottom" className="min-h-[300px]" />
+        </div>
+
         {/* Main Content */}
         <div className="flex-1 max-w-4xl">
           <div className="flex justify-between items-center mb-8">
@@ -37,24 +43,35 @@ export default function InvoiceGenerator() {
             </Button>
           </div>
 
+          {/* In-content Ad */}
+          <div className="mb-8">
+            <Ads slot="content-top" className="min-h-[250px]" />
+          </div>
+
           <Card>
             <CardContent className="pt-6">
               <InvoiceForm />
             </CardContent>
           </Card>
 
-          {/* Bottom Ad */}
-          <div className="mt-8">
-            <Ads slot="bottom-ad" className="min-h-[250px]" />
+          {/* Bottom Ads */}
+          <div className="mt-8 space-y-6">
+            <Ads slot="content-bottom" className="min-h-[250px]" />
+            <Ads slot="footer-banner" className="min-h-[90px]" />
           </div>
         </div>
 
-        {/* Sidebar Ads */}
-        <div className="w-80 space-y-6 hidden lg:block">
-          <Ads slot="sidebar-top" className="min-h-[300px]" />
-          <Ads slot="sidebar-middle" className="min-h-[300px]" />
-          <Ads slot="sidebar-bottom" className="min-h-[300px]" />
+        {/* Right Sidebar Ads */}
+        <div className="w-64 space-y-6 hidden lg:block">
+          <Ads slot="right-sidebar-top" className="min-h-[600px]" />
+          <Ads slot="right-sidebar-middle" className="min-h-[300px]" />
+          <Ads slot="right-sidebar-bottom" className="min-h-[300px]" />
         </div>
+      </div>
+
+      {/* Mobile Bottom Ad */}
+      <div className="lg:hidden mt-8">
+        <Ads slot="mobile-bottom" className="min-h-[250px]" />
       </div>
     </div>
   );
