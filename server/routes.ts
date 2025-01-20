@@ -29,12 +29,10 @@ export function registerRoutes(app: Express): Server {
 
       // Create SMTP transporter using Gmail
       const transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 587,
-        secure: false, // Use TLS
+        service: 'gmail',
         auth: {
           user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASSWORD, // Should be an App Password
+          pass: process.env.EMAIL_PASSWORD,
         },
         debug: true, // Enable debug output
       });
