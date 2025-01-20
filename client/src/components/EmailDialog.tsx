@@ -46,6 +46,7 @@ export default function EmailDialog({ open, onClose, invoiceData }: EmailDialogP
           to: email,
           invoiceNumber: invoiceData.invoiceNumber,
           pdfBase64: base64Data,
+          companyName: invoiceData.companyName,
         }),
       });
 
