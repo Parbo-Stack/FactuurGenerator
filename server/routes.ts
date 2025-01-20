@@ -8,18 +8,41 @@ export function registerRoutes(app: Express): Server {
     try {
       const { to, pdfBase64, invoiceNumber } = req.body;
 
+      // Validate request data
+      if (!to || !pdfBase64 || !invoiceNumber) {
+        throw new Error("Missing required fields: to, pdfBase64, or invoiceNumber");
+      }
+
       if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
         throw new Error("Email credentials not configured");
       }
 
+      console.log("Attempting to send email to:", to);
+      console.log("Using email configuration:", {
+        user: process.env.EMAIL_USER,
+        passwordLength: process.env.EMAIL_PASSWORD?.length || 0
+      });
+
       // Create SMTP transporter using Gmail
       const transporter = nodemailer.createTransport({
-        service: "gmail",
+        host: "smtp.gmail.com",
+        port: 587,
+        secure: false, // Use TLS
         auth: {
           user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASSWORD,
+          pass: process.env.EMAIL_PASSWORD, // Should be an App Password
         },
+        debug: true, // Enable debug output
       });
+
+      // Verify transporter configuration
+      try {
+        await transporter.verify();
+        console.log("SMTP connection verified successfully");
+      } catch (verifyError) {
+        console.error("SMTP verification failed:", verifyError);
+        throw new Error("Failed to connect to email server");
+      }
 
       // Email content
       const mailOptions = {
@@ -43,14 +66,22 @@ export function registerRoutes(app: Express): Server {
         ],
       };
 
+      console.log("Sending email with options:", {
+        to: mailOptions.to,
+        subject: mailOptions.subject,
+        hasAttachment: !!mailOptions.attachments?.length
+      });
+
       // Send email
       await transporter.sendMail(mailOptions);
+      console.log("Email sent successfully");
       res.json({ message: "Email sent successfully" });
     } catch (error: any) {
-      console.error("Email sending failed:", error);
+      console.error("Email sending failed - Full error:", error);
       res.status(500).json({ 
         message: "Failed to send email", 
-        error: error.message || "Unknown error occurred" 
+        error: error.message || "Unknown error occurred",
+        details: error.stack
       });
     }
   });
