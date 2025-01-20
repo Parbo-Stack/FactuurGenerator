@@ -10,6 +10,15 @@ interface ProductTableProps {
   form: UseFormReturn<InvoiceData>;
 }
 
+const formatCurrency = (amount: number, currency: string): string => {
+  const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: 2,
+  });
+  return formatter.format(amount);
+};
+
 export default function ProductTable({ form }: ProductTableProps) {
   const { t } = useTranslation();
   const products = form.watch("products");
@@ -73,8 +82,8 @@ export default function ProductTable({ form }: ProductTableProps) {
                   })}
                 />
               </TableCell>
-              <TableCell>
-                € {(product.quantity * product.price).toFixed(2)}
+              <TableCell className="text-right">
+                {formatCurrency(product.quantity * product.price, form.watch('currency'))}
               </TableCell>
               <TableCell>
                 <Button
@@ -104,12 +113,12 @@ export default function ProductTable({ form }: ProductTableProps) {
         </Button>
 
         <div className="space-y-2 text-right">
-          <p>Subtotal: € {subtotal.toFixed(2)}</p>
+          <p>Subtotal: {formatCurrency(subtotal, form.watch('currency'))}</p>
           <p>
-            {t("invoice.vat.amount")} ({vatRate}%): € {vatAmount.toFixed(2)}
+            {t("invoice.vat.amount")} ({vatRate}%): {formatCurrency(vatAmount, form.watch('currency'))}
           </p>
           <p className="font-bold">
-            {t("invoice.vat.total")}: € {total.toFixed(2)}
+            {t("invoice.vat.total")}: {formatCurrency(total, form.watch('currency'))}
           </p>
         </div>
       </div>

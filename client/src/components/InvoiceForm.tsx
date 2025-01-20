@@ -46,6 +46,14 @@ export default function InvoiceForm() {
     defaultValues,
   });
 
+  useEffect(() => {
+    const subscription = form.watch('currency', () => {
+      // Force re-render when currency changes
+      form.trigger('products');
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
+
   // Save form data to localStorage whenever it changes
   useEffect(() => {
     const subscription = form.watch((data) => {
