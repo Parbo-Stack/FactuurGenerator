@@ -47,19 +47,16 @@ export default function InvoiceForm() {
   });
 
   useEffect(() => {
-    const unsubscribe = form.watch('currency', () => {
-      // Force re-render when currency changes
-      form.trigger('products');
+    // Watch currency changes
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'currency') {
+        form.trigger('products');
+      }
+      // Save to localStorage on any change
+      localStorage.setItem('invoiceFormData', JSON.stringify(value));
     });
-    return () => unsubscribe();
-  }, [form]);
-
-  // Save form data to localStorage whenever it changes
-  useEffect(() => {
-    const unsubscribe = form.watch((data) => {
-      localStorage.setItem('invoiceFormData', JSON.stringify(data));
-    });
-    return () => unsubscribe();
+    
+    return () => subscription.unsubscribe();
   }, [form]);
 
   const handleLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
