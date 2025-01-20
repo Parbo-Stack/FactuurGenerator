@@ -14,7 +14,11 @@ export function registerRoutes(app: Express): Server {
       }
 
       if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-        throw new Error("Email credentials not configured");
+        console.error("Missing email credentials in environment variables");
+        return res.status(500).json({ 
+          message: "Email service not configured", 
+          error: "Missing EMAIL_USER or EMAIL_PASSWORD environment variables. Please configure these in Replit Secrets."
+        });
       }
 
       console.log("Attempting to send email to:", to);
