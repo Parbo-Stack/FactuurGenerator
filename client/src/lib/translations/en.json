@@ -38,7 +38,18 @@
       "amount": "VAT Amount",
       "total": "Total inc. VAT"
     },
+    "email": {
+      "title": "Send Invoice",
+      "description": "Enter the recipient's email address to send the invoice",
+      "recipient": "Recipient Email",
+      "send": "Send Invoice",
+      "sending": "Sending...",
+      "sent": "Invoice sent successfully",
+      "error": "Failed to send invoice"
+    },
     "pdfGenerated": "Invoice PDF has been generated",
-    "pdfError": "Failed to generate PDF"
+    "pdfError": "Failed to generate PDF",
+    "emailSent": "Invoice has been sent successfully",
+    "emailError": "Failed to send invoice email"
   }
 }

@@ -38,7 +38,18 @@
       "amount": "BTW Bedrag",
       "total": "Totaal incl. BTW"
     },
+    "email": {
+      "title": "Factuur Versturen",
+      "description": "Voer het e-mailadres van de ontvanger in",
+      "recipient": "E-mailadres Ontvanger",
+      "send": "Factuur Versturen",
+      "sending": "Versturen...",
+      "sent": "Factuur is succesvol verstuurd",
+      "error": "Kon de factuur niet versturen"
+    },
     "pdfGenerated": "Factuur PDF is gegenereerd",
-    "pdfError": "Kon geen PDF genereren"
+    "pdfError": "Kon geen PDF genereren",
+    "emailSent": "Factuur is succesvol verstuurd",
+    "emailError": "Kon de factuur niet per e-mail versturen"
   }
 }
