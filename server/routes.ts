@@ -8,12 +8,16 @@ export function registerRoutes(app: Express): Server {
     try {
       const { to, pdfBase64, invoiceNumber } = req.body;
 
-      // Create SMTP transporter using environment variables
+      if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+        throw new Error("Email credentials not configured");
+      }
+
+      // Create SMTP transporter using Gmail
       const transporter = nodemailer.createTransport({
-        service: "gmail",  // Changed to use Gmail service directly
+        service: "gmail",
         auth: {
           user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASSWORD, // Should be an App Password
+          pass: process.env.EMAIL_PASSWORD,
         },
       });
 
@@ -42,9 +46,12 @@ export function registerRoutes(app: Express): Server {
       // Send email
       await transporter.sendMail(mailOptions);
       res.json({ message: "Email sent successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Email sending failed:", error);
-      res.status(500).json({ message: "Failed to send email", error: error.message });
+      res.status(500).json({ 
+        message: "Failed to send email", 
+        error: error.message || "Unknown error occurred" 
+      });
     }
   });
 

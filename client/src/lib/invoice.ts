@@ -59,14 +59,15 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
   doc.setTextColor(0, 100, 0); // Dark green color
   doc.setFont("helvetica", "bold");
   doc.text("FACTUUR", 20, currentY);
+
+  // Logo placement at the same height as FACTUUR
+  if (logoDataUrl) {
+    doc.addImage(logoDataUrl, 'JPEG', pageWidth - 50, currentY - 20, 30, 30);
+  }
+
   doc.setTextColor(0, 0, 0); // Reset to black
   doc.setFont("helvetica", "normal");
   currentY += 20;
-
-  // Logo placement (if provided)
-  if (logoDataUrl) {
-    doc.addImage(logoDataUrl, 'JPEG', pageWidth - 50, 20, 30, 30);
-  }
 
   // Company details
   doc.setFontSize(10);
@@ -79,13 +80,13 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
   ];
   doc.text(companyDetails, 20, currentY);
 
-  // Invoice details (right side, below logo)
+  // Invoice details (right side)
   doc.text([
     `Factuurnummer: ${data.invoiceNumber}`,
     `Datum: ${data.date.toLocaleDateString("nl-NL")}`,
   ], pageWidth - 90, currentY);
 
-  currentY += 40; // Space before table
+  currentY += 40;
   drawLine(currentY);
   currentY += 15;
 
