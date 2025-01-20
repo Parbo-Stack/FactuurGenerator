@@ -13,7 +13,9 @@
       "address": "Adres",
       "coc": "KvK-nummer",
       "vat": "BTW-nummer",
-      "iban": "IBAN"
+      "iban": "IBAN",
+      "logo": "Bedrijfslogo",
+      "uploadLogo": "Logo Uploaden"
     },
     "details": {
       "date": "Datum",

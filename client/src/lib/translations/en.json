@@ -13,7 +13,9 @@
       "address": "Address",
       "coc": "Chamber of Commerce Number",
       "vat": "VAT Number",
-      "iban": "IBAN"
+      "iban": "IBAN",
+      "logo": "Company Logo",
+      "uploadLogo": "Upload Logo"
     },
     "details": {
       "date": "Date",

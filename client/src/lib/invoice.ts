@@ -24,7 +24,7 @@ const currencySymbols = {
   EUR: "€",
   USD: "$",
   GBP: "£",
-};
+} as const;
 
 export const calculateTotals = (products: Product[], vatRate: number) => {
   const subtotal = products.reduce((sum, product) => sum + product.price * product.quantity, 0);
@@ -37,14 +37,19 @@ export const formatCurrency = (amount: number, currency: keyof typeof currencySy
   return `${currencySymbols[currency]} ${amount.toFixed(2)}`;
 };
 
-export const generatePDF = (data: InvoiceData) => {
+export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
   const doc = new jsPDF();
   const { subtotal, vatAmount, total } = calculateTotals(data.products, data.vatRate);
   const currency = currencySymbols[data.currency];
 
+  // Logo
+  if (logoDataUrl) {
+    doc.addImage(logoDataUrl, 'JPEG', 20, 20, 30, 30);
+  }
+
   // Header
   doc.setFontSize(20);
-  doc.text("FACTUUR", 20, 20);
+  doc.text("FACTUUR", logoDataUrl ? 60 : 20, 20);
 
   // Company details
   doc.setFontSize(12);
@@ -54,16 +59,16 @@ export const generatePDF = (data: InvoiceData) => {
     `KvK: ${data.cocNumber}`,
     `BTW: ${data.vatNumber}`,
     `IBAN: ${data.iban}`,
-  ], 20, 40);
+  ], 20, logoDataUrl ? 60 : 40);
 
   // Invoice details
   doc.text([
     `Factuurnummer: ${data.invoiceNumber}`,
     `Datum: ${data.date.toLocaleDateString("nl-NL")}`,
-  ], 120, 40);
+  ], 120, logoDataUrl ? 60 : 40);
 
   // Products table
-  let y = 80;
+  let y = logoDataUrl ? 100 : 80;
   doc.text("Omschrijving", 20, y);
   doc.text("Aantal", 100, y);
   doc.text("Prijs", 140, y);

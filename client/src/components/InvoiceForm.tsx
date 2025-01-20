@@ -8,9 +8,9 @@ import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
-import ProductTable from "./ProductTable";
-import InvoicePreview from "./InvoicePreview";
+import { Calendar as CalendarIcon, Upload } from "lucide-react";
+import ProductTable from "@/components/ProductTable";
+import InvoicePreview from "@/components/InvoicePreview";
 import { InvoiceData, generatePDF } from "@/lib/invoice";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
@@ -19,19 +19,33 @@ export default function InvoiceForm() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [showPreview, setShowPreview] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   const form = useForm<InvoiceData>({
     defaultValues: {
       products: [{ description: "", quantity: 1, price: 0 }],
-      vatRate: 21,
-      currency: "EUR",
+      vatRate: 21 as const,
+      currency: "EUR" as const,
       date: new Date(),
     },
   });
 
+  const handleLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const onSubmit = (data: InvoiceData) => {
     try {
-      const doc = generatePDF(data);
+      const doc = generatePDF(data, logoPreview);
       doc.save(`invoice-${data.invoiceNumber}.pdf`);
       toast({
         title: "Success",
@@ -49,6 +63,33 @@ export default function InvoiceForm() {
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div className="col-span-2">
+          <Label htmlFor="logo">{t("invoice.company.logo")}</Label>
+          <div className="mt-2 flex items-center gap-4">
+            {logoPreview && (
+              <img src={logoPreview} alt="Logo preview" className="h-16 w-16 object-contain" />
+            )}
+            <div className="relative">
+              <Input
+                id="logo"
+                type="file"
+                accept="image/*"
+                onChange={handleLogoChange}
+                className="hidden"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => document.getElementById("logo")?.click()}
+                className="flex items-center gap-2"
+              >
+                <Upload className="h-4 w-4" />
+                {t("invoice.company.uploadLogo")}
+              </Button>
+            </div>
+          </div>
+        </div>
+
         <div>
           <Label htmlFor="companyName">{t("invoice.company.name")}</Label>
           <Input
@@ -112,7 +153,7 @@ export default function InvoiceForm() {
           <Label htmlFor="vatRate">{t("invoice.vat.rate")}</Label>
           <Select
             value={form.watch("vatRate").toString()}
-            onValueChange={(value) => form.setValue("vatRate", parseInt(value))}
+            onValueChange={(value) => form.setValue("vatRate", parseInt(value) as 9 | 21)}
           >
             <SelectTrigger>
               <SelectValue />
@@ -128,7 +169,7 @@ export default function InvoiceForm() {
           <Label htmlFor="currency">Currency</Label>
           <Select
             value={form.watch("currency")}
-            onValueChange={(value) => form.setValue("currency", value)}
+            onValueChange={(value) => form.setValue("currency", value as "EUR" | "USD" | "GBP")}
           >
             <SelectTrigger>
               <SelectValue />
