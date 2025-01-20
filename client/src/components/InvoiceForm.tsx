@@ -24,6 +24,12 @@ export default function InvoiceForm() {
 
   const form = useForm<InvoiceData>({
     defaultValues: {
+      companyName: "",
+      address: "",
+      cocNumber: "",
+      vatNumber: "",
+      iban: "",
+      invoiceNumber: "INV-001",
       products: [{ description: "", quantity: 1, price: 0 }],
       vatRate: 21 as const,
       currency: "EUR" as const,
@@ -48,13 +54,13 @@ export default function InvoiceForm() {
       const doc = generatePDF(data, logoPreview);
       doc.save(`invoice-${data.invoiceNumber}.pdf`);
       toast({
-        title: "Success",
-        description: "Invoice PDF has been generated",
+        title: t("common.success"),
+        description: t("invoice.pdfGenerated"),
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to generate PDF",
+        title: t("common.error"),
+        description: t("invoice.pdfError"),
         variant: "destructive",
       });
     }
@@ -127,6 +133,14 @@ export default function InvoiceForm() {
           <Input
             id="iban"
             {...form.register("iban", { required: true })}
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="invoiceNumber">{t("invoice.details.number")}</Label>
+          <Input
+            id="invoiceNumber"
+            {...form.register("invoiceNumber", { required: true })}
           />
         </div>
 

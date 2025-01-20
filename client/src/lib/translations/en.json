@@ -4,7 +4,9 @@
     "cancel": "Cancel",
     "preview": "Preview",
     "download": "Download PDF",
-    "required": "Required"
+    "required": "Required",
+    "success": "Success",
+    "error": "Error"
   },
   "invoice": {
     "title": "Invoice Generator",
@@ -35,6 +37,8 @@
       "rate": "VAT Rate",
       "amount": "VAT Amount",
       "total": "Total inc. VAT"
-    }
+    },
+    "pdfGenerated": "Invoice PDF has been generated",
+    "pdfError": "Failed to generate PDF"
   }
 }

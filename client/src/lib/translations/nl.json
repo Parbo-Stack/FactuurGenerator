@@ -4,7 +4,9 @@
     "cancel": "Annuleren",
     "preview": "Voorbeeld",
     "download": "PDF Downloaden",
-    "required": "Verplicht"
+    "required": "Verplicht",
+    "success": "Succes",
+    "error": "Fout"
   },
   "invoice": {
     "title": "Factuur Generator",
@@ -35,6 +37,8 @@
       "rate": "BTW Tarief",
       "amount": "BTW Bedrag",
       "total": "Totaal incl. BTW"
-    }
+    },
+    "pdfGenerated": "Factuur PDF is gegenereerd",
+    "pdfError": "Kon geen PDF genereren"
   }
 }
