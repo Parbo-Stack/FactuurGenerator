@@ -1,0 +1,57 @@
+Create a Dutch invoice generator web app using HTML, CSS, and JavaScript (React.js for interactivity). The app should have the following features:
+
+1. **Invoice Generation Form:**
+   - Input fields for:
+     - Bedrijfsnaam (Company Name)
+     - Adres (Address)
+     - KvK-nummer (Chamber of Commerce number)
+     - IBAN/BTW-nummer (VAT number)
+     - Datum (Date selection with a date picker)
+     - Product/Dienst tabel (Product/Service table with columns: description, quantity, price per unit, and total)
+     - Automatic BTW (VAT) calculation (9% or 21%)
+     - Opmerkingen (Notes) section for additional comments
+   - Button to **preview and download invoice as PDF.**
+
+2. **Customization Options:**
+   - Logo upload (optional feature)
+   - Custom color themes for invoices
+   - Currency selection (EUR, USD, GBP)
+   - Language toggle: Dutch (default) and English
+
+3. **Export Options:**
+   - Download the generated invoice as a **PDF** (use `jsPDF` library).
+   - Send invoice via email (using a basic email-sending API).
+
+4. **Monetization:**
+   - Integrate **Google AdSense** for ad revenue.
+   - Add affiliate banners for bookkeeping services such as Moneybird or Exact Online.
+   - Place ads in non-intrusive areas (sidebar, footer, download confirmation).
+
+5. **User Experience Features:**
+   - Responsive design (mobile-first) using **Tailwind CSS or Bootstrap.**
+   - Save the last entered invoice data in **LocalStorage** for easy retrieval.
+   - One-click invoice number increment for sequential numbering.
+
+6. **Advanced Features (Optional):**
+   - Invoice history storage (Firebase for free cloud storage).
+   - Recurring invoice generator for premium users (paid feature).
+   - Generate QR codes for payment links (Tikkie, iDEAL).
+
+7. **Technical Implementation Details:**
+   - Use React.js for frontend interactivity.
+   - Use `jsPDF` for generating PDF invoices.
+   - Store user data locally with `localStorage` for session persistence.
+   - Deploy the frontend using **Vercel or Firebase Hosting.**
+
+8. **Marketing Features:**
+   - Add basic SEO optimizations (meta tags, schema.org markup).
+   - Include social media sharing buttons for easy sharing.
+
+9. **Design Considerations:**
+   - Keep UI minimalistic, focusing on simplicity and ease of use.
+   - Add a friendly welcome message and step-by-step guidance.
+   - Include a "feedback" button to collect user suggestions.
+
+Please include detailed comments in the code for clarity, and structure the code in a modular way for future scalability.
+
+Deploy the app to a free hosting platform and ensure the site is fully responsive across desktop, tablet, and mobile devices.
