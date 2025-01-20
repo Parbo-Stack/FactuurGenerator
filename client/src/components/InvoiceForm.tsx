@@ -13,7 +13,7 @@ import ProductTable from "@/components/ProductTable";
 import InvoicePreview from "@/components/InvoicePreview";
 import { InvoiceData, generatePDF } from "@/lib/invoice";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import EmailDialog from "./EmailDialog";
 
 export default function InvoiceForm() {
