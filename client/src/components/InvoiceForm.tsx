@@ -24,20 +24,35 @@ export default function InvoiceForm() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [showEmailDialog, setShowEmailDialog] = useState(false); // Added state for email dialog
 
+  const savedData = localStorage.getItem('invoiceFormData');
+  const defaultValues = savedData ? JSON.parse(savedData) : {
+    companyName: "",
+    address: "",
+    cocNumber: "",
+    vatNumber: "",
+    iban: "",
+    invoiceNumber: "",
+    products: [{ description: "", quantity: 1, price: 0 }],
+    vatRate: 21 as const,
+    currency: "EUR" as const,
+    date: new Date(),
+  };
+
+  if (defaultValues.date) {
+    defaultValues.date = new Date(defaultValues.date);
+  }
+
   const form = useForm<InvoiceData>({
-    defaultValues: {
-      companyName: "",
-      address: "",
-      cocNumber: "",
-      vatNumber: "",
-      iban: "",
-      invoiceNumber: "",
-      products: [{ description: "", quantity: 1, price: 0 }],
-      vatRate: 21 as const,
-      currency: "EUR" as const,
-      date: new Date(),
-    },
+    defaultValues,
   });
+
+  // Save form data to localStorage whenever it changes
+  useEffect(() => {
+    const subscription = form.watch((data) => {
+      localStorage.setItem('invoiceFormData', JSON.stringify(data));
+    });
+    return () => subscription.unsubscribe();
+  }, [form.watch]);
 
   const handleLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
