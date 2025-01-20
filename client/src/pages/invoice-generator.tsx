@@ -16,62 +16,64 @@ export default function InvoiceGenerator() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header Ad */}
-      <div className="w-full max-w-4xl mx-auto pt-4">
-        <Ads slot="header-banner" className="min-h-[90px]" />
+      {/* Top Banner Ad */}
+      <div className="w-full max-w-6xl mx-auto pt-4 px-4">
+        <Ads slot="header-banner" className="min-h-[90px] bg-white rounded-lg shadow-sm" />
       </div>
 
-      <div className="flex gap-8 p-8">
-        {/* Left Sidebar Ads */}
-        <div className="w-64 space-y-6 hidden xl:block">
-          <Ads slot="left-sidebar-top" className="min-h-[600px]" />
-          <Ads slot="left-sidebar-bottom" className="min-h-[300px]" />
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 max-w-4xl">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">
-              {t("invoice.title")}
-            </h1>
-            <Button
-              variant="outline"
-              onClick={toggleLanguage}
-              className="ml-4"
-            >
-              {i18n.language === "nl" ? "EN" : "NL"}
-            </Button>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col lg:flex-row gap-8 justify-center">
+          {/* Left Sidebar Ads */}
+          <div className="hidden lg:flex lg:w-64 flex-col gap-6">
+            <Ads slot="left-sidebar-top" className="min-h-[600px] bg-white rounded-lg shadow-sm" />
+            <Ads slot="left-sidebar-bottom" className="min-h-[300px] bg-white rounded-lg shadow-sm" />
           </div>
 
-          {/* In-content Ad */}
-          <div className="mb-8">
-            <Ads slot="content-top" className="min-h-[250px]" />
+          {/* Main Content */}
+          <div className="flex-1 max-w-3xl">
+            <div className="flex justify-between items-center mb-8">
+              <h1 className="text-3xl font-bold text-gray-900">
+                {t("invoice.title")}
+              </h1>
+              <Button
+                variant="outline"
+                onClick={toggleLanguage}
+                className="ml-4"
+              >
+                {i18n.language === "nl" ? "EN" : "NL"}
+              </Button>
+            </div>
+
+            {/* In-content Top Ad */}
+            <div className="mb-8">
+              <Ads slot="content-top" className="min-h-[250px] bg-white rounded-lg shadow-sm" />
+            </div>
+
+            <Card className="shadow-lg">
+              <CardContent className="p-6">
+                <InvoiceForm />
+              </CardContent>
+            </Card>
+
+            {/* Bottom Ads */}
+            <div className="mt-8 space-y-6">
+              <Ads slot="content-bottom" className="min-h-[250px] bg-white rounded-lg shadow-sm" />
+              <Ads slot="footer-banner" className="min-h-[90px] bg-white rounded-lg shadow-sm" />
+            </div>
           </div>
 
-          <Card>
-            <CardContent className="pt-6">
-              <InvoiceForm />
-            </CardContent>
-          </Card>
-
-          {/* Bottom Ads */}
-          <div className="mt-8 space-y-6">
-            <Ads slot="content-bottom" className="min-h-[250px]" />
-            <Ads slot="footer-banner" className="min-h-[90px]" />
+          {/* Right Sidebar Ads */}
+          <div className="hidden lg:flex lg:w-64 flex-col gap-6">
+            <Ads slot="right-sidebar-top" className="min-h-[600px] bg-white rounded-lg shadow-sm" />
+            <Ads slot="right-sidebar-middle" className="min-h-[300px] bg-white rounded-lg shadow-sm" />
+            <Ads slot="right-sidebar-bottom" className="min-h-[300px] bg-white rounded-lg shadow-sm" />
           </div>
         </div>
 
-        {/* Right Sidebar Ads */}
-        <div className="w-64 space-y-6 hidden lg:block">
-          <Ads slot="right-sidebar-top" className="min-h-[600px]" />
-          <Ads slot="right-sidebar-middle" className="min-h-[300px]" />
-          <Ads slot="right-sidebar-bottom" className="min-h-[300px]" />
+        {/* Mobile Bottom Ad */}
+        <div className="lg:hidden mt-8">
+          <Ads slot="mobile-bottom" className="min-h-[250px] bg-white rounded-lg shadow-sm" />
         </div>
-      </div>
-
-      {/* Mobile Bottom Ad */}
-      <div className="lg:hidden mt-8">
-        <Ads slot="mobile-bottom" className="min-h-[250px]" />
       </div>
     </div>
   );
