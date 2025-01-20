@@ -7,11 +7,11 @@ export function registerRoutes(app: Express): Server {
   // Email sending endpoint
   app.post("/api/send-invoice", async (req, res) => {
     try {
-      const { to, subject, pdfBase64, invoiceNumber } = req.body;
+      const { to, pdfBase64, invoiceNumber } = req.body;
 
-      // Create a test SMTP transporter
+      // Create SMTP transporter using environment variables
       const transporter = nodemailer.createTransport({
-        host: "smtp.ethereal.email",
+        host: "smtp.gmail.com", // Using Gmail SMTP
         port: 587,
         secure: false,
         auth: {
@@ -24,11 +24,18 @@ export function registerRoutes(app: Express): Server {
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to,
-        subject: subject || `Invoice ${invoiceNumber}`,
-        text: `Please find attached your invoice ${invoiceNumber}.`,
+        subject: `Factuur ${invoiceNumber}`,
+        text: `Hierbij ontvangt u uw factuur ${invoiceNumber}.`,
+        html: `
+          <div>
+            <p>Beste,</p>
+            <p>Hierbij ontvangt u uw factuur ${invoiceNumber}.</p>
+            <p>Met vriendelijke groet,<br>Factuur Generator</p>
+          </div>
+        `,
         attachments: [
           {
-            filename: `invoice-${invoiceNumber}.pdf`,
+            filename: `factuur-${invoiceNumber}.pdf`,
             content: Buffer.from(pdfBase64, 'base64'),
             contentType: 'application/pdf',
           },
@@ -43,9 +50,6 @@ export function registerRoutes(app: Express): Server {
       res.status(500).json({ message: "Failed to send email" });
     }
   });
-
-  // API routes would go here if needed
-  // Currently we don't need any API routes as everything is handled client-side
 
   const httpServer = createServer(app);
 

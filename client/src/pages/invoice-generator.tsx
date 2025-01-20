@@ -26,10 +26,15 @@ export default function InvoiceGenerator() {
         <div className="flex flex-col lg:flex-row gap-8 justify-center">
           {/* Main Content */}
           <div className="flex-1 max-w-3xl">
-            <div className="flex justify-between items-center mb-8">
-              <h1 className="text-3xl font-bold">
-                {t("invoice.title")}
-              </h1>
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h1 className="text-3xl font-bold">
+                  {t("invoice.title")}
+                </h1>
+                <p className="mt-2 text-lg text-muted-foreground">
+                  Facturen maken, snel en gratis!
+                </p>
+              </div>
               <div className="flex items-center gap-4">
                 <ThemeToggle />
                 <Button
