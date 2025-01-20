@@ -41,10 +41,20 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
   const doc = new jsPDF();
   const { subtotal, vatAmount, total } = calculateTotals(data.products, data.vatRate);
   const currency = currencySymbols[data.currency];
+  const pageWidth = doc.internal.pageSize.width;
+
+  // Helper function to draw horizontal line
+  const drawLine = (y: number) => {
+    doc.setDrawColor(200, 200, 200); // Light gray color for lines
+    doc.setLineWidth(0.1);
+    doc.line(20, y, pageWidth - 20, y);
+  };
 
   // Logo
+  let startY = 20;
   if (logoDataUrl) {
-    doc.addImage(logoDataUrl, 'JPEG', 20, 20, 30, 30);
+    doc.addImage(logoDataUrl, 'JPEG', 20, startY, 30, 30);
+    startY = 60;
   }
 
   // Header
@@ -59,23 +69,34 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
     `KvK: ${data.cocNumber}`,
     `BTW: ${data.vatNumber}`,
     `IBAN: ${data.iban}`,
-  ], 20, logoDataUrl ? 60 : 40);
+  ], 20, startY);
 
   // Invoice details
   doc.text([
     `Factuurnummer: ${data.invoiceNumber}`,
     `Datum: ${data.date.toLocaleDateString("nl-NL")}`,
-  ], 120, logoDataUrl ? 60 : 40);
+  ], 120, startY);
+
+  // Line after header
+  drawLine(startY + 30);
 
   // Products table
-  let y = logoDataUrl ? 100 : 80;
+  let y = startY + 40;
+
+  // Table header
+  doc.setFont(undefined, 'bold');
   doc.text("Omschrijving", 20, y);
   doc.text("Aantal", 100, y);
   doc.text("Prijs", 140, y);
   doc.text("Totaal", 180, y);
+  doc.setFont(undefined, 'normal');
 
-  y += 10;
-  data.products.forEach(product => {
+  // Line after table header
+  drawLine(y + 3);
+
+  // Table content
+  y += 15;
+  data.products.forEach((product, index) => {
     doc.text(product.description, 20, y);
     doc.text(product.quantity.toString(), 100, y);
     doc.text(`${currency} ${product.price.toFixed(2)}`, 140, y);
@@ -83,15 +104,28 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
     y += 10;
   });
 
-  // Totals
-  y += 10;
-  doc.text(`Subtotaal: ${currency} ${subtotal.toFixed(2)}`, 140, y);
-  doc.text(`BTW ${data.vatRate}%: ${currency} ${vatAmount.toFixed(2)}`, 140, y + 10);
-  doc.text(`Totaal: ${currency} ${total.toFixed(2)}`, 140, y + 20);
+  // Line before totals
+  drawLine(y + 3);
 
-  // Notes
+  // Totals
+  y += 15;
+  doc.text(`Subtotaal:`, 140, y);
+  doc.text(`${currency} ${subtotal.toFixed(2)}`, 180, y);
+
+  y += 10;
+  doc.text(`BTW ${data.vatRate}%:`, 140, y);
+  doc.text(`${currency} ${vatAmount.toFixed(2)}`, 180, y);
+
+  y += 10;
+  doc.setFont(undefined, 'bold');
+  doc.text(`Totaal:`, 140, y);
+  doc.text(`${currency} ${total.toFixed(2)}`, 180, y);
+  doc.setFont(undefined, 'normal');
+
+  // Line before notes
   if (data.notes) {
-    y += 40;
+    drawLine(y + 15);
+    y += 25;
     doc.text("Opmerkingen:", 20, y);
     doc.text(data.notes, 20, y + 10);
   }
