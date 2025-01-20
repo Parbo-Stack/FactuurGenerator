@@ -29,7 +29,7 @@ export default function InvoiceForm() {
       cocNumber: "",
       vatNumber: "",
       iban: "",
-      invoiceNumber: "INV-001",
+      invoiceNumber: "",
       products: [{ description: "", quantity: 1, price: 0 }],
       vatRate: 21 as const,
       currency: "EUR" as const,
@@ -141,6 +141,7 @@ export default function InvoiceForm() {
           <Input
             id="invoiceNumber"
             {...form.register("invoiceNumber", { required: true })}
+            placeholder="e.g., INV-001"
           />
         </div>
 
