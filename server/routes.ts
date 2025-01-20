@@ -1,6 +1,5 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import path from "path";
 import nodemailer from "nodemailer";
 
 export function registerRoutes(app: Express): Server {
@@ -11,12 +10,10 @@ export function registerRoutes(app: Express): Server {
 
       // Create SMTP transporter using environment variables
       const transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com", // Using Gmail SMTP
-        port: 587,
-        secure: false,
+        service: "gmail",  // Changed to use Gmail service directly
         auth: {
           user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASSWORD,
+          pass: process.env.EMAIL_PASSWORD, // Should be an App Password
         },
       });
 
@@ -47,7 +44,7 @@ export function registerRoutes(app: Express): Server {
       res.json({ message: "Email sent successfully" });
     } catch (error) {
       console.error("Email sending failed:", error);
-      res.status(500).json({ message: "Failed to send email" });
+      res.status(500).json({ message: "Failed to send email", error: error.message });
     }
   });
 
