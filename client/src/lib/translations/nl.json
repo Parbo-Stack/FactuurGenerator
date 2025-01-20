@@ -1,0 +1,38 @@
+{
+  "common": {
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "preview": "Voorbeeld",
+    "download": "PDF Downloaden",
+    "required": "Verplicht"
+  },
+  "invoice": {
+    "title": "Factuur Generator",
+    "company": {
+      "name": "Bedrijfsnaam",
+      "address": "Adres",
+      "coc": "KvK-nummer",
+      "vat": "BTW-nummer",
+      "iban": "IBAN"
+    },
+    "details": {
+      "date": "Datum",
+      "number": "Factuurnummer",
+      "notes": "Opmerkingen"
+    },
+    "products": {
+      "title": "Producten/Diensten",
+      "description": "Omschrijving",
+      "quantity": "Aantal",
+      "price": "Prijs",
+      "total": "Totaal",
+      "add": "Item Toevoegen",
+      "remove": "Verwijderen"
+    },
+    "vat": {
+      "rate": "BTW Tarief",
+      "amount": "BTW Bedrag",
+      "total": "Totaal incl. BTW"
+    }
+  }
+}

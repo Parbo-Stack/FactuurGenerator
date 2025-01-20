@@ -1,0 +1,38 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "preview": "Preview",
+    "download": "Download PDF",
+    "required": "Required"
+  },
+  "invoice": {
+    "title": "Invoice Generator",
+    "company": {
+      "name": "Company Name",
+      "address": "Address",
+      "coc": "Chamber of Commerce Number",
+      "vat": "VAT Number",
+      "iban": "IBAN"
+    },
+    "details": {
+      "date": "Date",
+      "number": "Invoice Number",
+      "notes": "Notes"
+    },
+    "products": {
+      "title": "Products/Services",
+      "description": "Description",
+      "quantity": "Quantity",
+      "price": "Price",
+      "total": "Total",
+      "add": "Add Item",
+      "remove": "Remove"
+    },
+    "vat": {
+      "rate": "VAT Rate",
+      "amount": "VAT Amount",
+      "total": "Total inc. VAT"
+    }
+  }
+}
