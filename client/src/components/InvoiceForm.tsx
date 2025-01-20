@@ -223,8 +223,8 @@ export default function InvoiceForm() {
       </div>
 
       {showPreview && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-background rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto border shadow-lg">
             <div className="flex justify-end mb-4">
               <Button variant="ghost" onClick={() => setShowPreview(false)}>
                 ✕

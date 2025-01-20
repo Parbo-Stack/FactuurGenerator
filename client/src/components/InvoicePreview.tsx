@@ -13,7 +13,7 @@ export default function InvoicePreview({ data }: InvoicePreviewProps) {
   const { subtotal, vatAmount, total } = calculateTotals(data.products, data.vatRate);
 
   return (
-    <Card className="bg-white">
+    <Card className="bg-background border">
       <CardContent className="p-8 space-y-6">
         {/* Header */}
         <div className="flex justify-between">
@@ -40,28 +40,30 @@ export default function InvoicePreview({ data }: InvoicePreviewProps) {
         </div>
 
         {/* Products Table */}
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t("invoice.products.description")}</TableHead>
-              <TableHead className="text-right">{t("invoice.products.quantity")}</TableHead>
-              <TableHead className="text-right">{t("invoice.products.price")}</TableHead>
-              <TableHead className="text-right">{t("invoice.products.total")}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.products.map((product, index) => (
-              <TableRow key={index}>
-                <TableCell>{product.description}</TableCell>
-                <TableCell className="text-right">{product.quantity}</TableCell>
-                <TableCell className="text-right">€ {product.price.toFixed(2)}</TableCell>
-                <TableCell className="text-right">
-                  € {(product.quantity * product.price).toFixed(2)}
-                </TableCell>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("invoice.products.description")}</TableHead>
+                <TableHead className="text-right">{t("invoice.products.quantity")}</TableHead>
+                <TableHead className="text-right">{t("invoice.products.price")}</TableHead>
+                <TableHead className="text-right">{t("invoice.products.total")}</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {data.products.map((product, index) => (
+                <TableRow key={index}>
+                  <TableCell>{product.description}</TableCell>
+                  <TableCell className="text-right">{product.quantity}</TableCell>
+                  <TableCell className="text-right">€ {product.price.toFixed(2)}</TableCell>
+                  <TableCell className="text-right">
+                    € {(product.quantity * product.price).toFixed(2)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
 
         {/* Totals */}
         <div className="flex justify-end">
@@ -85,12 +87,12 @@ export default function InvoicePreview({ data }: InvoicePreviewProps) {
         {data.notes && (
           <div className="mt-8">
             <h3 className="font-semibold mb-2">{t("invoice.details.notes")}:</h3>
-            <p className="whitespace-pre-wrap text-gray-600">{data.notes}</p>
+            <p className="whitespace-pre-wrap text-muted-foreground">{data.notes}</p>
           </div>
         )}
 
         {/* Footer */}
-        <div className="text-sm text-gray-500 border-t pt-4">
+        <div className="text-sm text-muted-foreground border-t pt-4">
           <p>Betaling binnen 14 dagen na factuurdatum</p>
         </div>
       </CardContent>
