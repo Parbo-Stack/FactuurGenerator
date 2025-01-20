@@ -16,8 +16,15 @@ export interface InvoiceData {
   date: Date;
   products: Product[];
   vatRate: 9 | 21;
+  currency: "EUR" | "USD" | "GBP";
   notes?: string;
 }
+
+const currencySymbols = {
+  EUR: "€",
+  USD: "$",
+  GBP: "£",
+};
 
 export const calculateTotals = (products: Product[], vatRate: number) => {
   const subtotal = products.reduce((sum, product) => sum + product.price * product.quantity, 0);
@@ -26,9 +33,14 @@ export const calculateTotals = (products: Product[], vatRate: number) => {
   return { subtotal, vatAmount, total };
 };
 
+export const formatCurrency = (amount: number, currency: keyof typeof currencySymbols) => {
+  return `${currencySymbols[currency]} ${amount.toFixed(2)}`;
+};
+
 export const generatePDF = (data: InvoiceData) => {
   const doc = new jsPDF();
   const { subtotal, vatAmount, total } = calculateTotals(data.products, data.vatRate);
+  const currency = currencySymbols[data.currency];
 
   // Header
   doc.setFontSize(20);
@@ -61,16 +73,16 @@ export const generatePDF = (data: InvoiceData) => {
   data.products.forEach(product => {
     doc.text(product.description, 20, y);
     doc.text(product.quantity.toString(), 100, y);
-    doc.text(`€ ${product.price.toFixed(2)}`, 140, y);
-    doc.text(`€ ${(product.quantity * product.price).toFixed(2)}`, 180, y);
+    doc.text(`${currency} ${product.price.toFixed(2)}`, 140, y);
+    doc.text(`${currency} ${(product.quantity * product.price).toFixed(2)}`, 180, y);
     y += 10;
   });
 
   // Totals
   y += 10;
-  doc.text(`Subtotaal: € ${subtotal.toFixed(2)}`, 140, y);
-  doc.text(`BTW ${data.vatRate}%: € ${vatAmount.toFixed(2)}`, 140, y + 10);
-  doc.text(`Totaal: € ${total.toFixed(2)}`, 140, y + 20);
+  doc.text(`Subtotaal: ${currency} ${subtotal.toFixed(2)}`, 140, y);
+  doc.text(`BTW ${data.vatRate}%: ${currency} ${vatAmount.toFixed(2)}`, 140, y + 10);
+  doc.text(`Totaal: ${currency} ${total.toFixed(2)}`, 140, y + 20);
 
   // Notes
   if (data.notes) {

@@ -5,21 +5,26 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import ProductTable from "./ProductTable";
+import InvoicePreview from "./InvoicePreview";
 import { InvoiceData, generatePDF } from "@/lib/invoice";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 export default function InvoiceForm() {
   const { t } = useTranslation();
   const { toast } = useToast();
-  
+  const [showPreview, setShowPreview] = useState(false);
+
   const form = useForm<InvoiceData>({
     defaultValues: {
       products: [{ description: "", quantity: 1, price: 0 }],
       vatRate: 21,
+      currency: "EUR",
       date: new Date(),
     },
   });
@@ -51,7 +56,7 @@ export default function InvoiceForm() {
             {...form.register("companyName", { required: true })}
           />
         </div>
-        
+
         <div>
           <Label htmlFor="address">{t("invoice.company.address")}</Label>
           <Input
@@ -102,6 +107,39 @@ export default function InvoiceForm() {
             </PopoverContent>
           </Popover>
         </div>
+
+        <div>
+          <Label htmlFor="vatRate">{t("invoice.vat.rate")}</Label>
+          <Select
+            value={form.watch("vatRate").toString()}
+            onValueChange={(value) => form.setValue("vatRate", parseInt(value))}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="9">9%</SelectItem>
+              <SelectItem value="21">21%</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="currency">Currency</Label>
+          <Select
+            value={form.watch("currency")}
+            onValueChange={(value) => form.setValue("currency", value)}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="EUR">EUR</SelectItem>
+              <SelectItem value="USD">USD</SelectItem>
+              <SelectItem value="GBP">GBP</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <ProductTable form={form} />
@@ -115,10 +153,26 @@ export default function InvoiceForm() {
       </div>
 
       <div className="flex justify-end space-x-4">
+        <Button type="button" variant="outline" onClick={() => setShowPreview(true)}>
+          {t("common.preview")}
+        </Button>
         <Button type="submit">
           {t("common.download")}
         </Button>
       </div>
+
+      {showPreview && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-end mb-4">
+              <Button variant="ghost" onClick={() => setShowPreview(false)}>
+                ✕
+              </Button>
+            </div>
+            <InvoicePreview data={form.getValues()} />
+          </div>
+        </div>
+      )}
     </form>
   );
 }
