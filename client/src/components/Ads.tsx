@@ -12,22 +12,8 @@ declare global {
   }
 }
 
-// Add AdSense script to document head
-const addScript = () => {
-  const script = document.createElement('script');
-  script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5519222773135571";
-  script.async = true;
-  script.crossOrigin = "anonymous";
-  document.head.appendChild(script);
-};
-
 function AdComponent({ className, slot }: AdsProps) {
   useEffect(() => {
-    // Add AdSense script if not already present
-    if (!document.querySelector('script[src*="adsbygoogle.js"]')) {
-      addScript();
-    }
-
     try {
       // Push the ad to AdSense
       (window.adsbygoogle = window.adsbygoogle || []).push({});
