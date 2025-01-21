@@ -3,37 +3,30 @@ import { format } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
 import { InvoiceData, calculateTotals } from "@/lib/invoice";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { cn } from "@/lib/utils";
-import { getTemplateById } from "@/lib/invoice-templates";
 
 interface InvoicePreviewProps {
   data: InvoiceData;
-  templateId?: string;
 }
 
-export default function InvoicePreview({ data, templateId = "classic" }: InvoicePreviewProps) {
+export default function InvoicePreview({ data }: InvoicePreviewProps) {
   const { t } = useTranslation();
   const { subtotal, vatAmount, total } = calculateTotals(data.products, data.vatRate);
-  const template = getTemplateById(templateId);
-  const isModern = template.layout === "modern";
 
   return (
     <Card className="bg-background border">
       <CardContent className="p-8 space-y-6">
         {/* Header */}
-        <div className={cn(
-          "flex flex-col gap-4",
-          isModern && "items-center text-center"
-        )}>
+        <div className="flex flex-col gap-4">
           <h1 className="text-3xl font-bold">FACTUUR</h1>
-          <div className={cn("space-y-1", isModern && "text-center")}>
+          <div className="space-y-1">
+            <p className="font-semibold">{data.name}</p>
             <p className="font-semibold">{data.companyName}</p>
             <p className="whitespace-pre-wrap">{data.address}</p>
             <p>KvK: {data.cocNumber}</p>
             <p>BTW: {data.vatNumber}</p>
             <p>IBAN: {data.iban}</p>
           </div>
-          <div className={isModern ? "text-center" : "text-right"}>
+          <div className="text-right">
             <p>
               <span className="font-semibold">{t("invoice.details.number")}:</span>{" "}
               {data.invoiceNumber}
@@ -72,10 +65,7 @@ export default function InvoicePreview({ data, templateId = "classic" }: Invoice
         </div>
 
         {/* Totals */}
-        <div className={cn(
-          "flex",
-          isModern ? "justify-center" : "justify-end"
-        )}>
+        <div className="flex justify-end">
           <div className="w-64 space-y-2">
             <div className="flex justify-between">
               <span>Subtotaal:</span>
@@ -94,17 +84,14 @@ export default function InvoicePreview({ data, templateId = "classic" }: Invoice
 
         {/* Notes */}
         {data.notes && (
-          <div className={cn("mt-8", isModern && "text-center")}>
+          <div className="mt-8">
             <h3 className="font-semibold mb-2">{t("invoice.details.notes")}:</h3>
             <p className="whitespace-pre-wrap text-muted-foreground">{data.notes}</p>
           </div>
         )}
 
         {/* Footer */}
-        <div className={cn(
-          "text-sm text-muted-foreground border-t pt-4",
-          isModern && "text-center"
-        )}>
+        <div className="text-sm text-muted-foreground border-t pt-4">
           <p>Betaling binnen 14 dagen na factuurdatum</p>
         </div>
       </CardContent>

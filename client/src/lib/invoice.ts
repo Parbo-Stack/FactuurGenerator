@@ -1,5 +1,4 @@
 import { jsPDF } from "jspdf";
-import { type InvoiceTemplate } from "./invoice-templates";
 
 export interface Product {
   description: string;
@@ -9,6 +8,7 @@ export interface Product {
 
 export interface InvoiceData {
   companyName: string;
+  name: string; // Added sender's name
   address: string;
   cocNumber: string;
   vatNumber: string;
@@ -38,7 +38,7 @@ export const formatCurrency = (amount: number, currency: keyof typeof currencySy
   return `${currencySymbols[currency]} ${amount.toFixed(2)}`;
 };
 
-export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null, template?: InvoiceTemplate) => {
+export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
   const doc = new jsPDF();
   const { subtotal, vatAmount, total } = calculateTotals(data.products, data.vatRate);
   const currency = currencySymbols[data.currency];
@@ -56,28 +56,20 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null, temp
   doc.setFontSize(24);
   doc.setTextColor(0, 0, 0);
   doc.setFont("helvetica", "bold");
+  doc.text("FACTUUR", 20, currentY);
 
-  // Modern layout: center everything
-  if (template?.layout === "modern") {
-    doc.text("FACTUUR", pageWidth / 2, currentY, { align: "center" });
-    if (logoDataUrl) {
-      doc.addImage(logoDataUrl, 'JPEG', (pageWidth - 30) / 2, currentY + 10, 30, 30);
-      currentY += 50;
-    }
-  } else {
-    // Classic layout: left-aligned with logo on right
-    doc.text("FACTUUR", 20, currentY);
-    if (logoDataUrl) {
-      doc.addImage(logoDataUrl, 'JPEG', pageWidth - 50, currentY - 20, 30, 30);
-    }
-    currentY += 20;
+  // Logo on right if provided
+  if (logoDataUrl) {
+    doc.addImage(logoDataUrl, 'JPEG', pageWidth - 50, currentY - 20, 30, 30);
   }
+  currentY += 20;
 
-  // Company details based on layout
+  // Company and personal details
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
 
-  const companyDetails = [
+  const leftDetails = [
+    data.name, // Added sender's name
     data.companyName,
     data.address,
     `KvK: ${data.cocNumber}`,
@@ -85,21 +77,13 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null, temp
     `IBAN: ${data.iban}`,
   ];
 
-  const invoiceDetails = [
+  const rightDetails = [
     `Factuurnummer: ${data.invoiceNumber}`,
     `Datum: ${data.date.toLocaleDateString("nl-NL")}`,
   ];
 
-  if (template?.layout === "modern") {
-    // Modern: Center-aligned details
-    doc.text(companyDetails, pageWidth / 2, currentY, { align: "center" });
-    currentY += 30;
-    doc.text(invoiceDetails, pageWidth / 2, currentY, { align: "center" });
-  } else {
-    // Classic: Left-aligned details with invoice info on right
-    doc.text(companyDetails, 20, currentY);
-    doc.text(invoiceDetails, pageWidth - 90, currentY);
-  }
+  doc.text(leftDetails, 20, currentY);
+  doc.text(rightDetails, pageWidth - 90, currentY);
 
   currentY += 40;
   drawLine(currentY);
@@ -160,12 +144,7 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null, temp
   currentY = doc.internal.pageSize.height - 20;
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
-  const paymentTerms = "Betaling binnen 14 dagen na factuurdatum";
-  if (template?.layout === "modern") {
-    doc.text(paymentTerms, pageWidth / 2, currentY, { align: "center" });
-  } else {
-    doc.text(paymentTerms, 20, currentY);
-  }
+  doc.text("Betaling binnen 14 dagen na factuurdatum", 20, currentY);
 
   return doc;
 };

@@ -15,8 +15,6 @@ import { InvoiceData, generatePDF } from "@/lib/invoice";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import EmailDialog from "./EmailDialog";
-import TemplateSelector from "@/components/TemplateSelector";
-import { getTemplateById } from "@/lib/invoice-templates";
 
 export default function InvoiceForm() {
   const { t } = useTranslation();
@@ -25,11 +23,11 @@ export default function InvoiceForm() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [showEmailDialog, setShowEmailDialog] = useState(false);
-  const [templateId, setTemplateId] = useState("classic");
 
   const savedData = localStorage.getItem('invoiceFormData');
   const defaultValues = savedData ? JSON.parse(savedData) : {
     companyName: "",
+    name: "", // Added sender's name
     address: "",
     cocNumber: "",
     vatNumber: "",
@@ -73,8 +71,7 @@ export default function InvoiceForm() {
 
   const onSubmit = (data: InvoiceData) => {
     try {
-      const template = getTemplateById(templateId);
-      const doc = generatePDF(data, logoPreview, template);
+      const doc = generatePDF(data, logoPreview);
       doc.save(`invoice-${data.invoiceNumber}.pdf`);
       toast({
         title: t("common.success"),
@@ -91,10 +88,6 @@ export default function InvoiceForm() {
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-      <TemplateSelector
-        value={templateId}
-        onChange={setTemplateId}
-      />
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         <div className="col-span-2">
           <Label htmlFor="logo">{t("invoice.company.logo")}</Label>
@@ -121,6 +114,14 @@ export default function InvoiceForm() {
               </Button>
             </div>
           </div>
+        </div>
+
+        <div>
+          <Label htmlFor="name">{t("invoice.sender.name")}</Label>
+          <Input
+            id="name"
+            {...form.register("name", { required: true })}
+          />
         </div>
 
         <div>
@@ -255,7 +256,7 @@ export default function InvoiceForm() {
                 ✕
               </Button>
             </div>
-            <InvoicePreview data={form.getValues()} templateId={templateId} />
+            <InvoicePreview data={form.getValues()} />
           </div>
         </div>
       )}
