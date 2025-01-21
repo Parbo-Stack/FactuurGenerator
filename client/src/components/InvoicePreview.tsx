@@ -3,22 +3,45 @@ import { format } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
 import { InvoiceData, calculateTotals } from "@/lib/invoice";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
+import { getTemplateById } from "@/lib/invoice-templates";
 
 interface InvoicePreviewProps {
   data: InvoiceData;
+  templateId?: string;
 }
 
-export default function InvoicePreview({ data }: InvoicePreviewProps) {
+export default function InvoicePreview({ data, templateId = "classic" }: InvoicePreviewProps) {
   const { t } = useTranslation();
   const { subtotal, vatAmount, total } = calculateTotals(data.products, data.vatRate);
+  const template = getTemplateById(templateId);
+
+  const tableStyleClassNames = {
+    bordered: "border divide-y",
+    minimal: "",
+    striped: "[&_tr:nth-child(even)]:bg-muted/50",
+  };
 
   return (
     <Card className="bg-background border">
       <CardContent className="p-8 space-y-6">
         {/* Header */}
-        <div className="flex justify-between">
+        <div className={cn(
+          "flex",
+          template.styles.header.layout === "modern" ? "justify-between" : "justify-start",
+          "gap-8"
+        )}>
           <div>
-            <h1 className="text-3xl font-bold mb-6">FACTUUR</h1>
+            <h1 
+              className="font-bold mb-6"
+              style={{
+                fontSize: `${template.styles.title.fontSize}px`,
+                color: template.styles.title.color,
+                fontFamily: template.styles.content.fontFamily,
+              }}
+            >
+              FACTUUR
+            </h1>
             <div className="space-y-1">
               <p className="font-semibold">{data.companyName}</p>
               <p className="whitespace-pre-wrap">{data.address}</p>
@@ -40,7 +63,10 @@ export default function InvoicePreview({ data }: InvoicePreviewProps) {
         </div>
 
         {/* Products Table */}
-        <div className="rounded-md border">
+        <div className={cn(
+          "rounded-md",
+          tableStyleClassNames[template.styles.content.tableStyle]
+        )}>
           <Table>
             <TableHeader>
               <TableRow>

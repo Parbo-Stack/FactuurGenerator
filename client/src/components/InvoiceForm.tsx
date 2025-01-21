@@ -15,6 +15,8 @@ import { InvoiceData, generatePDF } from "@/lib/invoice";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import EmailDialog from "./EmailDialog";
+import TemplateSelector from "@/components/TemplateSelector";
+import { getTemplateById } from "@/lib/invoice-templates";
 
 export default function InvoiceForm() {
   const { t } = useTranslation();
@@ -22,7 +24,8 @@ export default function InvoiceForm() {
   const [showPreview, setShowPreview] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [showEmailDialog, setShowEmailDialog] = useState(false); // Added state for email dialog
+  const [showEmailDialog, setShowEmailDialog] = useState(false);
+  const [templateId, setTemplateId] = useState("classic");
 
   const savedData = localStorage.getItem('invoiceFormData');
   const defaultValues = savedData ? JSON.parse(savedData) : {
@@ -47,15 +50,12 @@ export default function InvoiceForm() {
   });
 
   useEffect(() => {
-    // Watch currency changes
     const subscription = form.watch((value, { name }) => {
       if (name === 'currency') {
         form.trigger('products');
       }
-      // Save to localStorage on any change
       localStorage.setItem('invoiceFormData', JSON.stringify(value));
     });
-    
     return () => subscription.unsubscribe();
   }, [form]);
 
@@ -73,7 +73,8 @@ export default function InvoiceForm() {
 
   const onSubmit = (data: InvoiceData) => {
     try {
-      const doc = generatePDF(data, logoPreview);
+      const template = getTemplateById(templateId);
+      const doc = generatePDF(data, logoPreview, template);
       doc.save(`invoice-${data.invoiceNumber}.pdf`);
       toast({
         title: t("common.success"),
@@ -90,6 +91,10 @@ export default function InvoiceForm() {
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <TemplateSelector
+        value={templateId}
+        onChange={setTemplateId}
+      />
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         <div className="col-span-2">
           <Label htmlFor="logo">{t("invoice.company.logo")}</Label>
@@ -250,7 +255,7 @@ export default function InvoiceForm() {
                 ✕
               </Button>
             </div>
-            <InvoicePreview data={form.getValues()} />
+            <InvoicePreview data={form.getValues()} templateId={templateId} />
           </div>
         </div>
       )}
