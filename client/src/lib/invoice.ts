@@ -54,9 +54,10 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
   // Header - Title (FACTUUR)
   let currentY = 30;
   doc.setFontSize(24);
-  doc.setTextColor(0, 100, 0); // Dark green color
+  doc.setTextColor(0, 100, 0); // Dark green color for FACTUUR only
   doc.setFont("helvetica", "bold");
   doc.text("FACTUUR", 20, currentY);
+  doc.setTextColor(0, 0, 0); // Reset to black for rest of the text
 
   // Logo on right if provided
   if (logoDataUrl) {

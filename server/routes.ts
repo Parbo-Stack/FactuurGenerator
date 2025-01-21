@@ -56,7 +56,7 @@ export function registerRoutes(app: Express): Server {
           <div>
             <p>Beste,</p>
             <p>Hierbij ontvangt u uw factuur ${invoiceNumber}.</p>
-            <p>Met vriendelijke groet,<br>${req.body.companyName}</p>
+            <p>Met vriendelijke groet,<br>${req.body.name}</p>
           </div>
         `,
         attachments: [
