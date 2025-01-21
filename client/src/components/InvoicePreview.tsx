@@ -15,42 +15,25 @@ export default function InvoicePreview({ data, templateId = "classic" }: Invoice
   const { t } = useTranslation();
   const { subtotal, vatAmount, total } = calculateTotals(data.products, data.vatRate);
   const template = getTemplateById(templateId);
-
-  const tableStyleClassNames = {
-    bordered: "border divide-y",
-    minimal: "",
-    striped: "[&_tr:nth-child(even)]:bg-muted/50",
-  };
+  const isModern = template.layout === "modern";
 
   return (
     <Card className="bg-background border">
       <CardContent className="p-8 space-y-6">
         {/* Header */}
         <div className={cn(
-          "flex",
-          template.styles.header.layout === "modern" ? "justify-between" : "justify-start",
-          "gap-8"
+          "flex flex-col gap-4",
+          isModern && "items-center text-center"
         )}>
-          <div>
-            <h1 
-              className="font-bold mb-6"
-              style={{
-                fontSize: `${template.styles.title.fontSize}px`,
-                color: template.styles.title.color,
-                fontFamily: template.styles.content.fontFamily,
-              }}
-            >
-              FACTUUR
-            </h1>
-            <div className="space-y-1">
-              <p className="font-semibold">{data.companyName}</p>
-              <p className="whitespace-pre-wrap">{data.address}</p>
-              <p>KvK: {data.cocNumber}</p>
-              <p>BTW: {data.vatNumber}</p>
-              <p>IBAN: {data.iban}</p>
-            </div>
+          <h1 className="text-3xl font-bold">FACTUUR</h1>
+          <div className={cn("space-y-1", isModern && "text-center")}>
+            <p className="font-semibold">{data.companyName}</p>
+            <p className="whitespace-pre-wrap">{data.address}</p>
+            <p>KvK: {data.cocNumber}</p>
+            <p>BTW: {data.vatNumber}</p>
+            <p>IBAN: {data.iban}</p>
           </div>
-          <div className="text-right">
+          <div className={isModern ? "text-center" : "text-right"}>
             <p>
               <span className="font-semibold">{t("invoice.details.number")}:</span>{" "}
               {data.invoiceNumber}
@@ -63,10 +46,7 @@ export default function InvoicePreview({ data, templateId = "classic" }: Invoice
         </div>
 
         {/* Products Table */}
-        <div className={cn(
-          "rounded-md",
-          tableStyleClassNames[template.styles.content.tableStyle]
-        )}>
+        <div className="rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -92,7 +72,10 @@ export default function InvoicePreview({ data, templateId = "classic" }: Invoice
         </div>
 
         {/* Totals */}
-        <div className="flex justify-end">
+        <div className={cn(
+          "flex",
+          isModern ? "justify-center" : "justify-end"
+        )}>
           <div className="w-64 space-y-2">
             <div className="flex justify-between">
               <span>Subtotaal:</span>
@@ -111,14 +94,17 @@ export default function InvoicePreview({ data, templateId = "classic" }: Invoice
 
         {/* Notes */}
         {data.notes && (
-          <div className="mt-8">
+          <div className={cn("mt-8", isModern && "text-center")}>
             <h3 className="font-semibold mb-2">{t("invoice.details.notes")}:</h3>
             <p className="whitespace-pre-wrap text-muted-foreground">{data.notes}</p>
           </div>
         )}
 
         {/* Footer */}
-        <div className="text-sm text-muted-foreground border-t pt-4">
+        <div className={cn(
+          "text-sm text-muted-foreground border-t pt-4",
+          isModern && "text-center"
+        )}>
           <p>Betaling binnen 14 dagen na factuurdatum</p>
         </div>
       </CardContent>

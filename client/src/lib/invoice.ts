@@ -51,30 +51,32 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null, temp
     doc.line(20, y, pageWidth - 20, y);
   };
 
-  // Set font based on template
-  doc.setFont(template?.styles.content.fontFamily || "helvetica");
-
   // Header - Title (FACTUUR)
   let currentY = 30;
-  doc.setFontSize(template?.styles.title.fontSize || 24);
-  doc.setTextColor(...hexToRgb(template?.styles.title.color || "rgb(0, 100, 0)"));
-  doc.setFont(template?.styles.content.fontFamily || "helvetica", "bold");
-  doc.text("FACTUUR", 20, currentY);
+  doc.setFontSize(24);
+  doc.setTextColor(0, 0, 0);
+  doc.setFont("helvetica", "bold");
 
-  // Logo placement based on template
-  if (logoDataUrl) {
-    const logoX = template?.styles.header.logoPosition === "left" ? 20 :
-                 template?.styles.header.logoPosition === "center" ? (pageWidth - 30) / 2 :
-                 pageWidth - 50;
-    doc.addImage(logoDataUrl, 'JPEG', logoX, currentY - 20, 30, 30);
+  // Modern layout: center everything
+  if (template?.layout === "modern") {
+    doc.text("FACTUUR", pageWidth / 2, currentY, { align: "center" });
+    if (logoDataUrl) {
+      doc.addImage(logoDataUrl, 'JPEG', (pageWidth - 30) / 2, currentY + 10, 30, 30);
+      currentY += 50;
+    }
+  } else {
+    // Classic layout: left-aligned with logo on right
+    doc.text("FACTUUR", 20, currentY);
+    if (logoDataUrl) {
+      doc.addImage(logoDataUrl, 'JPEG', pageWidth - 50, currentY - 20, 30, 30);
+    }
+    currentY += 20;
   }
 
-  doc.setTextColor(0, 0, 0); // Reset to black
-  doc.setFont(template?.styles.content.fontFamily || "helvetica", "normal");
-  currentY += 20;
-
-  // Company details with template-based layout
+  // Company details based on layout
   doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+
   const companyDetails = [
     data.companyName,
     data.address,
@@ -83,31 +85,27 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null, temp
     `IBAN: ${data.iban}`,
   ];
 
-  if (template?.styles.header.layout === "modern") {
-    currentY += 10;
-  }
-
-  doc.text(companyDetails, 20, currentY);
-
-  // Invoice details with template-based positioning
   const invoiceDetails = [
     `Factuurnummer: ${data.invoiceNumber}`,
     `Datum: ${data.date.toLocaleDateString("nl-NL")}`,
   ];
-  doc.text(invoiceDetails, pageWidth - 90, currentY);
 
-  currentY += 40;
-
-  if (template?.styles.content.tableStyle === "minimal") {
-    // Skip line for minimal style
-    currentY += 5;
+  if (template?.layout === "modern") {
+    // Modern: Center-aligned details
+    doc.text(companyDetails, pageWidth / 2, currentY, { align: "center" });
+    currentY += 30;
+    doc.text(invoiceDetails, pageWidth / 2, currentY, { align: "center" });
   } else {
-    drawLine(currentY);
+    // Classic: Left-aligned details with invoice info on right
+    doc.text(companyDetails, 20, currentY);
+    doc.text(invoiceDetails, pageWidth - 90, currentY);
   }
 
+  currentY += 40;
+  drawLine(currentY);
   currentY += 15;
 
-  // Table headers with template-based styling
+  // Table headers
   const columns = {
     description: { x: 20, align: "left" as const },
     quantity: { x: pageWidth - 150, align: "right" as const },
@@ -116,31 +114,19 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null, temp
   };
 
   // Table header row
-  doc.setFont(template?.styles.content.fontFamily || "helvetica", "bold");
+  doc.setFont("helvetica", "bold");
   doc.text("Omschrijving", columns.description.x, currentY);
   doc.text("Aantal", columns.quantity.x, currentY, { align: columns.quantity.align });
   doc.text("Prijs", columns.price.x, currentY, { align: columns.price.align });
   doc.text("Totaal", columns.total.x, currentY, { align: columns.total.align });
 
-  doc.setFont(template?.styles.content.fontFamily || "helvetica", "normal");
+  doc.setFont("helvetica", "normal");
   currentY += 5;
-
-  if (template?.styles.content.tableStyle !== "minimal") {
-    drawLine(currentY);
-  }
-
+  drawLine(currentY);
   currentY += 10;
 
-  // Table content with template-based styling
+  // Table content
   data.products.forEach((product) => {
-    if (template?.styles.content.tableStyle === "striped") {
-      // Add alternating row backgrounds for striped style
-      if (currentY % 20 === 0) {
-        doc.setFillColor(245, 245, 245);
-        doc.rect(20, currentY - 5, pageWidth - 40, 10, "F");
-      }
-    }
-
     doc.text(product.description, columns.description.x, currentY);
     doc.text(product.quantity.toString(), columns.quantity.x, currentY, { align: columns.quantity.align });
     doc.text(`${currency} ${product.price.toFixed(2)}`, columns.price.x, currentY, { align: columns.price.align });
@@ -154,12 +140,10 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null, temp
   });
 
   currentY += 5;
-  if (template?.styles.content.tableStyle !== "minimal") {
-    drawLine(currentY);
-  }
+  drawLine(currentY);
   currentY += 15;
 
-  // Totals section with template-based styling
+  // Totals section
   doc.text("Subtotaal:", pageWidth - 80, currentY);
   doc.text(`${currency} ${subtotal.toFixed(2)}`, pageWidth - 20, currentY, { align: "right" });
 
@@ -168,15 +152,20 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null, temp
   doc.text(`${currency} ${vatAmount.toFixed(2)}`, pageWidth - 20, currentY, { align: "right" });
 
   currentY += 8;
-  doc.setFont(template?.styles.content.fontFamily || "helvetica", "bold");
+  doc.setFont("helvetica", "bold");
   doc.text("Totaal:", pageWidth - 80, currentY);
   doc.text(`${currency} ${total.toFixed(2)}`, pageWidth - 20, currentY, { align: "right" });
 
   // Payment terms at bottom
   currentY = doc.internal.pageSize.height - 20;
   doc.setFontSize(9);
-  doc.setFont(template?.styles.content.fontFamily || "helvetica", "normal");
-  doc.text("Betaling binnen 14 dagen na factuurdatum", 20, currentY);
+  doc.setFont("helvetica", "normal");
+  const paymentTerms = "Betaling binnen 14 dagen na factuurdatum";
+  if (template?.layout === "modern") {
+    doc.text(paymentTerms, pageWidth / 2, currentY, { align: "center" });
+  } else {
+    doc.text(paymentTerms, 20, currentY);
+  }
 
   return doc;
 };
