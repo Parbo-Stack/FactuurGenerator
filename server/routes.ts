@@ -1,8 +1,19 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import nodemailer from "nodemailer";
+import cors from "cors";
 
 export function registerRoutes(app: Express): Server {
+  // Enable CORS for all routes
+  app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  }));
+
+  // Handle OPTIONS requests
+  app.options('*', cors());
+
   // Email sending endpoint
   app.post("/api/send-invoice", async (req, res) => {
     try {
