@@ -17,7 +17,7 @@ export function registerRoutes(app: Express): Server {
         console.error("Missing email credentials in environment variables");
         return res.status(500).json({ 
           message: "Email service not configured", 
-          error: "Missing EMAIL_USER or EMAIL_PASSWORD environment variables. Please configure these in Replit Secrets."
+          error: "Missing EMAIL_USER or EMAIL_PASSWORD environment variables"
         });
       }
 
