@@ -10,6 +10,7 @@
   },
   "invoice": {
     "title": "Factuur Generator",
+    "name": "Naam",
     "company": {
       "name": "Bedrijfsnaam",
       "address": "Adres",

@@ -10,6 +10,7 @@
   },
   "invoice": {
     "title": "Invoice Generator",
+    "name": "Name",
     "company": {
       "name": "Company Name",
       "address": "Address",
