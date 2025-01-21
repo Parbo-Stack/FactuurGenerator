@@ -54,7 +54,7 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
   // Header - Title (FACTUUR)
   let currentY = 30;
   doc.setFontSize(24);
-  doc.setTextColor(0, 0, 0);
+  doc.setTextColor(0, 100, 0); // Dark green color
   doc.setFont("helvetica", "bold");
   doc.text("FACTUUR", 20, currentY);
 
@@ -145,6 +145,7 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.text("Betaling binnen 14 dagen na factuurdatum", 20, currentY);
+  doc.text("factuurflow.com", pageWidth - 20, currentY, { align: "right" });
 
   return doc;
 };
