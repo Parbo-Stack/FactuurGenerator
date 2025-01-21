@@ -12,6 +12,10 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={InvoiceGenerator} />
+      <Route path="/sitemap.xml" component={() => {
+        window.location.href = "/sitemap.xml";
+        return null;
+      }} />
       <Route component={NotFound} />
     </Switch>
   );
