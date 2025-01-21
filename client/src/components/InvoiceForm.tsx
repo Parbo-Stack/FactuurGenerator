@@ -117,7 +117,7 @@ export default function InvoiceForm() {
         </div>
 
         <div>
-          <Label htmlFor="name">{t("invoice.sender.name")}</Label>
+          <Label htmlFor="name">{t("invoice.name")}</Label>
           <Input
             id="name"
             {...form.register("name", { required: true })}
