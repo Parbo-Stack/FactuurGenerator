@@ -37,7 +37,7 @@ export default function EmailDialog({ open, onClose, invoiceData }: EmailDialogP
       const base64Data = pdfDataUri.split(',')[1];
 
       // Send email
-      const response = await fetch('/api/send-invoice', {
+      const response = await fetch('https://factuurflow.com/api/send-invoice', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
