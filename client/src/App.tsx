@@ -11,11 +11,8 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 function Router() {
   return (
     <Switch>
-      <Route path="/sitemap" component={InvoiceGenerator} />
+      <Route path="/" component={InvoiceGenerator} />
       <Route component={NotFound} />
-      <Route path="/sitemap.xml" element={() => {
-          window.location.href = "/sitemap.xml";
-          return null;}} />
     </Switch>
   );
 }
