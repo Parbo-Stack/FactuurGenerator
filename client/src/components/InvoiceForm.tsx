@@ -14,7 +14,6 @@ import InvoicePreview from "@/components/InvoicePreview";
 import { InvoiceData, generatePDF } from "@/lib/invoice";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
-import EmailDialog from "./EmailDialog";
 
 export default function InvoiceForm() {
   const { t } = useTranslation();
@@ -22,7 +21,6 @@ export default function InvoiceForm() {
   const [showPreview, setShowPreview] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [showEmailDialog, setShowEmailDialog] = useState(false);
 
   const savedData = localStorage.getItem('invoiceFormData');
   const defaultValues = savedData ? JSON.parse(savedData) : {
@@ -240,9 +238,6 @@ export default function InvoiceForm() {
         <Button type="button" variant="outline" onClick={() => setShowPreview(true)}>
           {t("common.preview")}
         </Button>
-        <Button type="button" variant="outline" onClick={() => setShowEmailDialog(true)}>
-          {t("invoice.email.send")}
-        </Button>
         <Button type="submit">
           {t("common.download")}
         </Button>
@@ -260,11 +255,6 @@ export default function InvoiceForm() {
           </div>
         </div>
       )}
-      <EmailDialog
-        open={showEmailDialog}
-        onClose={() => setShowEmailDialog(false)}
-        invoiceData={form.getValues()}
-      />
     </form>
   );
 }
