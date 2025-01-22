@@ -68,15 +68,28 @@ export default function InvoiceForm() {
     }
   };
 
-  const onSubmit = (data: InvoiceData) => {
+  const onSubmit = async (data: InvoiceData) => {
     try {
       const doc = generatePDF(data, logoPreview);
-      doc.save(`invoice-${data.invoiceNumber}.pdf`);
+      const pdfBlob = doc.output('blob');
+
+      // Create a temporary link element
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(pdfBlob);
+      link.download = `factuur-${data.invoiceNumber}.pdf`;
+
+      // Append to document, click, and cleanup
+      document.body.appendChild(link);
+      link.click();
+      URL.revokeObjectURL(link.href);
+      document.body.removeChild(link);
+
       toast({
         title: t("common.success"),
         description: t("invoice.pdfGenerated"),
       });
     } catch (error) {
+      console.error("PDF generation error:", error);
       toast({
         title: t("common.error"),
         description: t("invoice.pdfError"),

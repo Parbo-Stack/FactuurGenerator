@@ -4,34 +4,45 @@ import nodemailer from "nodemailer";
 import cors from "cors";
 
 export function registerRoutes(app: Express): Server {
-  // Enable CORS for all routes with proper configuration
+  // Enable CORS with specific configuration for cross-browser support
   app.use(cors({
-    origin: true, // Allow all origins
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
+    origin: true,
+    methods: ['GET', 'POST', 'OPTIONS', 'HEAD'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    credentials: true,
+    maxAge: 86400 // Cache preflight requests for 24 hours
   }));
 
-  // Handle OPTIONS requests
+  // Handle preflight requests
   app.options('*', cors());
 
   // PDF generation endpoint
   app.post("/api/generate-pdf", (req, res) => {
     try {
-      // Set headers for PDF download
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', 'attachment; filename=invoice.pdf');
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+      // Set headers for PDF download with cross-browser support
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': 'attachment; filename="invoice.pdf"',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, HEAD',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept',
+        'Access-Control-Expose-Headers': 'Content-Disposition',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
 
       // Return success
-      res.status(200).json({ message: "PDF generation endpoint ready" });
+      res.status(200).json({ 
+        message: "PDF generation endpoint ready",
+        success: true 
+      });
     } catch (error: any) {
       console.error("PDF generation failed:", error);
       res.status(500).json({ 
         message: "Failed to generate PDF", 
-        error: error.message 
+        error: error.message,
+        success: false
       });
     }
   });
@@ -109,10 +120,21 @@ export function registerRoutes(app: Express): Server {
 
   const httpServer = createServer(app);
 
-  // Error handling middleware
+  // Error handling middleware with improved browser support
   app.use((err: any, req: any, res: any, next: any) => {
-    console.error(err.stack);
-    res.status(500).send('Something broke!');
+    console.error("Server error:", err);
+
+    // Set CORS headers even for errors
+    res.set({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, HEAD',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept'
+    });
+
+    res.status(err.status || 500).json({
+      message: err.message || 'Something broke!',
+      success: false
+    });
   });
 
   return httpServer;
