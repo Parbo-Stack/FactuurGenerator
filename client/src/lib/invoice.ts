@@ -73,7 +73,6 @@ const safeTranslate = (key: string, fallback: string): string => {
 // Add new function for generating payment QR code
 const generatePaymentQRCode = async (data: InvoiceData, total: number): Promise<string> => {
   // Format according to the EPC QR standard for SEPA payments
-  // https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
   const qrData = [
     'BCD',                              // Service Tag
     '002',                             // Version
@@ -100,140 +99,145 @@ const generatePaymentQRCode = async (data: InvoiceData, total: number): Promise<
   }
 };
 
-export const generatePDF = async (data: InvoiceData, logoDataUrl?: string | null) => {
-  const doc = new jsPDF();
-  const { subtotal, vatAmount, total } = calculateTotals(data.products, data.vatRate);
-  const currency = currencySymbols[data.currency];
-  const pageWidth = doc.internal.pageSize.width;
-  const dueDate = calculateDueDate(data.date, data.paymentTerm);
+export const generatePDF = async (data: InvoiceData, logoDataUrl?: string | null): Promise<jsPDF> => {
+  try {
+    const doc = new jsPDF();
+    const { subtotal, vatAmount, total } = calculateTotals(data.products, data.vatRate);
+    const currency = currencySymbols[data.currency];
+    const pageWidth = doc.internal.pageSize.width;
+    const dueDate = calculateDueDate(data.date, data.paymentTerm);
 
-  // Generate QR code for payment
-  const qrCodeDataUrl = await generatePaymentQRCode(data, total);
+    // Generate QR code for payment
+    const qrCodeDataUrl = await generatePaymentQRCode(data, total);
 
-  // Helper function to draw horizontal line
-  const drawLine = (y: number) => {
-    doc.setDrawColor(220, 220, 220);
-    doc.setLineWidth(0.1);
-    doc.line(20, y, pageWidth - 20, y);
-  };
+    // Helper function to draw horizontal line
+    const drawLine = (y: number) => {
+      doc.setDrawColor(220, 220, 220);
+      doc.setLineWidth(0.1);
+      doc.line(20, y, pageWidth - 20, y);
+    };
 
-  // Header - Title (FACTUUR)
-  let currentY = 30;
-  doc.setFontSize(24);
-  doc.setTextColor(0, 100, 0); // Dark green color for FACTUUR only
-  doc.setFont("helvetica", "bold");
+    // Header - Title (FACTUUR)
+    let currentY = 30;
+    doc.setFontSize(24);
+    doc.setTextColor(0, 100, 0); // Dark green color for FACTUUR only
+    doc.setFont("helvetica", "bold");
 
-  const title = safeTranslate("invoice.title", "Factuur");
-  doc.text(title, 20, currentY);
-  doc.setTextColor(0, 0, 0); // Reset to black for rest of the text
+    const title = safeTranslate("invoice.title", "Factuur");
+    doc.text(title, 20, currentY);
+    doc.setTextColor(0, 0, 0); // Reset to black for rest of the text
 
-  // Logo on right if provided
-  if (logoDataUrl) {
-    doc.addImage(logoDataUrl, 'JPEG', pageWidth - 50, currentY - 20, 30, 30);
-  }
-  currentY += 20;
+    // Logo on right if provided
+    if (logoDataUrl) {
+      doc.addImage(logoDataUrl, 'JPEG', pageWidth - 50, currentY - 20, 30, 30);
+    }
+    currentY += 20;
 
-  // Company and personal details
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
+    // Company and personal details
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
 
-  const leftDetails = [
-    data.name,
-    data.companyName,
-    data.address,
-    `${safeTranslate("invoice.company.coc", "KvK")}: ${data.cocNumber}`,
-    `${safeTranslate("invoice.company.vat", "BTW")}: ${data.vatNumber}`,
-    `${safeTranslate("invoice.company.iban", "IBAN")}: ${data.iban}`,
-  ];
+    const leftDetails = [
+      data.name,
+      data.companyName,
+      data.address,
+      `${safeTranslate("invoice.company.coc", "KvK")}: ${data.cocNumber}`,
+      `${safeTranslate("invoice.company.vat", "BTW")}: ${data.vatNumber}`,
+      `${safeTranslate("invoice.company.iban", "IBAN")}: ${data.iban}`,
+    ];
 
-  const rightDetails = [
-    `${safeTranslate("invoice.details.number", "Factuurnummer")}: ${data.invoiceNumber}`,
-    `${safeTranslate("invoice.details.date", "Datum")}: ${format(data.date, 'dd-MM-yyyy')}`,
-    `${safeTranslate("invoice.details.dueDate", "Vervaldatum")}: ${format(dueDate, 'dd-MM-yyyy')}`,
-    `${safeTranslate("invoice.details.paymentTerms", "Betalingstermijn")}: ${paymentTerms[data.paymentTerm]?.label || "14 dagen"}`,
-  ];
+    const rightDetails = [
+      `${safeTranslate("invoice.details.number", "Factuurnummer")}: ${data.invoiceNumber}`,
+      `${safeTranslate("invoice.details.date", "Datum")}: ${format(data.date, 'dd-MM-yyyy')}`,
+      `${safeTranslate("invoice.details.dueDate", "Vervaldatum")}: ${format(dueDate, 'dd-MM-yyyy')}`,
+      `${safeTranslate("invoice.details.paymentTerms", "Betalingstermijn")}: ${paymentTerms[data.paymentTerm]?.label || "14 dagen"}`,
+    ];
 
-  doc.text(leftDetails, 20, currentY);
-  doc.text(rightDetails, pageWidth - 90, currentY);
+    doc.text(leftDetails, 20, currentY);
+    doc.text(rightDetails, pageWidth - 90, currentY);
 
-  currentY += 50;
-  drawLine(currentY);
-  currentY += 15;
+    currentY += 50;
+    drawLine(currentY);
+    currentY += 15;
 
-  // Table headers
-  const headers = [[
-    safeTranslate("invoice.products.description", "Omschrijving"),
-    safeTranslate("invoice.products.quantity", "Aantal"),
-    safeTranslate("invoice.products.price", "Prijs"),
-    safeTranslate("invoice.products.total", "Totaal")
-  ]];
+    // Table headers
+    const headers = [[
+      safeTranslate("invoice.products.description", "Omschrijving"),
+      safeTranslate("invoice.products.quantity", "Aantal"),
+      safeTranslate("invoice.products.price", "Prijs"),
+      safeTranslate("invoice.products.total", "Totaal")
+    ]];
 
-  // Table header row
-  doc.setFont("helvetica", "bold");
-  doc.text(headers[0][0], 20, currentY);
-  doc.text(headers[0][1], pageWidth - 150, currentY, { align: "right" });
-  doc.text(headers[0][2], pageWidth - 100, currentY, { align: "right" });
-  doc.text(headers[0][3], pageWidth - 20, currentY, { align: "right" });
+    // Table header row
+    doc.setFont("helvetica", "bold");
+    doc.text(headers[0][0], 20, currentY);
+    doc.text(headers[0][1], pageWidth - 150, currentY, { align: "right" });
+    doc.text(headers[0][2], pageWidth - 100, currentY, { align: "right" });
+    doc.text(headers[0][3], pageWidth - 20, currentY, { align: "right" });
 
-  doc.setFont("helvetica", "normal");
-  currentY += 5;
-  drawLine(currentY);
-  currentY += 10;
+    doc.setFont("helvetica", "normal");
+    currentY += 5;
+    drawLine(currentY);
+    currentY += 10;
 
-  // Table content
-  data.products.forEach((product) => {
-    doc.text(product.description, 20, currentY);
-    doc.text(product.quantity.toString(), pageWidth - 150, currentY, { align: "right" });
-    doc.text(`${currency} ${product.price.toFixed(2)}`, pageWidth - 100, currentY, { align: "right" });
-    doc.text(
-      `${currency} ${(product.quantity * product.price).toFixed(2)}`,
-      pageWidth - 20,
-      currentY,
-      { align: "right" }
-    );
+    // Table content
+    data.products.forEach((product) => {
+      doc.text(product.description, 20, currentY);
+      doc.text(product.quantity.toString(), pageWidth - 150, currentY, { align: "right" });
+      doc.text(`${currency} ${product.price.toFixed(2)}`, pageWidth - 100, currentY, { align: "right" });
+      doc.text(
+        `${currency} ${(product.quantity * product.price).toFixed(2)}`,
+        pageWidth - 20,
+        currentY,
+        { align: "right" }
+      );
+      currentY += 8;
+    });
+
+    currentY += 5;
+    drawLine(currentY);
+    currentY += 15;
+
+    // Totals section
+    const startX = pageWidth - 80;
+    doc.text(`${safeTranslate("invoice.vat.subtotal", "Subtotaal")}:`, startX, currentY);
+    doc.text(`${currency} ${subtotal.toFixed(2)}`, pageWidth - 20, currentY, { align: "right" });
+
     currentY += 8;
-  });
+    doc.text(`${safeTranslate("invoice.vat.rate", "BTW")} (${data.vatRate}%)`, startX, currentY);
+    doc.text(`${currency} ${vatAmount.toFixed(2)}`, pageWidth - 20, currentY, { align: "right" });
 
-  currentY += 5;
-  drawLine(currentY);
-  currentY += 15;
+    currentY += 8;
+    doc.setFont("helvetica", "bold");
+    doc.text(safeTranslate("invoice.vat.total", "Totaal incl. BTW"), startX, currentY);
+    doc.text(`${currency} ${total.toFixed(2)}`, pageWidth - 20, currentY, { align: "right" });
 
-  // Totals section
-  const startX = pageWidth - 80;
-  doc.text(`${safeTranslate("invoice.vat.subtotal", "Subtotaal")}:`, startX, currentY);
-  doc.text(`${currency} ${subtotal.toFixed(2)}`, pageWidth - 20, currentY, { align: "right" });
+    // Add QR code at the bottom right
+    if (qrCodeDataUrl) {
+      const qrSize = 40;
+      const qrY = doc.internal.pageSize.height - 60;
+      doc.addImage(qrCodeDataUrl, 'PNG', pageWidth - qrSize - 20, qrY, qrSize, qrSize);
 
-  currentY += 8;
-  doc.text(`${safeTranslate("invoice.vat.rate", "BTW")} (${data.vatRate}%)`, startX, currentY);
-  doc.text(`${currency} ${vatAmount.toFixed(2)}`, pageWidth - 20, currentY, { align: "right" });
+      // Add QR code label
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "normal");
+      const label = safeTranslate("invoice.payment.scanQR", "Scan QR code voor betaling");
+      doc.text(label, pageWidth - qrSize - 20, qrY + qrSize + 5);
+    }
 
-  currentY += 8;
-  doc.setFont("helvetica", "bold");
-  doc.text(safeTranslate("invoice.vat.total", "Totaal incl. BTW"), startX, currentY);
-  doc.text(`${currency} ${total.toFixed(2)}`, pageWidth - 20, currentY, { align: "right" });
+    // Notes (move up slightly to make room for QR code)
+    if (data.notes) {
+      currentY = doc.internal.pageSize.height - 70;
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      doc.text(`${safeTranslate("invoice.details.notes", "Opmerkingen")}: ${data.notes}`, 20, currentY);
+    }
 
-  // Add QR code at the bottom right
-  if (qrCodeDataUrl) {
-    const qrSize = 40;
-    const qrY = doc.internal.pageSize.height - 60;
-    doc.addImage(qrCodeDataUrl, 'PNG', pageWidth - qrSize - 20, qrY, qrSize, qrSize);
-
-    // Add QR code label
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "normal");
-    const label = safeTranslate("invoice.payment.scanQR", "Scan QR code voor betaling");
-    doc.text(label, pageWidth - qrSize - 20, qrY + qrSize + 5);
+    return doc;
+  } catch (error) {
+    console.error("Error generating PDF:", error);
+    throw error;
   }
-
-  // Notes (move up slightly to make room for QR code)
-  if (data.notes) {
-    currentY = doc.internal.pageSize.height - 70;
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    doc.text(`${safeTranslate("invoice.details.notes", "Opmerkingen")}: ${data.notes}`, 20, currentY);
-  }
-
-  return doc;
 };
 
 // Helper function to convert hex/rgb color to RGB array
