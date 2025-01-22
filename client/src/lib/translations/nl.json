@@ -42,6 +42,9 @@
       "total": "Totaal incl. BTW",
       "subtotal": "Subtotaal"
     },
+    "payment": {
+      "scanQR": "Scan QR code voor betaling"
+    },
     "email": {
       "title": "Factuur Versturen",
       "description": "Voer het e-mailadres van de ontvanger in",

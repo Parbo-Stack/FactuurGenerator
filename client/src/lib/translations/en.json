@@ -42,6 +42,9 @@
       "total": "Total inc. VAT",
       "subtotal": "Subtotal"
     },
+    "payment": {
+      "scanQR": "Scan QR code for payment"
+    },
     "email": {
       "title": "Send Invoice",
       "description": "Enter the recipient's email address to send the invoice",

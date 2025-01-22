@@ -2,6 +2,7 @@ import { jsPDF } from "jspdf";
 import "jspdf-autotable";
 import { format, addDays } from "date-fns";
 import i18n from "./i18n";
+import QRCode from "qrcode";
 
 export interface Product {
   description: string;
@@ -69,12 +70,45 @@ const safeTranslate = (key: string, fallback: string): string => {
   }
 };
 
-export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
+// Add new function for generating payment QR code
+const generatePaymentQRCode = async (data: InvoiceData, total: number): Promise<string> => {
+  // Format according to the EPC QR standard for SEPA payments
+  // https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation
+  const qrData = [
+    'BCD',                              // Service Tag
+    '002',                             // Version
+    '1',                               // Character Set
+    'SCT',                             // Identification
+    data.iban.replace(/\s/g, ''),      // IBAN
+    data.companyName,                  // Beneficiary Name
+    total.toFixed(2),                  // Amount
+    'EUR',                             // Currency
+    '',                                // Purpose (empty)
+    data.invoiceNumber,                // Remittance Reference
+    `Invoice ${data.invoiceNumber}`    // Additional remittance information
+  ].join('\n');
+
+  try {
+    return await QRCode.toDataURL(qrData, {
+      errorCorrectionLevel: 'M',
+      margin: 2,
+      width: 150
+    });
+  } catch (error) {
+    console.error('QR code generation failed:', error);
+    throw error;
+  }
+};
+
+export const generatePDF = async (data: InvoiceData, logoDataUrl?: string | null) => {
   const doc = new jsPDF();
   const { subtotal, vatAmount, total } = calculateTotals(data.products, data.vatRate);
   const currency = currencySymbols[data.currency];
   const pageWidth = doc.internal.pageSize.width;
   const dueDate = calculateDueDate(data.date, data.paymentTerm);
+
+  // Generate QR code for payment
+  const qrCodeDataUrl = await generatePaymentQRCode(data, total);
 
   // Helper function to draw horizontal line
   const drawLine = (y: number) => {
@@ -178,9 +212,22 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
   doc.text(safeTranslate("invoice.vat.total", "Totaal incl. BTW"), startX, currentY);
   doc.text(`${currency} ${total.toFixed(2)}`, pageWidth - 20, currentY, { align: "right" });
 
-  // Notes
+  // Add QR code at the bottom right
+  if (qrCodeDataUrl) {
+    const qrSize = 40;
+    const qrY = doc.internal.pageSize.height - 60;
+    doc.addImage(qrCodeDataUrl, 'PNG', pageWidth - qrSize - 20, qrY, qrSize, qrSize);
+
+    // Add QR code label
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    const label = safeTranslate("invoice.payment.scanQR", "Scan QR code voor betaling");
+    doc.text(label, pageWidth - qrSize - 20, qrY + qrSize + 5);
+  }
+
+  // Notes (move up slightly to make room for QR code)
   if (data.notes) {
-    currentY = doc.internal.pageSize.height - 40;
+    currentY = doc.internal.pageSize.height - 70;
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
     doc.text(`${safeTranslate("invoice.details.notes", "Opmerkingen")}: ${data.notes}`, 20, currentY);
