@@ -1,4 +1,7 @@
 import { jsPDF } from "jspdf";
+import "jspdf-autotable";
+import { format } from "date-fns";
+import i18n from "./i18n";
 
 export interface Product {
   description: string;
@@ -56,7 +59,8 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
   doc.setFontSize(24);
   doc.setTextColor(0, 100, 0); // Dark green color for FACTUUR only
   doc.setFont("helvetica", "bold");
-  doc.text("FACTUUR", 20, currentY);
+  const t = i18n.t;
+  doc.text(t("invoice.title"), 20, currentY);
   doc.setTextColor(0, 0, 0); // Reset to black for rest of the text
 
   // Logo on right if provided
@@ -79,8 +83,8 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
   ];
 
   const rightDetails = [
-    `Factuurnummer: ${data.invoiceNumber}`,
-    `Datum: ${data.date.toLocaleDateString("nl-NL")}`,
+    `${t("invoice.number")}: ${data.invoiceNumber}`,
+    `${t("invoice.date")}: ${data.date.toLocaleDateString(i18n.language)}`,
   ];
 
   doc.text(leftDetails, 20, currentY);
@@ -91,19 +95,20 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
   currentY += 15;
 
   // Table headers
-  const columns = {
-    description: { x: 20, align: "left" as const },
-    quantity: { x: pageWidth - 150, align: "right" as const },
-    price: { x: pageWidth - 100, align: "right" as const },
-    total: { x: pageWidth - 20, align: "right" as const }
-  };
+  const headers = [[
+    t("invoice.products.description"),
+    t("invoice.products.quantity"),
+    t("invoice.products.price"),
+    t("invoice.products.total")
+  ]];
 
   // Table header row
   doc.setFont("helvetica", "bold");
-  doc.text("Omschrijving", columns.description.x, currentY);
-  doc.text("Aantal", columns.quantity.x, currentY, { align: columns.quantity.align });
-  doc.text("Prijs", columns.price.x, currentY, { align: columns.price.align });
-  doc.text("Totaal", columns.total.x, currentY, { align: columns.total.align });
+  doc.text(t("invoice.products.description"), 20, currentY);
+  doc.text(t("invoice.products.quantity"), pageWidth - 150, currentY, { align: "right" });
+  doc.text(t("invoice.products.price"), pageWidth - 100, currentY, { align: "right" });
+  doc.text(t("invoice.products.total"), pageWidth - 20, currentY, { align: "right" });
+
 
   doc.setFont("helvetica", "normal");
   currentY += 5;
@@ -112,14 +117,14 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
 
   // Table content
   data.products.forEach((product) => {
-    doc.text(product.description, columns.description.x, currentY);
-    doc.text(product.quantity.toString(), columns.quantity.x, currentY, { align: columns.quantity.align });
-    doc.text(`${currency} ${product.price.toFixed(2)}`, columns.price.x, currentY, { align: columns.price.align });
+    doc.text(product.description, 20, currentY);
+    doc.text(product.quantity.toString(), pageWidth - 150, currentY, { align: "right" });
+    doc.text(`${currency} ${product.price.toFixed(2)}`, pageWidth - 100, currentY, { align: "right" });
     doc.text(
       `${currency} ${(product.quantity * product.price).toFixed(2)}`,
-      columns.total.x,
+      pageWidth - 20,
       currentY,
-      { align: columns.total.align }
+      { align: "right" }
     );
     currentY += 8;
   });
@@ -129,24 +134,30 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
   currentY += 15;
 
   // Totals section
-  doc.text("Subtotaal:", pageWidth - 80, currentY);
+  const startX = pageWidth - 80;
+  doc.text(`${t("invoice.vat.subtotal")}:`, startX, currentY);
   doc.text(`${currency} ${subtotal.toFixed(2)}`, pageWidth - 20, currentY, { align: "right" });
 
   currentY += 8;
-  doc.text(`BTW ${data.vatRate}%:`, pageWidth - 80, currentY);
+  doc.text(`${t("invoice.vat.rate")} (${data.vatRate}%)`, startX, currentY);
   doc.text(`${currency} ${vatAmount.toFixed(2)}`, pageWidth - 20, currentY, { align: "right" });
 
   currentY += 8;
   doc.setFont("helvetica", "bold");
-  doc.text("Totaal:", pageWidth - 80, currentY);
+  doc.text(t("invoice.vat.total"), startX, currentY);
   doc.text(`${currency} ${total.toFixed(2)}`, pageWidth - 20, currentY, { align: "right" });
 
   // Payment terms at bottom
   currentY = doc.internal.pageSize.height - 20;
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
-  doc.text("Betaling binnen 14 dagen na factuurdatum", 20, currentY);
+  doc.text(t("invoice.paymentTerms"), 20, currentY);
   doc.text("factuurflow.com", pageWidth - 20, currentY, { align: "right" });
+
+  if (data.notes) {
+    currentY -= 10;
+    doc.text(`${t("invoice.details.notes")}: ${data.notes}`, 20, currentY);
+  }
 
   return doc;
 };
