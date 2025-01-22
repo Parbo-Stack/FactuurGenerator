@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
-import { InvoiceData, calculateTotals } from "@/lib/invoice";
+import { InvoiceData, calculateTotals, calculateDueDate, paymentTerms } from "@/lib/invoice";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface InvoicePreviewProps {
@@ -11,6 +11,7 @@ interface InvoicePreviewProps {
 export default function InvoicePreview({ data }: InvoicePreviewProps) {
   const { t } = useTranslation();
   const { subtotal, vatAmount, total } = calculateTotals(data.products, data.vatRate);
+  const dueDate = calculateDueDate(data.date, data.paymentTerm);
 
   return (
     <Card className="bg-background border">
@@ -26,7 +27,7 @@ export default function InvoicePreview({ data }: InvoicePreviewProps) {
             <p>BTW: {data.vatNumber}</p>
             <p>IBAN: {data.iban}</p>
           </div>
-          <div className="text-right">
+          <div className="text-right space-y-1">
             <p>
               <span className="font-semibold">Factuurnummer:</span>{" "}
               {data.invoiceNumber}
@@ -34,6 +35,14 @@ export default function InvoicePreview({ data }: InvoicePreviewProps) {
             <p>
               <span className="font-semibold">Factuurdatum:</span>{" "}
               {format(data.date, "dd-MM-yyyy")}
+            </p>
+            <p>
+              <span className="font-semibold">Vervaldatum:</span>{" "}
+              {format(dueDate, "dd-MM-yyyy")}
+            </p>
+            <p>
+              <span className="font-semibold">Betalingstermijn:</span>{" "}
+              {paymentTerms[data.paymentTerm].label}
             </p>
           </div>
         </div>
@@ -89,8 +98,7 @@ export default function InvoicePreview({ data }: InvoicePreviewProps) {
             <p className="whitespace-pre-wrap text-muted-foreground">{data.notes}</p>
           </div>
         )}
-
-        </CardContent>
+      </CardContent>
     </Card>
   );
 }

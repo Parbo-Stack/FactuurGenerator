@@ -7,11 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format } from "date-fns";
+import { format, addDays } from "date-fns";
 import { Calendar as CalendarIcon, Upload } from "lucide-react";
 import ProductTable from "@/components/ProductTable";
 import InvoicePreview from "@/components/InvoicePreview";
-import { InvoiceData, generatePDF } from "@/lib/invoice";
+import { InvoiceData, generatePDF, PaymentTerm, paymentTerms, calculateDueDate } from "@/lib/invoice";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 
@@ -25,7 +25,7 @@ export default function InvoiceForm() {
   const savedData = localStorage.getItem('invoiceFormData');
   const defaultValues = savedData ? JSON.parse(savedData) : {
     companyName: "",
-    name: "", // Added sender's name
+    name: "",
     address: "",
     cocNumber: "",
     vatNumber: "",
@@ -35,6 +35,7 @@ export default function InvoiceForm() {
     vatRate: 21 as const,
     currency: "EUR" as const,
     date: new Date(),
+    paymentTerm: "14_days" as PaymentTerm,
   };
 
   if (defaultValues.date) {
@@ -83,6 +84,10 @@ export default function InvoiceForm() {
       });
     }
   };
+
+  const watchDate = form.watch("date");
+  const watchPaymentTerm = form.watch("paymentTerm");
+  const dueDate = calculateDueDate(watchDate, watchPaymentTerm);
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -188,6 +193,32 @@ export default function InvoiceForm() {
               />
             </PopoverContent>
           </Popover>
+        </div>
+
+        <div>
+          <Label htmlFor="paymentTerm">{t("invoice.details.paymentTerms")}</Label>
+          <Select
+            value={form.watch("paymentTerm")}
+            onValueChange={(value) => form.setValue("paymentTerm", value as PaymentTerm)}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(paymentTerms).map(([key, { label }]) => (
+                <SelectItem key={key} value={key}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label>{t("invoice.details.dueDate")}</Label>
+          <div className="h-10 px-3 py-2 rounded-md border border-input bg-background text-sm">
+            {format(dueDate, "PP")}
+          </div>
         </div>
 
         <div>

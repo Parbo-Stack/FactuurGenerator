@@ -1,6 +1,6 @@
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
-import { format } from "date-fns";
+import { format, addDays } from "date-fns";
 import i18n from "./i18n";
 
 export interface Product {
@@ -9,15 +9,25 @@ export interface Product {
   price: number;
 }
 
+export type PaymentTerm = "14_days" | "30_days" | "net_15" | "net_60";
+
+export const paymentTerms: Record<PaymentTerm, { label: string; days: number }> = {
+  "14_days": { label: "14 days", days: 14 },
+  "30_days": { label: "30 days", days: 30 },
+  "net_15": { label: "Net 15", days: 15 },
+  "net_60": { label: "Net 60", days: 60 },
+};
+
 export interface InvoiceData {
   companyName: string;
-  name: string; // Added sender's name
+  name: string;
   address: string;
   cocNumber: string;
   vatNumber: string;
   iban: string;
   invoiceNumber: string;
   date: Date;
+  paymentTerm: PaymentTerm;
   products: Product[];
   vatRate: 9 | 21;
   currency: "EUR" | "USD" | "GBP";
@@ -41,11 +51,16 @@ export const formatCurrency = (amount: number, currency: keyof typeof currencySy
   return `${currencySymbols[currency]} ${amount.toFixed(2)}`;
 };
 
+export const calculateDueDate = (date: Date, paymentTerm: PaymentTerm): Date => {
+  return addDays(date, paymentTerms[paymentTerm].days);
+};
+
 export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
   const doc = new jsPDF();
   const { subtotal, vatAmount, total } = calculateTotals(data.products, data.vatRate);
   const currency = currencySymbols[data.currency];
   const pageWidth = doc.internal.pageSize.width;
+  const dueDate = calculateDueDate(data.date, data.paymentTerm);
 
   // Helper function to draw horizontal line
   const drawLine = (y: number) => {
@@ -74,7 +89,7 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
   doc.setFont("helvetica", "normal");
 
   const leftDetails = [
-    data.name, // Added sender's name
+    data.name,
     data.companyName,
     data.address,
     `KvK: ${data.cocNumber}`,
@@ -84,16 +99,15 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
 
   const rightDetails = [
     `Invoice number: ${data.invoiceNumber}`,
-    `Invoice date: ${data.date.toLocaleDateString(i18n.language)}`,
+    `Invoice date: ${format(data.date, 'dd-MM-yyyy')}`,
+    `Due date: ${format(dueDate, 'dd-MM-yyyy')}`,
+    `Payment terms: ${paymentTerms[data.paymentTerm].label}`,
   ];
 
   doc.text(leftDetails, 20, currentY);
   doc.text(rightDetails, pageWidth - 90, currentY);
-  
-  currentY += 30;
-  doc.text("Betaling binnen 14 dagen na factuurdatum", 20, currentY);
 
-  currentY += 20;
+  currentY += 50;
   drawLine(currentY);
   currentY += 15;
 
@@ -111,7 +125,6 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
   doc.text(t("invoice.products.quantity"), pageWidth - 150, currentY, { align: "right" });
   doc.text(t("invoice.products.price"), pageWidth - 100, currentY, { align: "right" });
   doc.text(t("invoice.products.total"), pageWidth - 20, currentY, { align: "right" });
-
 
   doc.setFont("helvetica", "normal");
   currentY += 5;
@@ -150,15 +163,11 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
   doc.text(t("invoice.vat.total"), startX, currentY);
   doc.text(`${currency} ${total.toFixed(2)}`, pageWidth - 20, currentY, { align: "right" });
 
-  // Payment terms at bottom
-  currentY = doc.internal.pageSize.height - 20;
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "normal");
-  doc.text(t("invoice.paymentTerms"), 20, currentY);
-  doc.text("factuurflow.com", pageWidth - 20, currentY, { align: "right" });
-
+  // Notes
   if (data.notes) {
-    currentY -= 10;
+    currentY = doc.internal.pageSize.height - 40;
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
     doc.text(`${t("invoice.details.notes")}: ${data.notes}`, 20, currentY);
   }
 
