@@ -18,31 +18,31 @@ export default function InvoicePreview({ data }: InvoicePreviewProps) {
       <CardContent className="p-8 space-y-6">
         {/* Header */}
         <div className="flex flex-col gap-4">
-          <h1 className="text-3xl font-bold">FACTUUR</h1>
+          <h1 className="text-3xl font-bold">{t("invoice.title")}</h1>
           <div className="space-y-1">
             <p className="font-semibold">{data.name}</p>
             <p className="font-semibold">{data.companyName}</p>
             <p className="whitespace-pre-wrap">{data.address}</p>
-            <p>KvK: {data.cocNumber}</p>
-            <p>BTW: {data.vatNumber}</p>
-            <p>IBAN: {data.iban}</p>
+            <p>{t("invoice.company.coc")}: {data.cocNumber}</p>
+            <p>{t("invoice.company.vat")}: {data.vatNumber}</p>
+            <p>{t("invoice.company.iban")}: {data.iban}</p>
           </div>
           <div className="text-right space-y-1">
             <p>
-              <span className="font-semibold">Factuurnummer:</span>{" "}
+              <span className="font-semibold">{t("invoice.details.number")}:</span>{" "}
               {data.invoiceNumber}
             </p>
             <p>
-              <span className="font-semibold">Factuurdatum:</span>{" "}
+              <span className="font-semibold">{t("invoice.details.date")}:</span>{" "}
               {format(data.date, "dd-MM-yyyy")}
             </p>
             <p>
-              <span className="font-semibold">Vervaldatum:</span>{" "}
+              <span className="font-semibold">{t("invoice.details.dueDate")}:</span>{" "}
               {format(dueDate, "dd-MM-yyyy")}
             </p>
             <p>
-              <span className="font-semibold">Betalingstermijn:</span>{" "}
-              {paymentTerms[data.paymentTerm].label}
+              <span className="font-semibold">{t("invoice.details.paymentTerms")}:</span>{" "}
+              {paymentTerms[data.paymentTerm]?.label || t("invoice.details.paymentTerms")}
             </p>
           </div>
         </div>
@@ -63,9 +63,9 @@ export default function InvoicePreview({ data }: InvoicePreviewProps) {
                 <TableRow key={index}>
                   <TableCell>{product.description}</TableCell>
                   <TableCell className="text-right">{product.quantity}</TableCell>
-                  <TableCell className="text-right">€ {product.price.toFixed(2)}</TableCell>
+                  <TableCell className="text-right">{data.currency} {product.price.toFixed(2)}</TableCell>
                   <TableCell className="text-right">
-                    € {(product.quantity * product.price).toFixed(2)}
+                    {data.currency} {(product.quantity * product.price).toFixed(2)}
                   </TableCell>
                 </TableRow>
               ))}
@@ -77,16 +77,16 @@ export default function InvoicePreview({ data }: InvoicePreviewProps) {
         <div className="flex justify-end">
           <div className="w-64 space-y-2">
             <div className="flex justify-between">
-              <span>Subtotaal:</span>
-              <span>€ {subtotal.toFixed(2)}</span>
+              <span>{t("invoice.vat.subtotal")}:</span>
+              <span>{data.currency} {subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
-              <span>BTW {data.vatRate}%:</span>
-              <span>€ {vatAmount.toFixed(2)}</span>
+              <span>{t("invoice.vat.rate")} {data.vatRate}%:</span>
+              <span>{data.currency} {vatAmount.toFixed(2)}</span>
             </div>
             <div className="flex justify-between font-bold border-t pt-2">
               <span>{t("invoice.vat.total")}:</span>
-              <span>€ {total.toFixed(2)}</span>
+              <span>{data.currency} {total.toFixed(2)}</span>
             </div>
           </div>
         </div>
