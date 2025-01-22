@@ -83,14 +83,17 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
   ];
 
   const rightDetails = [
-    `${t("invoice.number")}: ${data.invoiceNumber}`,
-    `${t("invoice.date")}: ${data.date.toLocaleDateString(i18n.language)}`,
+    `Factuurnummer: ${data.invoiceNumber}`,
+    `Factuurdatum: ${data.date.toLocaleDateString(i18n.language)}`,
   ];
 
   doc.text(leftDetails, 20, currentY);
   doc.text(rightDetails, pageWidth - 90, currentY);
+  
+  currentY += 30;
+  doc.text("Betaling binnen 14 dagen na factuurdatum", 20, currentY);
 
-  currentY += 40;
+  currentY += 20;
   drawLine(currentY);
   currentY += 15;
 

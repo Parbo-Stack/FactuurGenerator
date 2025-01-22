@@ -28,11 +28,11 @@ export default function InvoicePreview({ data }: InvoicePreviewProps) {
           </div>
           <div className="text-right">
             <p>
-              <span className="font-semibold">{t("invoice.details.number")}:</span>{" "}
+              <span className="font-semibold">Factuurnummer:</span>{" "}
               {data.invoiceNumber}
             </p>
             <p>
-              <span className="font-semibold">{t("invoice.details.date")}:</span>{" "}
+              <span className="font-semibold">Factuurdatum:</span>{" "}
               {format(data.date, "dd-MM-yyyy")}
             </p>
           </div>
