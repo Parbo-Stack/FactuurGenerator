@@ -58,6 +58,17 @@ export const calculateDueDate = (date: Date, paymentTerm: PaymentTerm): Date => 
   return addDays(date, paymentTerms[paymentTerm].days);
 };
 
+// Safe translation function with fallback
+const safeTranslate = (key: string, fallback: string): string => {
+  try {
+    const translation = i18n.t(key);
+    return translation === key ? fallback : translation;
+  } catch (error) {
+    console.warn(`Translation failed for key: ${key}, using fallback`);
+    return fallback;
+  }
+};
+
 export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
   const doc = new jsPDF();
   const { subtotal, vatAmount, total } = calculateTotals(data.products, data.vatRate);
@@ -77,8 +88,9 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
   doc.setFontSize(24);
   doc.setTextColor(0, 100, 0); // Dark green color for FACTUUR only
   doc.setFont("helvetica", "bold");
-  const t = i18n.t;
-  doc.text(t("invoice.title"), 20, currentY);
+
+  const title = safeTranslate("invoice.title", "Factuur");
+  doc.text(title, 20, currentY);
   doc.setTextColor(0, 0, 0); // Reset to black for rest of the text
 
   // Logo on right if provided
@@ -95,16 +107,16 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
     data.name,
     data.companyName,
     data.address,
-    `KvK: ${data.cocNumber}`,
-    `BTW: ${data.vatNumber}`,
-    `IBAN: ${data.iban}`,
+    `${safeTranslate("invoice.company.coc", "KvK")}: ${data.cocNumber}`,
+    `${safeTranslate("invoice.company.vat", "BTW")}: ${data.vatNumber}`,
+    `${safeTranslate("invoice.company.iban", "IBAN")}: ${data.iban}`,
   ];
 
   const rightDetails = [
-    `${t("invoice.details.number")}: ${data.invoiceNumber}`,
-    `${t("invoice.details.date")}: ${format(data.date, 'dd-MM-yyyy')}`,
-    `${t("invoice.details.dueDate")}: ${format(dueDate, 'dd-MM-yyyy')}`,
-    `${t("invoice.details.paymentTerms")}: ${paymentTerms[data.paymentTerm].label}`,
+    `${safeTranslate("invoice.details.number", "Factuurnummer")}: ${data.invoiceNumber}`,
+    `${safeTranslate("invoice.details.date", "Datum")}: ${format(data.date, 'dd-MM-yyyy')}`,
+    `${safeTranslate("invoice.details.dueDate", "Vervaldatum")}: ${format(dueDate, 'dd-MM-yyyy')}`,
+    `${safeTranslate("invoice.details.paymentTerms", "Betalingstermijn")}: ${paymentTerms[data.paymentTerm]?.label || "14 dagen"}`,
   ];
 
   doc.text(leftDetails, 20, currentY);
@@ -116,18 +128,18 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
 
   // Table headers
   const headers = [[
-    t("invoice.products.description"),
-    t("invoice.products.quantity"),
-    t("invoice.products.price"),
-    t("invoice.products.total")
+    safeTranslate("invoice.products.description", "Omschrijving"),
+    safeTranslate("invoice.products.quantity", "Aantal"),
+    safeTranslate("invoice.products.price", "Prijs"),
+    safeTranslate("invoice.products.total", "Totaal")
   ]];
 
   // Table header row
   doc.setFont("helvetica", "bold");
-  doc.text(t("invoice.products.description"), 20, currentY);
-  doc.text(t("invoice.products.quantity"), pageWidth - 150, currentY, { align: "right" });
-  doc.text(t("invoice.products.price"), pageWidth - 100, currentY, { align: "right" });
-  doc.text(t("invoice.products.total"), pageWidth - 20, currentY, { align: "right" });
+  doc.text(headers[0][0], 20, currentY);
+  doc.text(headers[0][1], pageWidth - 150, currentY, { align: "right" });
+  doc.text(headers[0][2], pageWidth - 100, currentY, { align: "right" });
+  doc.text(headers[0][3], pageWidth - 20, currentY, { align: "right" });
 
   doc.setFont("helvetica", "normal");
   currentY += 5;
@@ -154,16 +166,16 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
 
   // Totals section
   const startX = pageWidth - 80;
-  doc.text(`${t("invoice.vat.subtotal")}:`, startX, currentY);
+  doc.text(`${safeTranslate("invoice.vat.subtotal", "Subtotaal")}:`, startX, currentY);
   doc.text(`${currency} ${subtotal.toFixed(2)}`, pageWidth - 20, currentY, { align: "right" });
 
   currentY += 8;
-  doc.text(`${t("invoice.vat.rate")} (${data.vatRate}%)`, startX, currentY);
+  doc.text(`${safeTranslate("invoice.vat.rate", "BTW")} (${data.vatRate}%)`, startX, currentY);
   doc.text(`${currency} ${vatAmount.toFixed(2)}`, pageWidth - 20, currentY, { align: "right" });
 
   currentY += 8;
   doc.setFont("helvetica", "bold");
-  doc.text(t("invoice.vat.total"), startX, currentY);
+  doc.text(safeTranslate("invoice.vat.total", "Totaal incl. BTW"), startX, currentY);
   doc.text(`${currency} ${total.toFixed(2)}`, pageWidth - 20, currentY, { align: "right" });
 
   // Notes
@@ -171,7 +183,7 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
     currentY = doc.internal.pageSize.height - 40;
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
-    doc.text(`${t("invoice.details.notes")}: ${data.notes}`, 20, currentY);
+    doc.text(`${safeTranslate("invoice.details.notes", "Opmerkingen")}: ${data.notes}`, 20, currentY);
   }
 
   return doc;

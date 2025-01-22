@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format, addDays } from "date-fns";
+import { format } from "date-fns";
 import { Calendar as CalendarIcon, Upload } from "lucide-react";
 import ProductTable from "@/components/ProductTable";
 import InvoicePreview from "@/components/InvoicePreview";
@@ -21,6 +21,7 @@ export default function InvoiceForm() {
   const [showPreview, setShowPreview] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   const savedData = localStorage.getItem('invoiceFormData');
   const defaultValues = savedData ? JSON.parse(savedData) : {
@@ -68,33 +69,74 @@ export default function InvoiceForm() {
     }
   };
 
-  const onSubmit = async (data: InvoiceData) => {
+  const downloadPDF = async (blob: Blob, filename: string) => {
     try {
+      // For Safari, we need to use a different approach
+      if (navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const data = e.target?.result;
+          if (data) {
+            const link = document.createElement('a');
+            link.href = data as string;
+            link.download = filename;
+            link.click();
+          }
+        };
+        reader.readAsDataURL(blob);
+      } else {
+        // For other browsers
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.style.display = 'none';
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => {
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        }, 100);
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      throw error;
+    }
+  };
+
+  const onSubmit = async (data: InvoiceData) => {
+    if (isGeneratingPDF) return;
+
+    setIsGeneratingPDF(true);
+    try {
+      // Validate payment term
+      if (!data.paymentTerm || !paymentTerms[data.paymentTerm]) {
+        throw new Error('Invalid payment term');
+      }
+
       const doc = generatePDF(data, logoPreview);
+      if (!doc) {
+        throw new Error('Failed to generate PDF');
+      }
+
       const pdfBlob = doc.output('blob');
+      const filename = `factuur-${data.invoiceNumber || 'ongenummerd'}.pdf`;
 
-      // Create a temporary link element
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(pdfBlob);
-      link.download = `factuur-${data.invoiceNumber}.pdf`;
-
-      // Append to document, click, and cleanup
-      document.body.appendChild(link);
-      link.click();
-      URL.revokeObjectURL(link.href);
-      document.body.removeChild(link);
+      await downloadPDF(pdfBlob, filename);
 
       toast({
         title: t("common.success"),
         description: t("invoice.pdfGenerated"),
       });
     } catch (error) {
-      console.error("PDF generation error:", error);
+      console.error("PDF generation/download error:", error);
       toast({
         title: t("common.error"),
         description: t("invoice.pdfError"),
         variant: "destructive",
       });
+    } finally {
+      setIsGeneratingPDF(false);
     }
   };
 
@@ -282,8 +324,8 @@ export default function InvoiceForm() {
         <Button type="button" variant="outline" onClick={() => setShowPreview(true)}>
           {t("common.preview")}
         </Button>
-        <Button type="submit">
-          {t("common.download")}
+        <Button type="submit" disabled={isGeneratingPDF}>
+          {isGeneratingPDF ? "Generating..." : t("common.download")}
         </Button>
       </div>
 
