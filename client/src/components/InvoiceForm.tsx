@@ -114,7 +114,7 @@ export default function InvoiceForm() {
         throw new Error('Invalid payment term');
       }
 
-      const doc = generatePDF(data, logoPreview);
+      const doc = await generatePDF(data, logoPreview);
       if (!doc) {
         throw new Error('Failed to generate PDF');
       }
