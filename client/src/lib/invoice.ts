@@ -52,6 +52,9 @@ export const formatCurrency = (amount: number, currency: keyof typeof currencySy
 };
 
 export const calculateDueDate = (date: Date, paymentTerm: PaymentTerm): Date => {
+  if (!date || !paymentTerm || !paymentTerms[paymentTerm]) {
+    return new Date(); // Return current date as fallback
+  }
   return addDays(date, paymentTerms[paymentTerm].days);
 };
 
