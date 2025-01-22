@@ -39,7 +39,8 @@
     "vat": {
       "rate": "BTW Tarief",
       "amount": "BTW Bedrag",
-      "total": "Totaal incl. BTW"
+      "total": "Totaal incl. BTW",
+      "subtotal": "Subtotaal"
     },
     "email": {
       "title": "Factuur Versturen",

@@ -39,7 +39,8 @@
     "vat": {
       "rate": "VAT Rate",
       "amount": "VAT Amount",
-      "total": "Total inc. VAT"
+      "total": "Total inc. VAT",
+      "subtotal": "Subtotal"
     },
     "email": {
       "title": "Send Invoice",
