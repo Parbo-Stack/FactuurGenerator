@@ -83,8 +83,8 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
   ];
 
   const rightDetails = [
-    `Factuurnummer: ${data.invoiceNumber}`,
-    `Factuurdatum: ${data.date.toLocaleDateString(i18n.language)}`,
+    `Invoice number: ${data.invoiceNumber}`,
+    `Invoice date: ${data.date.toLocaleDateString(i18n.language)}`,
   ];
 
   doc.text(leftDetails, 20, currentY);
