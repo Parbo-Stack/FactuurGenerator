@@ -9,7 +9,7 @@
     "error": "Error"
   },
   "invoice": {
-    "title": "Invoice Generator",
+    "title": "Invoice",
     "name": "Name",
     "company": {
       "name": "Company Name",

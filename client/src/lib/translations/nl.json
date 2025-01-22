@@ -9,7 +9,7 @@
     "error": "Fout"
   },
   "invoice": {
-    "title": "Factuur Generator",
+    "title": "Factuur",
     "name": "Naam",
     "company": {
       "name": "Bedrijfsnaam",
