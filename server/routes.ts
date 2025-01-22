@@ -4,15 +4,37 @@ import nodemailer from "nodemailer";
 import cors from "cors";
 
 export function registerRoutes(app: Express): Server {
-  // Enable CORS for all routes
+  // Enable CORS for all routes with proper configuration
   app.use(cors({
-    origin: '*',
+    origin: true, // Allow all origins
     methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
   }));
 
   // Handle OPTIONS requests
   app.options('*', cors());
+
+  // PDF generation endpoint
+  app.post("/api/generate-pdf", (req, res) => {
+    try {
+      // Set headers for PDF download
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename=invoice.pdf');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+      // Return success
+      res.status(200).json({ message: "PDF generation endpoint ready" });
+    } catch (error: any) {
+      console.error("PDF generation failed:", error);
+      res.status(500).json({ 
+        message: "Failed to generate PDF", 
+        error: error.message 
+      });
+    }
+  });
 
   // Email sending endpoint
   app.post("/api/send-invoice", async (req, res) => {
@@ -31,12 +53,6 @@ export function registerRoutes(app: Express): Server {
           error: "Missing EMAIL_USER or EMAIL_PASSWORD environment variables"
         });
       }
-
-      console.log("Attempting to send email to:", to);
-      console.log("Using email configuration:", {
-        user: process.env.EMAIL_USER,
-        passwordLength: process.env.EMAIL_PASSWORD?.length || 0
-      });
 
       // Create SMTP transporter using Gmail
       const transporter = nodemailer.createTransport({
@@ -67,7 +83,7 @@ export function registerRoutes(app: Express): Server {
           <div>
             <p>Beste,</p>
             <p>Hierbij ontvangt u uw factuur ${invoiceNumber}.</p>
-            <p>Met vriendelijke groet,<br>${req.body.name}</p>
+            <p>Met vriendelijke groet,</p>
           </div>
         `,
         attachments: [
@@ -79,22 +95,14 @@ export function registerRoutes(app: Express): Server {
         ],
       };
 
-      console.log("Sending email with options:", {
-        to: mailOptions.to,
-        subject: mailOptions.subject,
-        hasAttachment: !!mailOptions.attachments?.length
-      });
-
       // Send email
       await transporter.sendMail(mailOptions);
-      console.log("Email sent successfully");
       res.json({ message: "Email sent successfully" });
     } catch (error: any) {
-      console.error("Email sending failed - Full error:", error);
+      console.error("Email sending failed:", error);
       res.status(500).json({ 
         message: "Failed to send email", 
-        error: error.message || "Unknown error occurred",
-        details: error.stack
+        error: error.message 
       });
     }
   });
