@@ -12,10 +12,10 @@ export interface Product {
 export type PaymentTerm = "14_days" | "30_days" | "net_15" | "net_60";
 
 export const paymentTerms: Record<PaymentTerm, { label: string; days: number }> = {
-  "14_days": { label: "14 days", days: 14 },
-  "30_days": { label: "30 days", days: 30 },
-  "net_15": { label: "Net 15", days: 15 },
-  "net_60": { label: "Net 60", days: 60 },
+  "14_days": { label: "14 dagen", days: 14 },
+  "30_days": { label: "30 dagen", days: 30 },
+  "net_15": { label: "Netto 15", days: 15 },
+  "net_60": { label: "Netto 60", days: 60 },
 };
 
 export interface InvoiceData {
@@ -101,10 +101,10 @@ export const generatePDF = (data: InvoiceData, logoDataUrl?: string | null) => {
   ];
 
   const rightDetails = [
-    `Invoice number: ${data.invoiceNumber}`,
-    `Invoice date: ${format(data.date, 'dd-MM-yyyy')}`,
-    `Due date: ${format(dueDate, 'dd-MM-yyyy')}`,
-    `Payment terms: ${paymentTerms[data.paymentTerm].label}`,
+    `${t("invoice.details.number")}: ${data.invoiceNumber}`,
+    `${t("invoice.details.date")}: ${format(data.date, 'dd-MM-yyyy')}`,
+    `${t("invoice.details.dueDate")}: ${format(dueDate, 'dd-MM-yyyy')}`,
+    `${t("invoice.details.paymentTerms")}: ${paymentTerms[data.paymentTerm].label}`,
   ];
 
   doc.text(leftDetails, 20, currentY);
