@@ -58,6 +58,7 @@
     "i18next": "^24.2.1",
     "input-otp": "^1.2.4",
     "jspdf": "^2.5.2",
+    "jspdf-autotable": "^3.8.4",
     "lucide-react": "^0.453.0",
     "memorystore": "^1.6.7",
     "nodemailer": "^6.9.16",
