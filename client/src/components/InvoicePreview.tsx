@@ -90,11 +90,7 @@ export default function InvoicePreview({ data }: InvoicePreviewProps) {
           </div>
         )}
 
-        {/* Footer */}
-        <div className="text-sm text-muted-foreground border-t pt-4">
-          <p>Betaling binnen 14 dagen na factuurdatum</p>
-        </div>
-      </CardContent>
+        </CardContent>
     </Card>
   );
 }
