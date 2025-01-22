@@ -23,7 +23,9 @@
     "details": {
       "date": "Datum",
       "number": "Factuurnummer",
-      "notes": "Opmerkingen"
+      "notes": "Opmerkingen",
+      "paymentTerms": "Betalingstermijn",
+      "dueDate": "Vervaldatum"
     },
     "products": {
       "title": "Producten/Diensten",

@@ -23,7 +23,9 @@
     "details": {
       "date": "Date",
       "number": "Invoice Number",
-      "notes": "Notes"
+      "notes": "Notes",
+      "paymentTerms": "Payment Terms",
+      "dueDate": "Due Date"
     },
     "products": {
       "title": "Products/Services",
