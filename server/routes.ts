@@ -3,14 +3,24 @@ import { createServer, type Server } from "http";
 import nodemailer from "nodemailer";
 import cors from "cors";
 import { db } from "@db";
-import { expenses, users } from "@db/schema";
+import { expenses, income, users } from "@db/schema";
 import { eq, and, between, like, desc, sql } from "drizzle-orm";
 import { z } from "zod";
 
-// Validation schema for expense filtering
+// Validation schemas
 const expenseFilterSchema = z.object({
   startDate: z.string().optional(),
   endDate: z.string().optional(),
+  category: z.string().optional(),
+  minAmount: z.number().optional(),
+  maxAmount: z.number().optional(),
+  searchTerm: z.string().optional(),
+});
+
+const incomeFilterSchema = z.object({
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  source: z.string().optional(),
   category: z.string().optional(),
   minAmount: z.number().optional(),
   maxAmount: z.number().optional(),
@@ -29,6 +39,127 @@ export function registerRoutes(app: Express): Server {
 
   // Handle preflight requests
   app.options('*', cors());
+
+  // Income routes
+  app.post("/api/income", async (req, res) => {
+    try {
+      const { date, amount, source, description, category, paymentMethod } = req.body;
+      const userId = 1; // TODO: Get from session
+
+      const newIncome = await db.insert(income).values({
+        userId,
+        date: new Date(date),
+        amount,
+        source,
+        description,
+        category,
+        paymentMethod,
+      }).returning();
+
+      res.json({ message: "Income entry created successfully", income: newIncome[0] });
+    } catch (error: any) {
+      console.error("Failed to create income entry:", error);
+      res.status(500).json({ message: "Failed to create income entry", error: error.message });
+    }
+  });
+
+  app.get("/api/income", async (req, res) => {
+    try {
+      const filters = incomeFilterSchema.parse(req.query);
+      const userId = 1; // TODO: Get from session
+
+      let baseQuery = db.select().from(income);
+      const conditions = [eq(income.userId, userId)];
+
+      if (filters.startDate && filters.endDate) {
+        conditions.push(
+          sql`${income.date} BETWEEN ${new Date(filters.startDate)} AND ${new Date(filters.endDate)}`
+        );
+      }
+
+      if (filters.source) {
+        conditions.push(eq(income.source, filters.source));
+      }
+
+      if (filters.category) {
+        conditions.push(eq(income.category, filters.category));
+      }
+
+      if (filters.minAmount !== undefined) {
+        conditions.push(sql`CAST(${income.amount} AS DECIMAL) >= ${filters.minAmount}`);
+      }
+
+      if (filters.maxAmount !== undefined) {
+        conditions.push(sql`CAST(${income.amount} AS DECIMAL) <= ${filters.maxAmount}`);
+      }
+
+      if (filters.searchTerm) {
+        conditions.push(like(income.description, `%${filters.searchTerm}%`));
+      }
+
+      const results = await baseQuery
+        .where(and(...conditions))
+        .orderBy(desc(income.date));
+
+      res.json(results);
+    } catch (error: any) {
+      console.error("Failed to fetch income entries:", error);
+      res.status(500).json({ message: "Failed to fetch income entries", error: error.message });
+    }
+  });
+
+  app.put("/api/income/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = 1; // TODO: Get from session
+      const updates = req.body;
+
+      const updatedIncome = await db
+        .update(income)
+        .set({
+          ...updates,
+          updatedAt: new Date(),
+        })
+        .where(and(
+          eq(income.id, parseInt(id)),
+          eq(income.userId, userId)
+        ))
+        .returning();
+
+      if (!updatedIncome.length) {
+        return res.status(404).json({ message: "Income entry not found" });
+      }
+
+      res.json({ message: "Income entry updated successfully", income: updatedIncome[0] });
+    } catch (error: any) {
+      console.error("Failed to update income entry:", error);
+      res.status(500).json({ message: "Failed to update income entry", error: error.message });
+    }
+  });
+
+  app.delete("/api/income/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = 1; // TODO: Get from session
+
+      const deletedIncome = await db
+        .delete(income)
+        .where(and(
+          eq(income.id, parseInt(id)),
+          eq(income.userId, userId)
+        ))
+        .returning();
+
+      if (!deletedIncome.length) {
+        return res.status(404).json({ message: "Income entry not found" });
+      }
+
+      res.json({ message: "Income entry deleted successfully" });
+    } catch (error: any) {
+      console.error("Failed to delete income entry:", error);
+      res.status(500).json({ message: "Failed to delete income entry", error: error.message });
+    }
+  });
 
   // Create expense
   app.post("/api/expenses", async (req, res) => {
@@ -172,14 +303,14 @@ export function registerRoutes(app: Express): Server {
       });
 
       // Return success
-      res.status(200).json({ 
+      res.status(200).json({
         message: "PDF generation endpoint ready",
-        success: true 
+        success: true
       });
     } catch (error: any) {
       console.error("PDF generation failed:", error);
-      res.status(500).json({ 
-        message: "Failed to generate PDF", 
+      res.status(500).json({
+        message: "Failed to generate PDF",
         error: error.message,
         success: false
       });
@@ -198,8 +329,8 @@ export function registerRoutes(app: Express): Server {
 
       if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
         console.error("Missing email credentials in environment variables");
-        return res.status(500).json({ 
-          message: "Email service not configured", 
+        return res.status(500).json({
+          message: "Email service not configured",
           error: "Missing EMAIL_USER or EMAIL_PASSWORD environment variables"
         });
       }
@@ -250,9 +381,9 @@ export function registerRoutes(app: Express): Server {
       res.json({ message: "Email sent successfully" });
     } catch (error: any) {
       console.error("Email sending failed:", error);
-      res.status(500).json({ 
-        message: "Failed to send email", 
-        error: error.message 
+      res.status(500).json({
+        message: "Failed to send email",
+        error: error.message
       });
     }
   });

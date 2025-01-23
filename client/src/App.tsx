@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import InvoiceGenerator from "@/pages/invoice-generator";
 import ExpensesPage from "@/pages/expenses";
+import IncomePage from "@/pages/income";
 import { I18nextProvider } from "react-i18next";
 import i18n from "./lib/i18n";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -17,6 +18,7 @@ function Router() {
       <Switch>
         <Route path="/" component={InvoiceGenerator} />
         <Route path="/expenses" component={ExpensesPage} />
+        <Route path="/income" component={IncomePage} />
         <Route path="/sitemap.xml" component={() => {
           window.location.href = "/sitemap.xml";
           return null;
