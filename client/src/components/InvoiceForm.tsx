@@ -114,14 +114,12 @@ export default function InvoiceForm() {
         throw new Error('Invalid payment term');
       }
 
-      const doc = await generatePDF(data, logoPreview);
-      if (!doc) {
+      const pdfBlob = await generatePDF(data, logoPreview);
+      if (!pdfBlob) {
         throw new Error('Failed to generate PDF');
       }
 
-      const pdfBlob = doc.output('blob');
       const filename = `factuur-${data.invoiceNumber || 'ongenummerd'}.pdf`;
-
       await downloadPDF(pdfBlob, filename);
 
       toast({

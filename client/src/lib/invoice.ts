@@ -99,7 +99,7 @@ const generatePaymentQRCode = async (data: InvoiceData, total: number): Promise<
   }
 };
 
-export const generatePDF = async (data: InvoiceData, logoDataUrl?: string | null): Promise<jsPDF> => {
+export const generatePDF = async (data: InvoiceData, logoDataUrl?: string | null): Promise<Blob> => {
   try {
     const doc = new jsPDF();
     const { subtotal, vatAmount, total } = calculateTotals(data.products, data.vatRate);
@@ -233,7 +233,7 @@ export const generatePDF = async (data: InvoiceData, logoDataUrl?: string | null
       doc.text(`${safeTranslate("invoice.details.notes", "Opmerkingen")}: ${data.notes}`, 20, currentY);
     }
 
-    return doc;
+    return doc.output('blob');
   } catch (error) {
     console.error("Error generating PDF:", error);
     throw error;
