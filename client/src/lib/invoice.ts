@@ -108,7 +108,31 @@ export const generatePDF = async (data: InvoiceData, logoDataUrl?: string | null
     const dueDate = calculateDueDate(data.date, data.paymentTerm);
 
     // Generate QR code for payment
-    const qrCodeDataUrl = await generatePaymentQRCode(data, total);
+    const qrData = [
+      'BCD',                              // Service Tag
+      '002',                             // Version
+      '1',                               // Character Set
+      'SCT',                             // Identification
+      data.iban.replace(/\s/g, ''),      // IBAN
+      data.companyName,                  // Beneficiary Name
+      total.toFixed(2),                  // Amount
+      data.currency,                     // Currency
+      '',                                // Purpose (empty)
+      data.invoiceNumber,                // Remittance Reference
+      `Invoice ${data.invoiceNumber}`    // Additional remittance information
+    ].join('\n');
+
+    let qrCodeDataUrl;
+    try {
+      qrCodeDataUrl = await QRCode.toDataURL(qrData, {
+        errorCorrectionLevel: 'M',
+        margin: 2,
+        width: 150
+      });
+    } catch (error) {
+      console.error('QR code generation failed:', error);
+      // Continue without QR code if generation fails
+    }
 
     // Helper function to draw horizontal line
     const drawLine = (y: number) => {
@@ -212,7 +236,7 @@ export const generatePDF = async (data: InvoiceData, logoDataUrl?: string | null
     doc.text(safeTranslate("invoice.vat.total", "Totaal incl. BTW"), startX, currentY);
     doc.text(`${currency} ${total.toFixed(2)}`, pageWidth - 20, currentY, { align: "right" });
 
-    // Add QR code at the bottom right
+    // Add QR code at the bottom right if generated successfully
     if (qrCodeDataUrl) {
       const qrSize = 40;
       const qrY = doc.internal.pageSize.height - 60;

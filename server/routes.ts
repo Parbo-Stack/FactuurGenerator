@@ -2,19 +2,158 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import nodemailer from "nodemailer";
 import cors from "cors";
+import { db } from "@db";
+import { expenses, users } from "@db/schema";
+import { eq, and, between, like, desc, sql } from "drizzle-orm";
+import { z } from "zod";
+
+// Validation schema for expense filtering
+const expenseFilterSchema = z.object({
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  category: z.string().optional(),
+  minAmount: z.number().optional(),
+  maxAmount: z.number().optional(),
+  searchTerm: z.string().optional(),
+});
 
 export function registerRoutes(app: Express): Server {
-  // Enable CORS with specific configuration for cross-browser support
+  // Enable CORS with specific configuration
   app.use(cors({
     origin: true,
-    methods: ['GET', 'POST', 'OPTIONS', 'HEAD'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     credentials: true,
-    maxAge: 86400 // Cache preflight requests for 24 hours
+    maxAge: 86400
   }));
 
   // Handle preflight requests
   app.options('*', cors());
+
+  // Create expense
+  app.post("/api/expenses", async (req, res) => {
+    try {
+      const { date, amount, category, description, taxDeductible, attachments } = req.body;
+
+      // TODO: Get actual user ID from session
+      const userId = 1; // Temporary for testing
+
+      const newExpense = await db.insert(expenses).values({
+        userId,
+        date: new Date(date),
+        amount,
+        category,
+        description,
+        taxDeductible,
+        attachments: attachments || [],
+      }).returning();
+
+      res.json({ message: "Expense created successfully", expense: newExpense[0] });
+    } catch (error: any) {
+      console.error("Failed to create expense:", error);
+      res.status(500).json({ message: "Failed to create expense", error: error.message });
+    }
+  });
+
+  // Get expenses with filtering
+  app.get("/api/expenses", async (req, res) => {
+    try {
+      const filters = expenseFilterSchema.parse(req.query);
+      const userId = 1; // TODO: Get from session
+
+      let baseQuery = db.select().from(expenses);
+
+      // Build the where conditions array
+      const conditions = [eq(expenses.userId, userId)];
+
+      if (filters.startDate && filters.endDate) {
+        conditions.push(
+          sql`${expenses.date} BETWEEN ${new Date(filters.startDate)} AND ${new Date(filters.endDate)}`
+        );
+      }
+
+      if (filters.category) {
+        conditions.push(eq(expenses.category, filters.category));
+      }
+
+      if (filters.minAmount !== undefined) {
+        conditions.push(sql`CAST(${expenses.amount} AS DECIMAL) >= ${filters.minAmount}`);
+      }
+
+      if (filters.maxAmount !== undefined) {
+        conditions.push(sql`CAST(${expenses.amount} AS DECIMAL) <= ${filters.maxAmount}`);
+      }
+
+      if (filters.searchTerm) {
+        conditions.push(like(expenses.description, `%${filters.searchTerm}%`));
+      }
+
+      // Apply all conditions
+      const results = await baseQuery
+        .where(and(...conditions))
+        .orderBy(desc(expenses.date));
+
+      res.json(results);
+    } catch (error: any) {
+      console.error("Failed to fetch expenses:", error);
+      res.status(500).json({ message: "Failed to fetch expenses", error: error.message });
+    }
+  });
+
+  // Update expense
+  app.put("/api/expenses/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = 1; // TODO: Get from session
+      const updates = req.body;
+
+      const updatedExpense = await db
+        .update(expenses)
+        .set({
+          ...updates,
+          updatedAt: new Date(),
+        })
+        .where(and(
+          eq(expenses.id, parseInt(id)),
+          eq(expenses.userId, userId)
+        ))
+        .returning();
+
+      if (!updatedExpense.length) {
+        return res.status(404).json({ message: "Expense not found" });
+      }
+
+      res.json({ message: "Expense updated successfully", expense: updatedExpense[0] });
+    } catch (error: any) {
+      console.error("Failed to update expense:", error);
+      res.status(500).json({ message: "Failed to update expense", error: error.message });
+    }
+  });
+
+  // Delete expense
+  app.delete("/api/expenses/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = 1; // TODO: Get from session
+
+      const deletedExpense = await db
+        .delete(expenses)
+        .where(and(
+          eq(expenses.id, parseInt(id)),
+          eq(expenses.userId, userId)
+        ))
+        .returning();
+
+      if (!deletedExpense.length) {
+        return res.status(404).json({ message: "Expense not found" });
+      }
+
+      res.json({ message: "Expense deleted successfully" });
+    } catch (error: any) {
+      console.error("Failed to delete expense:", error);
+      res.status(500).json({ message: "Failed to delete expense", error: error.message });
+    }
+  });
 
   // PDF generation endpoint
   app.post("/api/generate-pdf", (req, res) => {
@@ -120,17 +259,14 @@ export function registerRoutes(app: Express): Server {
 
   const httpServer = createServer(app);
 
-  // Error handling middleware with improved browser support
+  // Error handling middleware
   app.use((err: any, req: any, res: any, next: any) => {
     console.error("Server error:", err);
-
-    // Set CORS headers even for errors
     res.set({
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, HEAD',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, HEAD',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept'
     });
-
     res.status(err.status || 500).json({
       message: err.message || 'Something broke!',
       success: false

@@ -9,6 +9,7 @@ import { I18nextProvider } from "react-i18next";
 import i18n from "./lib/i18n";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Layout from "@/components/Layout";
+import HotjarTracking from "@/components/HotjarTracking";
 
 function Router() {
   return (
@@ -33,6 +34,7 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <Router />
           <Toaster />
+          <HotjarTracking />
         </QueryClientProvider>
       </I18nextProvider>
     </ThemeProvider>
