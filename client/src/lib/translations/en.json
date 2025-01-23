@@ -6,10 +6,7 @@
     "download": "Download PDF",
     "required": "Required",
     "success": "Success",
-    "error": "Error",
-    "add": "Add",
-    "edit": "Edit",
-    "delete": "Delete"
+    "error": "Error"
   },
   "invoice": {
     "title": "Invoice",
@@ -61,48 +58,5 @@
     "pdfError": "Failed to generate PDF",
     "emailSent": "Invoice has been sent successfully",
     "emailError": "Failed to send invoice email"
-  },
-  "expenses": {
-    "title": "Expense Tracking",
-    "add": "Add Expense",
-    "edit": "Edit Expense",
-    "form": {
-      "date": "Date",
-      "amount": "Amount",
-      "category": "Category",
-      "description": "Description",
-      "taxDeductible": "Tax Deductible",
-      "attachments": "Attachments",
-      "addAttachment": "Add Attachment",
-      "submit": "Save Expense"
-    },
-    "list": {
-      "title": "Expenses List",
-      "noExpenses": "No expenses found",
-      "filter": "Filter expenses",
-      "search": "Search expenses",
-      "columns": {
-        "date": "Date",
-        "amount": "Amount",
-        "category": "Category",
-        "description": "Description",
-        "taxDeductible": "Tax Deductible",
-        "actions": "Actions"
-      }
-    },
-    "categories": {
-      "office": "Office Supplies",
-      "travel": "Travel",
-      "meals": "Meals & Entertainment",
-      "software": "Software & Subscriptions",
-      "hardware": "Hardware & Equipment",
-      "marketing": "Marketing & Advertising",
-      "other": "Other"
-    },
-    "messages": {
-      "saved": "Expense saved successfully",
-      "deleted": "Expense deleted successfully",
-      "error": "Failed to save expense"
-    }
   }
 }

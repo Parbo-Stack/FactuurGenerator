@@ -6,10 +6,7 @@
     "download": "PDF Downloaden",
     "required": "Verplicht",
     "success": "Succes",
-    "error": "Fout",
-    "add": "Toevoegen",
-    "edit": "Bewerken",
-    "delete": "Verwijderen"
+    "error": "Fout"
   },
   "invoice": {
     "title": "Factuur",
@@ -61,48 +58,5 @@
     "pdfError": "Kon geen PDF genereren",
     "emailSent": "Factuur is succesvol verstuurd",
     "emailError": "Kon de factuur niet per e-mail versturen"
-  },
-  "expenses": {
-    "title": "Uitgaven Beheer",
-    "add": "Uitgave Toevoegen",
-    "edit": "Uitgave Bewerken",
-    "form": {
-      "date": "Datum",
-      "amount": "Bedrag",
-      "category": "Categorie",
-      "description": "Omschrijving",
-      "taxDeductible": "Fiscaal Aftrekbaar",
-      "attachments": "Bijlagen",
-      "addAttachment": "Bijlage Toevoegen",
-      "submit": "Uitgave Opslaan"
-    },
-    "list": {
-      "title": "Uitgaven Lijst",
-      "noExpenses": "Geen uitgaven gevonden",
-      "filter": "Filter uitgaven",
-      "search": "Zoek uitgaven",
-      "columns": {
-        "date": "Datum",
-        "amount": "Bedrag",
-        "category": "Categorie",
-        "description": "Omschrijving",
-        "taxDeductible": "Fiscaal Aftrekbaar",
-        "actions": "Acties"
-      }
-    },
-    "categories": {
-      "office": "Kantoorbenodigdheden",
-      "travel": "Reiskosten",
-      "meals": "Eten & Drinken",
-      "software": "Software & Abonnementen",
-      "hardware": "Hardware & Apparatuur",
-      "marketing": "Marketing & Reclame",
-      "other": "Overig"
-    },
-    "messages": {
-      "saved": "Uitgave succesvol opgeslagen",
-      "deleted": "Uitgave succesvol verwijderd",
-      "error": "Kon de uitgave niet opslaan"
-    }
   }
 }
