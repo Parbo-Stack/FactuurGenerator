@@ -1,0 +1,48 @@
+Enhance the existing FactuurFlow website (https://www.factuurflow.com/) by adding new accounting features such as tracking expenses, income management, and storing invoices while keeping the current structure and design intact.
+
+Existing Tech Stack:
+- Frontend: React.js (with TailwindCSS for styling)
+- Backend: Node.js/Express
+- Database: cloudflare for authentication and data storage
+- PDF Generation: jsPDF for invoice creation
+- Hosting: Cloudflare Pages (for frontend) and backend
+
+New Features to Implement:
+1. **Expense Tracking:**
+   - Add a new page/section to allow users to input expenses with fields such as date, category, amount, and description.
+   - Provide filtering and search options by date, category, and amount.
+   - Use Firebase to store and retrieve expenses.
+
+2. **Income Tracking:**
+   - Implement a form to track different sources of income with fields for date, source, amount, and payment method.
+   - Display a summary of total income over selected time periods.
+
+3. **Invoice Storage:**
+   - Allow users to upload and store invoices in PDF format.
+   - Implement a file management system using Firebase Storage.
+   - Provide options to view, download, and delete invoices.
+
+4. **Dashboard Enhancements:**
+   - Integrate data visualization using Chart.js to show financial reports (e.g., income vs. expenses, monthly trends).
+   - Create a financial summary widget on the homepage.
+
+5. **Export to CSV:**
+   - Add functionality to export income and expense data as CSV files for accounting purposes.
+
+6. **User Authentication Improvements:**
+   - Ensure users can securely log in to manage their financial records.
+   - Add password reset functionality.
+
+7. **Responsiveness & UX Improvements:**
+   - Optimize UI components for better mobile experience.
+   - Improve form validation and user feedback.
+
+Development Guidelines:
+- Maintain the current site’s UI/UX design and branding.
+- Use existing component styles to ensure design consistency.
+- Ensure the new features do not break existing functionalities.
+
+Additional Notes:
+- Use cloudflare Firestore for storing financial records efficiently.
+- Ensure data security and GDPR compliance when handling financial data.
+- Provide meaningful error messages and logging for debugging
