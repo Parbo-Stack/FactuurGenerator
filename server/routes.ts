@@ -1,11 +1,12 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import nodemailer from "nodemailer";
+import { setupAuth } from "./auth";
 import cors from "cors";
 import { db } from "@db";
 import { expenses, income, users } from "@db/schema";
 import { eq, and, between, like, desc, sql } from "drizzle-orm";
 import { z } from "zod";
+import nodemailer from "nodemailer";
 
 // Validation schemas
 const expenseFilterSchema = z.object({
@@ -40,11 +41,18 @@ export function registerRoutes(app: Express): Server {
   // Handle preflight requests
   app.options('*', cors());
 
+  // Set up authentication routes and middleware
+  setupAuth(app);
+
   // Income routes
   app.post("/api/income", async (req, res) => {
     try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
       const { date, amount, source, description, category, paymentMethod } = req.body;
-      const userId = 1; // TODO: Get from session
+      const userId = req.user!.id;
 
       const newIncome = await db.insert(income).values({
         userId,
@@ -65,8 +73,12 @@ export function registerRoutes(app: Express): Server {
 
   app.get("/api/income", async (req, res) => {
     try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
       const filters = incomeFilterSchema.parse(req.query);
-      const userId = 1; // TODO: Get from session
+      const userId = req.user!.id;
 
       let baseQuery = db.select().from(income);
       const conditions = [eq(income.userId, userId)];
@@ -110,8 +122,12 @@ export function registerRoutes(app: Express): Server {
 
   app.put("/api/income/:id", async (req, res) => {
     try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
       const { id } = req.params;
-      const userId = 1; // TODO: Get from session
+      const userId = req.user!.id;
       const updates = req.body;
 
       const updatedIncome = await db
@@ -139,8 +155,12 @@ export function registerRoutes(app: Express): Server {
 
   app.delete("/api/income/:id", async (req, res) => {
     try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
       const { id } = req.params;
-      const userId = 1; // TODO: Get from session
+      const userId = req.user!.id;
 
       const deletedIncome = await db
         .delete(income)
@@ -161,13 +181,15 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Create expense
+  // Expense routes
   app.post("/api/expenses", async (req, res) => {
     try {
-      const { date, amount, category, description, taxDeductible, attachments } = req.body;
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
 
-      // TODO: Get actual user ID from session
-      const userId = 1; // Temporary for testing
+      const { date, amount, category, description, taxDeductible, attachments } = req.body;
+      const userId = req.user!.id;
 
       const newExpense = await db.insert(expenses).values({
         userId,
@@ -186,11 +208,13 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Get expenses with filtering
   app.get("/api/expenses", async (req, res) => {
     try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
       const filters = expenseFilterSchema.parse(req.query);
-      const userId = 1; // TODO: Get from session
+      const userId = req.user!.id;
 
       let baseQuery = db.select().from(expenses);
 
@@ -231,11 +255,13 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Update expense
   app.put("/api/expenses/:id", async (req, res) => {
     try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
       const { id } = req.params;
-      const userId = 1; // TODO: Get from session
+      const userId = req.user!.id;
       const updates = req.body;
 
       const updatedExpense = await db
@@ -261,11 +287,13 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Delete expense
   app.delete("/api/expenses/:id", async (req, res) => {
     try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
       const { id } = req.params;
-      const userId = 1; // TODO: Get from session
+      const userId = req.user!.id;
 
       const deletedExpense = await db
         .delete(expenses)

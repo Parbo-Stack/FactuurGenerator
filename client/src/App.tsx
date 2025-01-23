@@ -6,13 +6,30 @@ import NotFound from "@/pages/not-found";
 import InvoiceGenerator from "@/pages/invoice-generator";
 import ExpensesPage from "@/pages/expenses";
 import IncomePage from "@/pages/income";
+import AuthPage from "@/pages/auth-page";
 import { I18nextProvider } from "react-i18next";
 import i18n from "./lib/i18n";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Layout from "@/components/Layout";
 import HotjarTracking from "@/components/HotjarTracking";
+import { useUser } from "@/hooks/use-user";
+import { Loader2 } from "lucide-react";
 
 function Router() {
+  const { user, isLoading } = useUser();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-border" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthPage />;
+  }
+
   return (
     <Layout>
       <Switch>
