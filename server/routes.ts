@@ -1,7 +1,13 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { setupAuth } from "./auth";
+import { db } from "@db";
+import { users, insertUserSchema } from "@db/schema";
+import { eq } from "drizzle-orm";
 import nodemailer from "nodemailer";
 import cors from "cors";
+import passport from 'passport';
+
 
 export function registerRoutes(app: Express): Server {
   // Enable CORS with specific configuration for cross-browser support
@@ -15,6 +21,98 @@ export function registerRoutes(app: Express): Server {
 
   // Handle preflight requests
   app.options('*', cors());
+
+  // Set up authentication routes and middleware
+  setupAuth(app);
+
+  // Authentication routes
+  app.post("/api/register", async (req, res, next) => {
+    try {
+      const result = insertUserSchema.safeParse(req.body);
+      if (!result.success) {
+        return res
+          .status(400)
+          .send("Invalid input: " + result.error.issues.map(i => i.message).join(", "));
+      }
+
+      const { username, password, email } = result.data;
+
+      // Check if user already exists
+      const [existingUser] = await db
+        .select()
+        .from(users)
+        .where(eq(users.username, username))
+        .limit(1);
+
+      if (existingUser) {
+        return res.status(400).send("Username already exists");
+      }
+
+      // Create the new user
+      const [newUser] = await db
+        .insert(users)
+        .values({
+          username,
+          password,
+          email,
+        })
+        .returning();
+
+      // Log the user in after registration
+      req.login(newUser, (err) => {
+        if (err) {
+          return next(err);
+        }
+        return res.json({
+          message: "Registration successful",
+          user: { id: newUser.id, username: newUser.username },
+        });
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/login", (req, res) => {
+    const result = insertUserSchema.safeParse(req.body);
+    if (!result.success) {
+      return res.status(400).send("Invalid credentials");
+    }
+
+    passport.authenticate("local", (err: any, user: any) => { //Assuming Express.User is not available here.  Replace 'any' with correct type if available.
+      if (err) {
+        return res.status(500).send("Authentication error");
+      }
+      if (!user) {
+        return res.status(401).send("Invalid credentials");
+      }
+      req.logIn(user, (err) => {
+        if (err) {
+          return res.status(500).send("Login error");
+        }
+        return res.json({ 
+          message: "Login successful",
+          user: { id: user.id, username: user.username }
+        });
+      });
+    })(req, res);
+  });
+
+  app.post("/api/logout", (req, res) => {
+    req.logout((err) => {
+      if (err) {
+        return res.status(500).send("Logout failed");
+      }
+      res.json({ message: "Logout successful" });
+    });
+  });
+
+  app.get("/api/user", (req, res) => {
+    if (req.isAuthenticated()) {
+      return res.json(req.user);
+    }
+    res.status(401).send("Not logged in");
+  });
 
   // PDF generation endpoint
   app.post("/api/generate-pdf", (req, res) => {
