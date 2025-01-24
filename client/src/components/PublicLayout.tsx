@@ -2,6 +2,7 @@ import { type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { AdSenseAd } from "@/components/Ads";
 
 interface PublicLayoutProps {
   children: ReactNode;
@@ -38,7 +39,17 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
         </div>
       </header>
 
+      {/* Ad placement before main content */}
+      <div className="container mx-auto px-4 py-4">
+        <AdSenseAd className="w-full min-h-[100px]" />
+      </div>
+
       {children}
+
+      {/* Ad placement before footer */}
+      <div className="container mx-auto px-4 py-4">
+        <AdSenseAd className="w-full min-h-[100px]" />
+      </div>
 
       {/* Footer */}
       <footer className="mt-auto border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

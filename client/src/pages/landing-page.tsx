@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, FileText, Calculator, Globe } from "lucide-react";
 import { Link } from "wouter";
+import AffiliateBanner from "@/components/AffiliateBanner";
 
 export default function LandingPage() {
   return (
@@ -62,6 +63,11 @@ export default function LandingPage() {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* Affiliate Banner Section */}
+        <div className="mt-16">
+          <AffiliateBanner className="max-w-xl mx-auto" />
         </div>
       </div>
     </div>

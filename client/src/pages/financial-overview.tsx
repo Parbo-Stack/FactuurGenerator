@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Euro } from "lucide-react";
 import { format } from "date-fns";
 import Layout from "@/components/Layout";
+import AffiliateBanner from "@/components/AffiliateBanner";
 
 // Mock data types
 interface Invoice {
@@ -56,6 +57,9 @@ export default function FinancialOverview() {
             Track your invoices, income, and expenses
           </p>
         </div>
+
+        {/* Affiliate Banner at the top */}
+        <AffiliateBanner className="mb-8" />
 
         {/* Statistics Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
