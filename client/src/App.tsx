@@ -1,31 +1,22 @@
 import { Switch, Route } from "wouter";
-import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
-import LandingPage from "@/pages/landing-page";
+import InvoiceGenerator from "@/pages/invoice-generator";
+import { I18nextProvider } from "react-i18next";
+import i18n from "./lib/i18n";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import PublicLayout from "@/components/PublicLayout";
-import FinancialOverview from "@/pages/financial-overview";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={() => (
-        <PublicLayout>
-          <LandingPage />
-        </PublicLayout>
-      )} />
-      <Route path="/dashboard" component={() => (
-        <PublicLayout>
-          <FinancialOverview />
-        </PublicLayout>
-      )} />
-      <Route component={() => (
-        <PublicLayout>
-          <NotFound />
-        </PublicLayout>
-      )} />
+      <Route path="/" component={InvoiceGenerator} />
+      <Route path="/sitemap.xml" component={() => {
+        window.location.href = "/sitemap.xml";
+        return null;
+      }} />
+      <Route component={NotFound} />
     </Switch>
   );
 }
@@ -33,10 +24,12 @@ function Router() {
 function App() {
   return (
     <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <Router />
-        <Toaster />
-      </QueryClientProvider>
+      <I18nextProvider i18n={i18n}>
+        <QueryClientProvider client={queryClient}>
+          <Router />
+          <Toaster />
+        </QueryClientProvider>
+      </I18nextProvider>
     </ThemeProvider>
   );
 }

@@ -14,7 +14,6 @@ import InvoicePreview from "@/components/InvoicePreview";
 import { InvoiceData, generatePDF, PaymentTerm, paymentTerms, calculateDueDate } from "@/lib/invoice";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
-import { useMutation } from "@tanstack/react-query";
 
 export default function InvoiceForm() {
   const { t } = useTranslation();
@@ -105,61 +104,16 @@ export default function InvoiceForm() {
     }
   };
 
-  const saveMutation = useMutation({
-    mutationFn: async (data: InvoiceData) => {
-      const response = await fetch("/api/invoices", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          invoiceNumber: data.invoiceNumber,
-          status: "draft",
-          currency: data.currency,
-          vatRate: data.vatRate,
-          subtotal: data.products.reduce((sum, p) => sum + (p.quantity * p.price), 0),
-          vatAmount: data.products.reduce((sum, p) => sum + (p.quantity * p.price * data.vatRate / 100), 0),
-          total: data.products.reduce((sum, p) => sum + (p.quantity * p.price * (1 + data.vatRate / 100)), 0),
-          issueDate: data.date.toISOString(),
-          dueDate: calculateDueDate(data.date, data.paymentTerm).toISOString(),
-          notes: data.notes,
-          recipientDetails: {
-            name: data.name,
-          },
-          senderDetails: {
-            companyName: data.companyName,
-            address: data.address,
-            cocNumber: data.cocNumber,
-            vatNumber: data.vatNumber,
-            iban: data.iban,
-          },
-          items: data.products.map(product => ({
-            description: product.description,
-            quantity: product.quantity,
-            unitPrice: product.price,
-            amount: product.quantity * product.price,
-          })),
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(await response.text());
-      }
-
-      return response.json();
-    },
-  });
-
   const onSubmit = async (data: InvoiceData) => {
     if (isGeneratingPDF) return;
 
     setIsGeneratingPDF(true);
     try {
-      // First save the invoice
-      await saveMutation.mutateAsync(data);
+      // Validate payment term
+      if (!data.paymentTerm || !paymentTerms[data.paymentTerm]) {
+        throw new Error('Invalid payment term');
+      }
 
-      // Then generate PDF
       const doc = await generatePDF(data, logoPreview);
       if (!doc) {
         throw new Error('Failed to generate PDF');
