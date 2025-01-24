@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { db } from "@db";
+import { setupAuth } from "./auth";
 
 const app = express();
 app.use(express.json());
@@ -44,6 +45,9 @@ app.use((req, res, next) => {
     await db.query.users.findMany().execute();
     log("Database connection successful");
 
+    // Set up authentication
+    setupAuth(app);
+
     const server = registerRoutes(app);
 
     // Global error handler
@@ -62,7 +66,7 @@ app.use((req, res, next) => {
 
     const PORT = 5000;
     server.listen(PORT, "0.0.0.0", () => {
-      log(`serving on port ${PORT}`);
+      log(`Server running on port ${PORT}`);
     });
   } catch (err) {
     console.error("Failed to start server:", err);

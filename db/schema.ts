@@ -2,6 +2,7 @@ import { pgTable, text, serial, integer, boolean, timestamp, decimal, jsonb } fr
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { relations } from "drizzle-orm";
 
+// Core user table for authentication
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").unique().notNull(),
@@ -9,6 +10,7 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Main invoices table
 export const invoices = pgTable("invoices", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id).notNull(),
@@ -29,6 +31,7 @@ export const invoices = pgTable("invoices", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Invoice line items
 export const invoiceItems = pgTable("invoice_items", {
   id: serial("id").primaryKey(),
   invoiceId: integer("invoice_id").references(() => invoices.id).notNull(),

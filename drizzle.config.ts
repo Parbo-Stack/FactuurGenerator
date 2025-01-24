@@ -11,10 +11,5 @@ export default defineConfig({
   dbCredentials: {
     url: process.env.DATABASE_URL,
   },
-  // Force a complete schema push without interactive prompts
-  strict: true,
   verbose: true,
-  push: {
-    force: true // This will force push the schema without interactive prompts
-  }
 });

@@ -1,1 +1,1 @@
-// This file is being removed as we no longer need AdSense functionality
+// Placeholder file - Monetization features will be implemented later
