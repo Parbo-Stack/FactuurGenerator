@@ -3,9 +3,10 @@ import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { db } from "@db";
 import { invoices, invoiceItems } from "@db/schema";
+import { eq } from "drizzle-orm";
 
 export function registerRoutes(app: Express): Server {
-  // Set up authentication routes
+  // Set up authentication routes and middleware
   setupAuth(app);
 
   // Create a new invoice
