@@ -6,11 +6,13 @@ import NotFound from "@/pages/not-found";
 import InvoiceGenerator from "@/pages/invoice-generator";
 import AuthPage from "@/pages/auth-page";
 import FinancialOverview from "@/pages/financial-overview";
+import LandingPage from "@/pages/landing-page";
 import { useUser } from "@/hooks/use-user";
 import { I18nextProvider } from "react-i18next";
 import i18n from "./lib/i18n";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Loader2 } from "lucide-react";
+import PublicLayout from "@/components/PublicLayout";
 
 function Router() {
   const { user, isLoading } = useUser();
@@ -24,17 +26,31 @@ function Router() {
   }
 
   if (!user) {
-    return <AuthPage />;
+    return (
+      <Switch>
+        <Route path="/" component={() => (
+          <PublicLayout>
+            <LandingPage />
+          </PublicLayout>
+        )} />
+        <Route path="/login" component={() => (
+          <PublicLayout>
+            <AuthPage />
+          </PublicLayout>
+        )} />
+        <Route component={() => (
+          <PublicLayout>
+            <NotFound />
+          </PublicLayout>
+        )} />
+      </Switch>
+    );
   }
 
   return (
     <Switch>
       <Route path="/" component={InvoiceGenerator} />
       <Route path="/finances" component={FinancialOverview} />
-      <Route path="/sitemap.xml" component={() => {
-        window.location.href = "/sitemap.xml";
-        return null;
-      }} />
       <Route component={NotFound} />
     </Switch>
   );

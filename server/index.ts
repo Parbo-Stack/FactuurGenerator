@@ -43,7 +43,7 @@ let server: ReturnType<typeof createServer> | null = null;
 let retries = 0;
 const MAX_RETRIES = 5;
 
-async function startServer() {
+(async () => {
   try {
     // Test database connection first
     await db.query.users.findMany().execute();
@@ -71,57 +71,59 @@ async function startServer() {
       serveStatic(app);
     }
 
-    // ALWAYS serve the app on port 5000
-    // this serves both the API and the client
-    const PORT = 5000;
-
-    // Handle server shutdown gracefully
-    const closeServer = () => {
-      if (server) {
-        server.close(() => {
-          log("Server closed");
-          process.exit(0);
-        });
-      } else {
-        process.exit(0);
-      }
-    };
-
-    process.on('SIGTERM', closeServer);
-    process.on('SIGINT', closeServer);
-
-    // Try to start the server with proper error handling and retries
-    const startServerWithRetry = () => {
-      server?.listen(PORT, "0.0.0.0", () => {
-        log(`serving on port ${PORT}`);
-        retries = 0; // Reset retries on successful start
-      }).on('error', (err: any) => {
-        if (err.code === 'EADDRINUSE') {
-          if (retries < MAX_RETRIES) {
-            retries++;
-            log(`Port ${PORT} is in use, attempt ${retries} of ${MAX_RETRIES} to recover...`);
-            setTimeout(() => {
-              server?.close();
-              startServerWithRetry();
-            }, 2000); // Increased delay between retries
-          } else {
-            console.error(`Failed to start server after ${MAX_RETRIES} attempts`);
-            process.exit(1);
-          }
+    // Changed port from 5000 to 3000
+    const PORT = 3000;
+    server?.listen(PORT, "0.0.0.0", () => {
+      log(`serving on port ${PORT}`);
+      retries = 0; // Reset retries on successful start
+    }).on('error', (err: any) => {
+      if (err.code === 'EADDRINUSE') {
+        if (retries < MAX_RETRIES) {
+          retries++;
+          log(`Port ${PORT} is in use, attempt ${retries} of ${MAX_RETRIES} to recover...`);
+          setTimeout(() => {
+            server?.close();
+            //startServerWithRetry(); //this function is removed
+            server?.listen(PORT, "0.0.0.0", () => {
+              log(`serving on port ${PORT}`);
+              retries = 0; // Reset retries on successful start
+            }).on('error', (err: any) => {
+              if (err.code === 'EADDRINUSE') {
+                if (retries < MAX_RETRIES) {
+                  retries++;
+                  log(`Port ${PORT} is in use, attempt ${retries} of ${MAX_RETRIES} to recover...`);
+                  setTimeout(() => {
+                    server?.close();
+                    server?.listen(PORT, "0.0.0.0", () => {
+                      log(`serving on port ${PORT}`);
+                      retries = 0; // Reset retries on successful start
+                    });
+                  }, 2000);
+                } else {
+                  console.error(`Failed to start server after ${MAX_RETRIES} attempts`);
+                  process.exit(1);
+                }
+              } else {
+                console.error("Server error:", err);
+                process.exit(1);
+              }
+            });
+          }, 2000);
         } else {
-          console.error("Server error:", err);
+          console.error(`Failed to start server after ${MAX_RETRIES} attempts`);
           process.exit(1);
         }
-      });
-    };
-
-    startServerWithRetry();
+      } else {
+        console.error("Server error:", err);
+        process.exit(1);
+      }
+    });
 
   } catch (err) {
     console.error("Failed to start server:", err);
     process.exit(1);
   }
-}
+})();
 
 // Handle process-wide unhandled errors
 process.on('uncaughtException', (err) => {
@@ -146,5 +148,5 @@ process.on('unhandledRejection', (err) => {
   }
 });
 
-// Start the server
-startServer();
+// Start the server - this line is now redundant because of the self executing function above.
+//startServer();
