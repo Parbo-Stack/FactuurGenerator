@@ -27,7 +27,7 @@ function AdComponent({ className, slot }: AdsProps) {
       <ins
         className="adsbygoogle"
         style={{ display: "block" }}
-        data-ad-client="ca-pub-5519222773135571"
+        data-ad-client={import.meta.env.VITE_ADSENSE_CLIENT_ID}
         data-ad-slot={slot}
         data-ad-format="auto"
         data-full-width-responsive="true"

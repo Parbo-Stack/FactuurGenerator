@@ -1,7 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import nodemailer from "nodemailer";
+import { setupAuth } from "./auth";
 import cors from "cors";
+import nodemailer from "nodemailer";
 
 export function registerRoutes(app: Express): Server {
   // Enable CORS with specific configuration for cross-browser support
@@ -15,6 +16,9 @@ export function registerRoutes(app: Express): Server {
 
   // Handle preflight requests
   app.options('*', cors());
+
+  // Set up authentication routes
+  setupAuth(app);
 
   // PDF generation endpoint
   app.post("/api/generate-pdf", (req, res) => {
