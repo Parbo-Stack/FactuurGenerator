@@ -1,11 +1,16 @@
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
 import { Euro } from "lucide-react";
+import { format } from "date-fns";
 import Layout from "@/components/Layout";
-import type { SelectInvoice } from "@db/schema";
+
+// Mock data types
+interface Invoice {
+  id: number;
+  invoiceNumber: string;
+  total: number;
+  status: 'paid' | 'unpaid' | 'overdue';
+  dueDate: string;
+}
 
 interface InvoiceStats {
   totalAmount: number;
@@ -14,41 +19,33 @@ interface InvoiceStats {
   overDueAmount: number;
 }
 
+// Mock data
+const mockInvoices: Invoice[] = [
+  { id: 1, invoiceNumber: "INV-001", total: 1500, status: 'paid', dueDate: '2025-01-15' },
+  { id: 2, invoiceNumber: "INV-002", total: 2300, status: 'unpaid', dueDate: '2025-02-01' },
+  { id: 3, invoiceNumber: "INV-003", total: 800, status: 'overdue', dueDate: '2024-12-25' },
+  { id: 4, invoiceNumber: "INV-004", total: 1200, status: 'paid', dueDate: '2025-01-20' },
+];
+
 export default function FinancialOverview() {
-  const { toast } = useToast();
-
-  const { data: invoices, isLoading: isLoadingInvoices } = useQuery<SelectInvoice[]>({
-    queryKey: ['/api/invoices'],
-  });
-
-  if (isLoadingInvoices) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      </Layout>
-    );
-  }
-
-  const stats: InvoiceStats = invoices?.reduce(
+  // Calculate stats from mock data
+  const stats: InvoiceStats = mockInvoices.reduce(
     (acc, invoice) => {
-      const total = Number(invoice.total);
-      acc.totalAmount += total;
+      acc.totalAmount += invoice.total;
 
-      if (invoice.status === 'paid' && invoice.paidDate) {
-        acc.paidAmount += total;
+      if (invoice.status === 'paid') {
+        acc.paidAmount += invoice.total;
       } else {
-        acc.unpaidAmount += total;
-        if (new Date(invoice.dueDate) < new Date()) {
-          acc.overDueAmount += total;
+        acc.unpaidAmount += invoice.total;
+        if (invoice.status === 'overdue') {
+          acc.overDueAmount += invoice.total;
         }
       }
 
       return acc;
     },
     { totalAmount: 0, paidAmount: 0, unpaidAmount: 0, overDueAmount: 0 }
-  ) ?? { totalAmount: 0, paidAmount: 0, unpaidAmount: 0, overDueAmount: 0 };
+  );
 
   return (
     <Layout>
@@ -125,7 +122,7 @@ export default function FinancialOverview() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {invoices?.map(invoice => (
+              {mockInvoices.map(invoice => (
                 <div
                   key={invoice.id}
                   className="flex items-center justify-between p-4 border rounded-lg"
@@ -137,11 +134,11 @@ export default function FinancialOverview() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-medium">€{Number(invoice.total).toFixed(2)}</p>
+                    <p className="font-medium">€{invoice.total.toFixed(2)}</p>
                     <p className={`text-sm ${
                       invoice.status === 'paid'
                         ? 'text-green-600'
-                        : new Date(invoice.dueDate) < new Date()
+                        : invoice.status === 'overdue'
                         ? 'text-red-600'
                         : 'text-yellow-600'
                     }`}>

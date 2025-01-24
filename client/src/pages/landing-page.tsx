@@ -10,7 +10,7 @@ export default function LandingPage() {
         <div className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80">
           <div className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"></div>
         </div>
-        
+
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
@@ -20,7 +20,7 @@ export default function LandingPage() {
               Create, manage, and send professional invoices in minutes. Perfect for freelancers and small businesses.
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
-              <Link href="/login">
+              <Link href="/dashboard">
                 <Button size="lg" className="gap-2">
                   Get Started <ArrowRight className="h-4 w-4" />
                 </Button>
@@ -64,15 +64,6 @@ export default function LandingPage() {
           </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="mx-auto max-w-6xl px-6 py-12 flex flex-col items-center">
-          <p className="text-sm text-muted-foreground">
-            © 2025 FacturHero. All rights reserved.
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }

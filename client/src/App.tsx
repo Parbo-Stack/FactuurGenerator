@@ -1,57 +1,31 @@
 import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
-import InvoiceGenerator from "@/pages/invoice-generator";
-import AuthPage from "@/pages/auth-page";
-import FinancialOverview from "@/pages/financial-overview";
 import LandingPage from "@/pages/landing-page";
-import { useUser } from "@/hooks/use-user";
-import { I18nextProvider } from "react-i18next";
-import i18n from "./lib/i18n";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { Loader2 } from "lucide-react";
 import PublicLayout from "@/components/PublicLayout";
+import FinancialOverview from "@/pages/financial-overview";
 
 function Router() {
-  const { user, isLoading } = useUser();
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-border" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <Switch>
-        <Route path="/" component={() => (
-          <PublicLayout>
-            <LandingPage />
-          </PublicLayout>
-        )} />
-        <Route path="/login" component={() => (
-          <PublicLayout>
-            <AuthPage />
-          </PublicLayout>
-        )} />
-        <Route component={() => (
-          <PublicLayout>
-            <NotFound />
-          </PublicLayout>
-        )} />
-      </Switch>
-    );
-  }
-
   return (
     <Switch>
-      <Route path="/" component={InvoiceGenerator} />
-      <Route path="/finances" component={FinancialOverview} />
-      <Route component={NotFound} />
+      <Route path="/" component={() => (
+        <PublicLayout>
+          <LandingPage />
+        </PublicLayout>
+      )} />
+      <Route path="/dashboard" component={() => (
+        <PublicLayout>
+          <FinancialOverview />
+        </PublicLayout>
+      )} />
+      <Route component={() => (
+        <PublicLayout>
+          <NotFound />
+        </PublicLayout>
+      )} />
     </Switch>
   );
 }
@@ -59,12 +33,10 @@ function Router() {
 function App() {
   return (
     <ThemeProvider>
-      <I18nextProvider i18n={i18n}>
-        <QueryClientProvider client={queryClient}>
-          <Router />
-          <Toaster />
-        </QueryClientProvider>
-      </I18nextProvider>
+      <QueryClientProvider client={queryClient}>
+        <Router />
+        <Toaster />
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }
