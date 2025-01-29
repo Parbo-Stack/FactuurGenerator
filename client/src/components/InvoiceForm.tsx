@@ -36,7 +36,8 @@ export default function InvoiceForm() {
     vatRate: 21 as const,
     currency: "EUR" as const,
     date: new Date(),
-    paymentTerm: "14_days" as PaymentTerm,
+    paymentTerm: "14_days" as PaymentTerm, // Ensure this matches one of the valid payment terms
+    notes: ""
   };
 
   if (defaultValues.date) {
