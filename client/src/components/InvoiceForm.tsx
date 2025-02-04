@@ -37,7 +37,7 @@ export default function InvoiceForm() {
     vatRate: 21,
     currency: "EUR",
     date: new Date(),
-    paymentTerm: "14_days",
+    paymentTerm: "14_days" as PaymentTerm,
     notes: ""
   };
 
