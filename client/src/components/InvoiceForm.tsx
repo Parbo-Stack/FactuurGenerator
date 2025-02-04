@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -33,10 +34,10 @@ export default function InvoiceForm() {
     iban: "",
     invoiceNumber: "",
     products: [{ description: "", quantity: 1, price: 0 }],
-    vatRate: 21 as const,
-    currency: "EUR" as const,
+    vatRate: 21,
+    currency: "EUR",
     date: new Date(),
-    paymentTerm: "14_days" as PaymentTerm, // Ensure this matches one of the valid payment terms
+    paymentTerm: "14_days",
     notes: ""
   };
 
@@ -70,47 +71,11 @@ export default function InvoiceForm() {
     }
   };
 
-  const downloadPDF = async (blob: Blob, filename: string) => {
-    try {
-      // For Safari, we need to use a different approach
-      if (navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome')) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const data = e.target?.result;
-          if (data) {
-            const link = document.createElement('a');
-            link.href = data as string;
-            link.download = filename;
-            link.click();
-          }
-        };
-        reader.readAsDataURL(blob);
-      } else {
-        // For other browsers
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.style.display = 'none';
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        setTimeout(() => {
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(url);
-        }, 100);
-      }
-    } catch (error) {
-      console.error('Download error:', error);
-      throw error;
-    }
-  };
-
   const onSubmit = async (data: InvoiceData) => {
     if (isGeneratingPDF) return;
 
     setIsGeneratingPDF(true);
     try {
-      // Validate payment term
       if (!data.paymentTerm || !paymentTerms[data.paymentTerm]) {
         throw new Error('Invalid payment term');
       }
@@ -121,7 +86,7 @@ export default function InvoiceForm() {
       }
 
       const pdfBlob = doc.output('blob');
-      const filename = factuur-${data.invoiceNumber || 'ongenummerd'}.pdf;
+      const filename = `factuur-${data.invoiceNumber || 'ongenummerd'}.pdf`;
 
       await downloadPDF(pdfBlob, filename);
 
@@ -141,6 +106,39 @@ export default function InvoiceForm() {
     }
   };
 
+  const downloadPDF = async (blob: Blob, filename: string) => {
+    try {
+      if (navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const data = e.target?.result;
+          if (data) {
+            const link = document.createElement('a');
+            link.href = data as string;
+            link.download = filename;
+            link.click();
+          }
+        };
+        reader.readAsDataURL(blob);
+      } else {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.style.display = 'none';
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => {
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        }, 100);
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      throw error;
+    }
+  };
+
   const watchDate = form.watch("date");
   const watchPaymentTerm = form.watch("paymentTerm");
   const dueDate = calculateDueDate(watchDate, watchPaymentTerm);
@@ -148,6 +146,7 @@ export default function InvoiceForm() {
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        {/* Company Info */}
         <div className="col-span-2">
           <Label htmlFor="logo">{t("invoice.company.logo")}</Label>
           <div className="mt-2 flex items-center gap-4">
