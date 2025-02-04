@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -16,6 +15,8 @@ import { InvoiceData, generatePDF, PaymentTerm, paymentTerms, calculateDueDate }
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 
+const DEFAULT_PAYMENT_TERM: PaymentTerm = "14_days";
+
 export default function InvoiceForm() {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -24,8 +25,24 @@ export default function InvoiceForm() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
-  const savedData = localStorage.getItem('invoiceFormData');
-  const defaultValues = savedData ? JSON.parse(savedData) : {
+  // Initialize form with safe defaults and proper local storage handling
+  const savedData = (() => {
+    try {
+      const data = localStorage.getItem('invoiceFormData');
+      if (!data) return null;
+      const parsed = JSON.parse(data);
+      // Ensure payment term is valid
+      if (!parsed.paymentTerm || !paymentTerms[parsed.paymentTerm as PaymentTerm]) {
+        parsed.paymentTerm = DEFAULT_PAYMENT_TERM;
+      }
+      return parsed;
+    } catch (e) {
+      console.error('Error parsing localStorage data:', e);
+      return null;
+    }
+  })();
+
+  const defaultValues = savedData || {
     companyName: "",
     name: "",
     address: "",
@@ -37,7 +54,7 @@ export default function InvoiceForm() {
     vatRate: 21,
     currency: "EUR",
     date: new Date(),
-    paymentTerm: "14_days" as PaymentTerm,
+    paymentTerm: DEFAULT_PAYMENT_TERM,
     notes: ""
   };
 
@@ -54,7 +71,11 @@ export default function InvoiceForm() {
       if (name === 'currency') {
         form.trigger('products');
       }
-      localStorage.setItem('invoiceFormData', JSON.stringify(value));
+      try {
+        localStorage.setItem('invoiceFormData', JSON.stringify(value));
+      } catch (e) {
+        console.error('Error saving to localStorage:', e);
+      }
     });
     return () => subscription.unsubscribe();
   }, [form]);
@@ -76,7 +97,8 @@ export default function InvoiceForm() {
 
     setIsGeneratingPDF(true);
     try {
-      if (!data.paymentTerm || !paymentTerms[data.paymentTerm]) {
+      // Validate payment term
+      if (!data.paymentTerm || !Object.keys(paymentTerms).includes(data.paymentTerm)) {
         throw new Error('Invalid payment term');
       }
 
@@ -108,31 +130,20 @@ export default function InvoiceForm() {
 
   const downloadPDF = async (blob: Blob, filename: string) => {
     try {
-      if (navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome')) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const data = e.target?.result;
-          if (data) {
-            const link = document.createElement('a');
-            link.href = data as string;
-            link.download = filename;
-            link.click();
-          }
-        };
-        reader.readAsDataURL(blob);
-      } else {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.style.display = 'none';
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        setTimeout(() => {
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(url);
-        }, 100);
-      }
+      // Universal download method that works across browsers
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.style.display = 'none';
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }, 100);
     } catch (error) {
       console.error('Download error:', error);
       throw error;
