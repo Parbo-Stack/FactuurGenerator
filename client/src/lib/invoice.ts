@@ -10,6 +10,7 @@ export interface Product {
   price: number;
 }
 
+// Define payment term as string literal type
 export type PaymentTerm = "14_days" | "30_days" | "net_15" | "net_60";
 
 export const paymentTerms: Record<PaymentTerm, { label: string; days: number }> = {
@@ -17,6 +18,12 @@ export const paymentTerms: Record<PaymentTerm, { label: string; days: number }> 
   "30_days": { label: "30 dagen", days: 30 },
   "net_15": { label: "Netto 15", days: 15 },
   "net_60": { label: "Netto 60", days: 60 },
+} as const;
+
+// Function to validate payment term
+export const isValidPaymentTerm = (term: string | null | undefined): term is PaymentTerm => {
+  if (!term) return false;
+  return Object.keys(paymentTerms).includes(term);
 };
 
 export interface InvoiceData {
@@ -101,6 +108,9 @@ const generatePaymentQRCode = async (data: InvoiceData, total: number): Promise<
 
 export const generatePDF = async (data: InvoiceData, logoDataUrl?: string | null): Promise<jsPDF> => {
   try {
+    if (!isValidPaymentTerm(data.paymentTerm)) {
+      throw new Error("Invalid payment term provided.");
+    }
     const doc = new jsPDF();
     const { subtotal, vatAmount, total } = calculateTotals(data.products, data.vatRate);
     const currency = currencySymbols[data.currency];

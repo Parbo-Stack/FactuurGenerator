@@ -11,7 +11,7 @@ import { format } from "date-fns";
 import { Calendar as CalendarIcon, Upload } from "lucide-react";
 import ProductTable from "@/components/ProductTable";
 import InvoicePreview from "@/components/InvoicePreview";
-import { InvoiceData, generatePDF, PaymentTerm, paymentTerms, calculateDueDate } from "@/lib/invoice";
+import { InvoiceData, generatePDF, PaymentTerm, paymentTerms, isValidPaymentTerm } from "@/lib/invoice";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 
@@ -31,8 +31,9 @@ export default function InvoiceForm() {
       const data = localStorage.getItem('invoiceFormData');
       if (!data) return null;
       const parsed = JSON.parse(data);
-      // Ensure payment term is valid
-      if (!parsed.paymentTerm || !paymentTerms[parsed.paymentTerm as PaymentTerm]) {
+      // Ensure payment term is valid using the validation function
+      if (!isValidPaymentTerm(parsed.paymentTerm)) {
+        console.warn('Invalid payment term found in saved data, using default');
         parsed.paymentTerm = DEFAULT_PAYMENT_TERM;
       }
       return parsed;
@@ -51,8 +52,8 @@ export default function InvoiceForm() {
     iban: "",
     invoiceNumber: "",
     products: [{ description: "", quantity: 1, price: 0 }],
-    vatRate: 21,
-    currency: "EUR",
+    vatRate: 21 as const,
+    currency: "EUR" as const,
     date: new Date(),
     paymentTerm: DEFAULT_PAYMENT_TERM,
     notes: ""
@@ -98,8 +99,8 @@ export default function InvoiceForm() {
     setIsGeneratingPDF(true);
     try {
       // Validate payment term
-      if (!data.paymentTerm || !Object.keys(paymentTerms).includes(data.paymentTerm)) {
-        throw new Error('Invalid payment term');
+      if (!isValidPaymentTerm(data.paymentTerm)) {
+        throw new Error(`Invalid payment term: ${data.paymentTerm}`);
       }
 
       const doc = await generatePDF(data, logoPreview);
@@ -354,4 +355,18 @@ export default function InvoiceForm() {
       )}
     </form>
   );
+}
+
+function calculateDueDate(date: Date | undefined, paymentTerm: PaymentTerm | undefined): Date {
+  if (!date || !paymentTerm) {
+    return new Date();
+  }
+  const [days] = paymentTerm.split('_');
+  return addDays(date, parseInt(days));
+}
+
+function addDays(date: Date, days: number): Date {
+  const newDate = new Date(date);
+  newDate.setDate(newDate.getDate() + days);
+  return newDate;
 }
