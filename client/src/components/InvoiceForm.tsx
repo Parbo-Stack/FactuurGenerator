@@ -296,8 +296,7 @@
                     </div>
 
                     <ProductTable
-                      products={form.watch("products")}
-                      onChange={(updatedProducts) => form.setValue("products", updatedProducts)}
+                      form={form}
                     />
 
                     <div className="flex justify-between">
