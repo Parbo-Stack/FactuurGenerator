@@ -7,7 +7,9 @@ import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
 export default defineConfig({
+  assetsInclude: ['**/*.txt'],  // Include .txt files
   plugins: [react(), runtimeErrorOverlay(), themePlugin()],
   resolve: {
     alias: {
@@ -16,6 +18,7 @@ export default defineConfig({
     },
   },
   root: path.resolve(__dirname, "client"),
+  publicDir: path.resolve(__dirname, "client", "public"), // Point to public dir
   build: {
     outDir: path.resolve(__dirname, "dist/public"),
     emptyOutDir: true,
