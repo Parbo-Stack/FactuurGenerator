@@ -146,6 +146,7 @@
       "priceIncl": "Prijs (incl. BTW)",
       "lineTotal": "Totaal (excl.)",
       "taxRate": "BTW tarief",
+      "currency": "Valuta",
       "priceMode": "Prijzen invoeren",
       "exclBtw": "Excl. BTW",
       "inclBtw": "Incl. BTW",
@@ -242,7 +243,8 @@
       "invoiceSubtitle": "Standaardwaarden voor nieuwe facturen",
       "prefix": "Factuurprefix",
       "paymentDays": "Betalingstermijn (dagen)",
-      "taxRate": "Standaard BTW"
+      "taxRate": "Standaard BTW",
+      "currency": "Standaard valuta"
     },
     "notifications": {
       "title": "E-mailmeldingen",

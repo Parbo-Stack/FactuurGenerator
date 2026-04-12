@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/AppLayout";
 import { useInvoices, useDeleteInvoice, useUpdateInvoiceStatus } from "@/hooks/useInvoices";
 import type { Invoice, InvoiceStatus } from "@/lib/api";
+import { formatCurrency } from "@/lib/currency";
 import {
   Search,
   Plus,
@@ -20,13 +21,6 @@ import {
 } from "lucide-react";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function formatEuro(amount: string | number) {
-  return new Intl.NumberFormat("nl-NL", {
-    style: "currency",
-    currency: "EUR",
-    minimumFractionDigits: 2,
-  }).format(Number(amount));
-}
 
 // ── Status config ─────────────────────────────────────────────────────────────
 const statusConfig: Record<InvoiceStatus, { classes: string; icon: React.ElementType }> = {
@@ -269,7 +263,7 @@ export default function InvoicesPage() {
                         <td className="px-5 py-4 text-sm text-gray-500">{inv.issueDate}</td>
                         <td className="px-5 py-4 text-sm text-gray-500">{inv.dueDate}</td>
                         <td className="px-5 py-4 text-sm font-semibold text-gray-900">
-                          {formatEuro(inv.total)}
+                          {formatCurrency(inv.total, inv.currency)}
                         </td>
                         <td className="px-5 py-4">
                           <StatusBadge status={inv.status} />

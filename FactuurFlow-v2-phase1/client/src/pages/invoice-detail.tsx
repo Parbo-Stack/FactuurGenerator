@@ -6,6 +6,7 @@ import { useInvoice, useUpdateInvoiceStatus, useDeleteInvoice } from "@/hooks/us
 import { useQuery } from "@tanstack/react-query";
 import { fetchCurrentUser, type AuthUser } from "@/lib/auth";
 import type { InvoiceStatus, InvoiceDetail } from "@/lib/api";
+import { formatCurrency } from "@/lib/currency";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -25,14 +26,6 @@ import {
 } from "lucide-react";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function formatEuro(amount: string | number) {
-  return new Intl.NumberFormat("nl-NL", {
-    style: "currency",
-    currency: "EUR",
-    minimumFractionDigits: 2,
-  }).format(Number(amount));
-}
-
 function formatDate(str: string | null | undefined) {
   if (!str) return "—";
   return new Date(str).toLocaleDateString("nl-NL", {
@@ -53,7 +46,7 @@ const statusConfig: Record<InvoiceStatus, { badge: string; icon: React.ElementTy
 const statusOptions: InvoiceStatus[] = ["draft", "sent", "paid", "overdue"];
 
 // ── PDF generator ─────────────────────────────────────────────────────────────
-function generatePdf(invoice: InvoiceDetail, user: AuthUser | null | undefined): jsPDF {
+function generatePdf(invoice: InvoiceDetail, user: AuthUser | null | undefined, currency: string): jsPDF {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const pageW = 210;
   const ml = 15;
@@ -122,8 +115,8 @@ function generatePdf(invoice: InvoiceDetail, user: AuthUser | null | undefined):
     body: invoice.items.map((item) => [
       item.description,
       Number(item.quantity).toString(),
-      formatEuro(item.unitPrice),
-      formatEuro(item.amount),
+      formatCurrency(item.unitPrice, currency),
+      formatCurrency(item.amount, currency),
     ]),
     styles: { fontSize: 9.5, cellPadding: { top: 4, bottom: 4, left: 4, right: 4 } },
     headStyles: {
@@ -160,18 +153,18 @@ function generatePdf(invoice: InvoiceDetail, user: AuthUser | null | undefined):
   }
 
   (doc as any)._totY = finalY;
-  totRow("Subtotaal", formatEuro(invoice.subtotal));
+  totRow("Subtotaal", formatCurrency(invoice.subtotal, currency));
   if (Number(invoice.discount) > 0) {
-    totRow("Korting", `-${formatEuro(invoice.discount)}`, false, [200, 50, 50]);
+    totRow("Korting", `-${formatCurrency(invoice.discount, currency)}`, false, [200, 50, 50]);
   }
-  totRow(`BTW ${Number(invoice.taxRate)}%`, formatEuro(invoice.taxAmount));
+  totRow(`BTW ${Number(invoice.taxRate)}%`, formatCurrency(invoice.taxAmount, currency));
 
   const lineY: number = (doc as any)._totY - 2;
   doc.setDrawColor(200, 200, 200).setLineWidth(0.3);
   doc.line(totX, lineY, mr, lineY);
   (doc as any)._totY += 2;
 
-  totRow("Totaal te betalen", formatEuro(invoice.total), true, [22, 163, 74]);
+  totRow("Totaal te betalen", formatCurrency(invoice.total, currency), true, [22, 163, 74]);
 
   let footerY: number = (doc as any)._totY + 10;
 
@@ -200,12 +193,13 @@ function generatePdf(invoice: InvoiceDetail, user: AuthUser | null | undefined):
 // ── Invoice Print (schermweergave) ────────────────────────────────────────────
 function InvoicePrint({
   invoiceNumber, issueDate, dueDate, clientName, clientEmail, clientAddress, clientCity,
-  notes, taxRate, taxAmount, subtotal, total, discount, items,
+  notes, taxRate, taxAmount, subtotal, total, discount, currency, items,
   companyName, companyAddress, companyCity, companyKvk, companyBtw, companyIban, logoUrl,
 }: {
   invoiceNumber: string; issueDate: string; dueDate: string;
   clientName: string; clientEmail?: string | null; clientAddress?: string | null; clientCity?: string | null;
   notes?: string | null; taxRate: string; taxAmount: string; subtotal: string; total: string; discount: string;
+  currency: string;
   items: { description: string; quantity: string; unitPrice: string; amount: string }[];
   companyName?: string | null; companyAddress?: string | null; companyCity?: string | null;
   companyKvk?: string | null; companyBtw?: string | null; companyIban?: string | null; logoUrl?: string | null;
@@ -267,8 +261,8 @@ function InvoicePrint({
             <tr key={i} className="border-b border-gray-50">
               <td className="py-3 px-4 text-sm">{item.description}</td>
               <td className="py-3 px-3 text-sm text-right text-gray-600">{Number(item.quantity)}</td>
-              <td className="py-3 px-3 text-sm text-right text-gray-600">{formatEuro(item.unitPrice)}</td>
-              <td className="py-3 px-4 text-sm text-right font-medium">{formatEuro(item.amount)}</td>
+              <td className="py-3 px-3 text-sm text-right text-gray-600">{formatCurrency(item.unitPrice, currency)}</td>
+              <td className="py-3 px-4 text-sm text-right font-medium">{formatCurrency(item.amount, currency)}</td>
             </tr>
           ))}
         </tbody>
@@ -278,21 +272,21 @@ function InvoicePrint({
         <div className="w-56 space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-gray-500">{t("invoiceDetail.totals.subtotal")}</span>
-            <span>{formatEuro(subtotal)}</span>
+            <span>{formatCurrency(subtotal, currency)}</span>
           </div>
           {Number(discount) > 0 && (
             <div className="flex justify-between text-red-600">
               <span>{t("invoiceDetail.totals.discount")}</span>
-              <span>-{formatEuro(discount)}</span>
+              <span>-{formatCurrency(discount, currency)}</span>
             </div>
           )}
           <div className="flex justify-between">
             <span className="text-gray-500">{t("invoiceDetail.totals.tax", { rate: Number(taxRate) })}</span>
-            <span>{formatEuro(taxAmount)}</span>
+            <span>{formatCurrency(taxAmount, currency)}</span>
           </div>
           <div className="flex justify-between font-bold text-base border-t border-gray-200 pt-2 mt-1">
             <span>{t("invoiceDetail.totals.total")}</span>
-            <span className="text-green-700">{formatEuro(total)}</span>
+            <span className="text-green-700">{formatCurrency(total, currency)}</span>
           </div>
         </div>
       </div>
@@ -369,7 +363,7 @@ export default function InvoiceDetailPage() {
   }
 
   function handleDownloadPdf() {
-    const doc = generatePdf(invoice!, user);
+    const doc = generatePdf(invoice!, user, invoice!.currency);
     doc.save(`factuur-${invoice!.invoiceNumber}.pdf`);
   }
 
@@ -380,7 +374,7 @@ export default function InvoiceDetailPage() {
     }
     setIsSending(true);
     try {
-      const doc = generatePdf(invoice!, user);
+      const doc = generatePdf(invoice!, user, invoice!.currency);
       const base64 = doc.output("datauristring").split(",")[1];
 
       const res = await fetch("/api/send-invoice", {
@@ -511,7 +505,7 @@ export default function InvoiceDetailPage() {
             </p>
           </div>
           <div className="text-right flex-shrink-0">
-            <div className="text-2xl font-bold text-gray-900">{formatEuro(invoice.total)}</div>
+            <div className="text-2xl font-bold text-gray-900">{formatCurrency(invoice.total, invoice.currency)}</div>
             <div className="text-xs text-gray-400 mt-0.5">{t("invoiceDetail.inclBtw")}</div>
           </div>
         </div>
@@ -531,6 +525,7 @@ export default function InvoiceDetailPage() {
           subtotal={invoice.subtotal}
           total={invoice.total}
           discount={invoice.discount}
+          currency={invoice.currency}
           items={invoice.items}
           companyName={user?.companyName}
           companyAddress={user?.companyAddress}

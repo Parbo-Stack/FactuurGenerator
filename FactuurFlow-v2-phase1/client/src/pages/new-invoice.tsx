@@ -7,6 +7,7 @@ import { useCreateInvoice } from "@/hooks/useInvoices";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { fetchCurrentUser } from "@/lib/auth";
+import { formatCurrency, CURRENCIES } from "@/lib/currency";
 import { Plus, Trash2, ChevronDown, Loader2 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -15,11 +16,6 @@ interface LineItem {
   description: string;
   quantity: number;
   unitPrice: number;
-}
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function formatEuro(n: number) {
-  return new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR" }).format(n);
 }
 
 function todayStr() {
@@ -54,6 +50,7 @@ function InvoicePreview({
   clientCity,
   notes,
   taxRate,
+  currency,
   items,
   companyName,
   logoUrl,
@@ -67,6 +64,7 @@ function InvoicePreview({
   clientCity: string;
   notes: string;
   taxRate: number;
+  currency: string;
   items: LineItem[];
   companyName?: string | null;
   logoUrl?: string | null;
@@ -75,6 +73,7 @@ function InvoicePreview({
   const subtotal = items.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
   const tax = subtotal * (taxRate / 100);
   const total = subtotal + tax;
+  const fmt = (n: number) => formatCurrency(n, currency);
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm h-full overflow-hidden flex flex-col">
@@ -137,9 +136,9 @@ function InvoicePreview({
                   {item.description || <span className="text-gray-300">{t("newInvoice.descriptionPlaceholder")}</span>}
                 </td>
                 <td className="py-2 px-2 text-right">{item.quantity}</td>
-                <td className="py-2 px-2 text-right">{formatEuro(item.unitPrice)}</td>
+                <td className="py-2 px-2 text-right">{fmt(item.unitPrice)}</td>
                 <td className="py-2 px-3 text-right font-medium">
-                  {formatEuro(item.quantity * item.unitPrice)}
+                  {fmt(item.quantity * item.unitPrice)}
                 </td>
               </tr>
             ))}
@@ -149,15 +148,15 @@ function InvoicePreview({
         <div className="ml-auto w-48 space-y-1 text-xs">
           <div className="flex justify-between">
             <span className="text-gray-500">{t("newInvoice.subtotal")}</span>
-            <span>{formatEuro(subtotal)}</span>
+            <span>{fmt(subtotal)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-500">{t("newInvoice.tax", { rate: taxRate })}</span>
-            <span>{formatEuro(tax)}</span>
+            <span>{fmt(tax)}</span>
           </div>
           <div className="flex justify-between font-bold text-sm border-t border-gray-200 pt-1">
             <span>{t("newInvoice.total")}</span>
-            <span className="text-green-700">{formatEuro(total)}</span>
+            <span className="text-green-700">{fmt(total)}</span>
           </div>
         </div>
 
@@ -197,6 +196,7 @@ export default function NewInvoicePage() {
   const [clientCity, setClientCity] = useState("");
   const [notes, setNotes] = useState("");
   const [taxRate, setTaxRate] = useState(Number(user?.defaultTaxRate ?? 21));
+  const [currency, setCurrency] = useState(user?.defaultCurrency ?? "EUR");
   const [items, setItems] = useState<LineItem[]>([
     { id: 1, description: "", quantity: 1, unitPrice: 0 },
   ]);
@@ -255,6 +255,7 @@ export default function NewInvoicePage() {
         issueDate,
         dueDate,
         notes: notes || undefined,
+        currency,
         taxRate,
         items: items.map((item, idx) => ({
           description: item.description,
@@ -437,7 +438,7 @@ export default function NewInvoicePage() {
                       onChange={(e) => updateItem(item.id, "unitPrice", e.target.value)}
                     />
                     <div className="text-sm font-medium text-gray-700 text-right pr-1">
-                      {formatEuro(item.quantity * item.unitPrice)}
+                      {formatCurrency(item.quantity * item.unitPrice, currency)}
                     </div>
                     <button
                       onClick={() => removeItem(item.id)}
@@ -461,9 +462,21 @@ export default function NewInvoicePage() {
               <div className="mt-5 pt-4 border-t border-gray-100 flex items-end justify-between gap-4">
                 <div className="flex items-end gap-3">
                   <div>
+                    <label className={labelCls}>{t("newInvoice.fields.currency")}</label>
+                    <select
+                      className={`${inputCls} w-36`}
+                      value={currency}
+                      onChange={(e) => setCurrency(e.target.value)}
+                    >
+                      {CURRENCIES.map((c) => (
+                        <option key={c.code} value={c.code}>{c.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
                     <label className={labelCls}>{t("newInvoice.fields.taxRate")}</label>
                     <select
-                      className={`${inputCls} w-32`}
+                      className={`${inputCls} w-28`}
                       value={taxRate}
                       onChange={(e) => setTaxRate(Number(e.target.value))}
                     >
@@ -495,15 +508,15 @@ export default function NewInvoicePage() {
                 <div className="text-right space-y-1 text-sm min-w-[160px]">
                   <div className="flex justify-between gap-8 text-gray-500">
                     <span>{t("newInvoice.subtotal")}</span>
-                    <span>{formatEuro(subtotal)}</span>
+                    <span>{formatCurrency(subtotal, currency)}</span>
                   </div>
                   <div className="flex justify-between gap-8 text-gray-500">
                     <span>{t("newInvoice.tax", { rate: taxRate })}</span>
-                    <span>{formatEuro(tax)}</span>
+                    <span>{formatCurrency(tax, currency)}</span>
                   </div>
                   <div className="flex justify-between gap-8 font-bold text-gray-900 text-base border-t border-gray-200 pt-1">
                     <span>{t("newInvoice.total")}</span>
-                    <span className="text-green-700">{formatEuro(total)}</span>
+                    <span className="text-green-700">{formatCurrency(total, currency)}</span>
                   </div>
                 </div>
               </div>
@@ -534,6 +547,7 @@ export default function NewInvoicePage() {
               clientCity={clientCity}
               notes={notes}
               taxRate={taxRate}
+              currency={currency}
               items={previewItems}
               companyName={user?.companyName}
               logoUrl={user?.logoUrl}

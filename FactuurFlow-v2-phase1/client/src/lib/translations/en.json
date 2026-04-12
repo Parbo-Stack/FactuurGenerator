@@ -146,6 +146,7 @@
       "priceIncl": "Price (incl. VAT)",
       "lineTotal": "Total (excl.)",
       "taxRate": "VAT rate",
+      "currency": "Currency",
       "priceMode": "Enter prices",
       "exclBtw": "Excl. VAT",
       "inclBtw": "Incl. VAT",
@@ -242,7 +243,8 @@
       "invoiceSubtitle": "Defaults for new invoices",
       "prefix": "Invoice prefix",
       "paymentDays": "Payment terms (days)",
-      "taxRate": "Default VAT"
+      "taxRate": "Default VAT",
+      "currency": "Default currency"
     },
     "notifications": {
       "title": "Email notifications",

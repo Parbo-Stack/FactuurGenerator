@@ -52,6 +52,7 @@ export interface Invoice {
   issueDate: string;
   dueDate: string;
   notes: string | null;
+  currency: string;
   subtotal: string;
   taxRate: string;
   taxAmount: string;
@@ -102,6 +103,7 @@ export interface CreateInvoicePayload {
   issueDate: string;
   dueDate: string;
   notes?: string;
+  currency?: string;
   taxRate?: number;
   discount?: number;
   items: { description: string; quantity: number; unitPrice: number; sortOrder?: number }[];

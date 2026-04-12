@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { fetchCurrentUser } from "@/lib/auth";
+import { CURRENCIES } from "@/lib/currency";
 import { useToast } from "@/hooks/use-toast";
 import { User, Building2, Bell, Shield, Check, Loader2, ImageIcon, X, Activity } from "lucide-react";
 import { SecurityTab } from "@/components/SecurityTab";
@@ -121,6 +122,7 @@ export default function SettingsPage() {
   const [invoicePrefix, setInvoicePrefix] = useState("FF");
   const [defaultPaymentDays, setDefaultPaymentDays] = useState("30");
   const [defaultTaxRate, setDefaultTaxRate] = useState("21");
+  const [defaultCurrency, setDefaultCurrency] = useState("EUR");
 
   // Notifications
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -151,6 +153,7 @@ export default function SettingsPage() {
     setInvoicePrefix(user.invoicePrefix ?? "FF");
     setDefaultPaymentDays(String(user.defaultPaymentDays ?? 30));
     setDefaultTaxRate(user.defaultTaxRate ?? "21");
+    setDefaultCurrency(user.defaultCurrency ?? "EUR");
     setEmailNotifications(user.emailNotifications ?? true);
     setOverdueReminders(user.overdueReminders ?? true);
   }, [user]);
@@ -195,6 +198,7 @@ export default function SettingsPage() {
       invoicePrefix,
       defaultPaymentDays: Number(defaultPaymentDays),
       defaultTaxRate,
+      defaultCurrency,
     });
   }
 
@@ -399,7 +403,7 @@ export default function SettingsPage() {
                 title={t("settings.company.invoiceTitle")}
                 description={t("settings.company.invoiceSubtitle")}
               >
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className={labelCls}>{t("settings.company.prefix")}</label>
                     <input className={inputCls} value={invoicePrefix} onChange={(e) => setInvoicePrefix(e.target.value)} placeholder="FF" />
@@ -414,6 +418,14 @@ export default function SettingsPage() {
                       <option value="0">0%</option>
                       <option value="9">9%</option>
                       <option value="21">21%</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className={labelCls}>{t("settings.company.currency")}</label>
+                    <select className={inputCls} value={defaultCurrency} onChange={(e) => setDefaultCurrency(e.target.value)}>
+                      {CURRENCIES.map((c) => (
+                        <option key={c.code} value={c.code}>{c.label}</option>
+                      ))}
                     </select>
                   </div>
                 </div>

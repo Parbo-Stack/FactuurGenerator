@@ -18,6 +18,7 @@ export interface AuthUser {
   invoicePrefix?: string | null;
   defaultPaymentDays?: number | null;
   defaultTaxRate?: string | null;
+  defaultCurrency?: string | null;
   emailNotifications?: boolean | null;
   overdueReminders?: boolean | null;
 }

@@ -126,7 +126,7 @@ export function registerRoutes(app: Express): Server {
         "name", "companyName", "companyAddress", "companyCity", "companyZip",
         "companyCountry", "companyPhone", "companyEmail", "companyKvk",
         "companyBtw", "companyIban", "logoUrl", "defaultPaymentDays",
-        "defaultTaxRate", "invoicePrefix", "emailNotifications", "overdueReminders",
+        "defaultTaxRate", "defaultCurrency", "invoicePrefix", "emailNotifications", "overdueReminders",
       ];
       const updates: Record<string, any> = {};
       for (const key of allowed) {
@@ -320,6 +320,7 @@ export function registerRoutes(app: Express): Server {
           taxAmount: invoices.taxAmount,
           discount: invoices.discount,
           total: invoices.total,
+          currency: invoices.currency,
           paidAt: invoices.paidAt,
           createdAt: invoices.createdAt,
           clientId: invoices.clientId,

@@ -11,7 +11,7 @@ const initI18n = async () => {
       en: { translation: en },
       nl: { translation: nl },
     },
-    lng: savedLang ?? "nl",
+    lng: savedLang ?? "en",
     fallbackLng: "en",
     interpolation: {
       escapeValue: false,

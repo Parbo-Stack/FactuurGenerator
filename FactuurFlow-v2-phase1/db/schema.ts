@@ -40,6 +40,7 @@ export const users = pgTable("users", {
   // Factuurinstellingen
   defaultPaymentDays: integer("default_payment_days").default(30),
   defaultTaxRate: numeric("default_tax_rate", { precision: 5, scale: 2 }).default("21"),
+  defaultCurrency: text("default_currency").default("EUR"),
   invoicePrefix: text("invoice_prefix").default("FF"),
   // Notificaties
   emailNotifications: boolean("email_notifications").default(true),
@@ -101,6 +102,7 @@ export const invoices = pgTable("invoices", {
   issueDate: text("issue_date").notNull(), // ISO date string
   dueDate: text("due_date").notNull(),
   notes: text("notes"),
+  currency: text("currency").default("EUR").notNull(),
   // Bedragen (opgeslagen als string voor precisie)
   subtotal: numeric("subtotal", { precision: 12, scale: 2 }).default("0").notNull(),
   taxRate: numeric("tax_rate", { precision: 5, scale: 2 }).default("21").notNull(),
