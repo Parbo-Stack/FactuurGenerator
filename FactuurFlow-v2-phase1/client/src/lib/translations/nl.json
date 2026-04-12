@@ -64,7 +64,9 @@
     "viewAll": "Bekijk alle facturen",
     "noInvoices": "Nog geen facturen",
     "noInvoicesHint": "Maak je eerste factuur aan.",
-    "monthlyRevenue": "Maandomzet (afgelopen 6 maanden)"
+    "monthlyRevenue": "Maandomzet (afgelopen 6 maanden)",
+    "revenueChartTitle": "Omzet overzicht",
+    "revenueChartPeriod": "Afgelopen 6 maanden"
   },
   "invoices": {
     "title": "Facturen",

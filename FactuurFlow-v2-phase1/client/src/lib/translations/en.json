@@ -64,7 +64,9 @@
     "viewAll": "View all invoices",
     "noInvoices": "No invoices yet",
     "noInvoicesHint": "Create your first invoice.",
-    "monthlyRevenue": "Monthly revenue (last 6 months)"
+    "monthlyRevenue": "Monthly revenue (last 6 months)",
+    "revenueChartTitle": "Revenue overview",
+    "revenueChartPeriod": "Last 6 months"
   },
   "invoices": {
     "title": "Invoices",

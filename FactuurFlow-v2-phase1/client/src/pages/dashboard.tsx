@@ -5,13 +5,13 @@ import { AppLayout } from "@/components/AppLayout";
 import { fetchCurrentUser } from "@/lib/auth";
 import { dashboardApi, invoicesApi } from "@/lib/api";
 import type { InvoiceStatus } from "@/lib/api";
+import { formatCurrency, CURRENCIES } from "@/lib/currency";
 import {
   TrendingUp,
   Clock,
   FileText,
   Users,
   ArrowUpRight,
-  ArrowDownRight,
   MoreHorizontal,
   Circle,
   Loader2,
@@ -27,13 +27,12 @@ import {
 } from "recharts";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function formatEuro(amount: number) {
-  return new Intl.NumberFormat("nl-NL", {
-    style: "currency",
-    currency: "EUR",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
+function currencySymbol(currency: string) {
+  const entry = CURRENCIES.find((c) => c.code === currency);
+  // Get the symbol from Intl (e.g. "€", "$", "£")
+  return new Intl.NumberFormat(entry?.locale ?? "en-US", { style: "currency", currency })
+    .formatToParts(0)
+    .find((p) => p.type === "currency")?.value ?? currency;
 }
 
 // ── Status badge ──────────────────────────────────────────────────────────────
@@ -90,19 +89,27 @@ function StatCard({
 }
 
 // ── Custom Tooltip ────────────────────────────────────────────────────────────
-function CustomTooltip({ active, payload, label }: any) {
+function CustomTooltip({ active, payload, label, currency }: any) {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-white border border-gray-100 rounded-xl shadow-lg px-4 py-3">
       <p className="text-xs text-gray-500 mb-1">{label}</p>
-      <p className="text-sm font-semibold text-gray-900">{formatEuro(payload[0].value)}</p>
+      <p className="text-sm font-semibold text-gray-900">{formatCurrency(payload[0].value, currency)}</p>
     </div>
   );
 }
 
-// ── Fallback grafiekdata (lege staat) ─────────────────────────────────────────
-const MONTHS = ["Nov", "Dec", "Jan", "Feb", "Mrt", "Apr"];
-const emptyChartData = MONTHS.map((month) => ({ month, omzet: 0 }));
+// ── Fallback chart data (empty state) ─────────────────────────────────────────
+function getLastSixMonths() {
+  const months = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date();
+    d.setMonth(d.getMonth() - i);
+    months.push(d.toLocaleString("en-US", { month: "short" }));
+  }
+  return months;
+}
+const emptyChartData = getLastSixMonths().map((month) => ({ month, omzet: 0 }));
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 export default function DashboardPage() {
@@ -128,9 +135,10 @@ export default function DashboardPage() {
     select: (data) => data.slice(0, 5),
   });
 
-  const firstName = user?.name?.split(" ")[0] ?? "daar";
+  const firstName = user?.name?.split(" ")[0] ?? "there";
+  const currency = user?.defaultCurrency ?? "EUR";
+  const symbol = currencySymbol(currency);
 
-  // Grafiek: gebruik echte data of lege staat
   const chartData =
     stats?.monthlyRevenue && stats.monthlyRevenue.length > 0
       ? stats.monthlyRevenue
@@ -151,14 +159,14 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
           <StatCard
             title={t("dashboard.stats.revenue")}
-            value={stats ? formatEuro(stats.totalRevenue) : "—"}
+            value={stats ? formatCurrency(stats.totalRevenue, currency) : "—"}
             loading={statsLoading}
             iconBg="bg-green-50"
             icon={<TrendingUp className="w-5 h-5 text-green-600" />}
           />
           <StatCard
             title={t("dashboard.stats.outstanding")}
-            value={stats ? formatEuro(stats.outstanding) : "—"}
+            value={stats ? formatCurrency(stats.outstanding, currency) : "—"}
             loading={statsLoading}
             iconBg="bg-orange-50"
             icon={<Clock className="w-5 h-5 text-orange-500" />}
@@ -181,12 +189,12 @@ export default function DashboardPage() {
 
         {/* Grafiek + recente facturen */}
         <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
-          {/* Omzetgrafiek */}
+          {/* Revenue chart */}
           <div className="xl:col-span-3 bg-white rounded-2xl border border-gray-100 p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="font-semibold text-gray-900">Omzet overzicht</h2>
-                <p className="text-xs text-gray-400 mt-0.5">Afgelopen 6 maanden</p>
+                <h2 className="font-semibold text-gray-900">{t("dashboard.revenueChartTitle")}</h2>
+                <p className="text-xs text-gray-400 mt-0.5">{t("dashboard.revenueChartPeriod")}</p>
               </div>
               <button className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50">
                 <MoreHorizontal className="w-4 h-4" />
@@ -211,9 +219,9 @@ export default function DashboardPage() {
                   tick={{ fontSize: 12, fill: "#9ca3af" }}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={(v) => v === 0 ? "€0" : `€${(v / 1000).toFixed(0)}k`}
+                  tickFormatter={(v) => v === 0 ? `${symbol}0` : `${symbol}${(v / 1000).toFixed(0)}k`}
                 />
-                <Tooltip content={<CustomTooltip />} />
+                <Tooltip content={<CustomTooltip currency={currency} />} />
                 <Area
                   type="monotone"
                   dataKey="omzet"
@@ -271,7 +279,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="text-right flex-shrink-0">
                       <p className="text-sm font-semibold text-gray-900">
-                        {formatEuro(Number(inv.total))}
+                        {formatCurrency(Number(inv.total), inv.currency)}
                       </p>
                       <StatusBadge status={inv.status} />
                     </div>
