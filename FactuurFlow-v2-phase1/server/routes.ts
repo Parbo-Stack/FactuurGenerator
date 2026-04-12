@@ -8,12 +8,14 @@ import {
   clients,
   invoices,
   invoiceItems,
+  auditLog,
   insertUserSchema,
   insertClientSchema,
   insertInvoiceSchema,
 } from "@db/schema";
 import { eq, and, desc, sql, inArray } from "drizzle-orm";
 import { hashPassword, comparePassword } from "./auth";
+import { logAudit } from "./audit";
 import { z } from "zod";
 
 // ── Auth guard ────────────────────────────────────────────────────────────────
@@ -54,6 +56,7 @@ export function registerRoutes(app: Express): Server {
 
       req.login(user, (err) => {
         if (err) return res.status(500).json({ message: "Inloggen na registratie mislukt." });
+        logAudit(req, "register", { userId: user.id });
         const { password: _, ...safe } = user;
         res.status(201).json({ user: safe });
       });
@@ -66,9 +69,13 @@ export function registerRoutes(app: Express): Server {
   app.post("/api/auth/login", (req, res, next) => {
     passport.authenticate("local", (err: any, user: any, info: any) => {
       if (err) return next(err);
-      if (!user) return res.status(401).json({ message: info?.message ?? "Inloggen mislukt." });
+      if (!user) {
+        logAudit(req, "login_failed", { metadata: { email: req.body.email } });
+        return res.status(401).json({ message: info?.message ?? "Inloggen mislukt." });
+      }
       req.login(user, (loginErr) => {
         if (loginErr) return next(loginErr);
+        logAudit(req, "login", { userId: user.id });
         const { password: _, ...safe } = user;
         res.json({ user: safe });
       });
@@ -76,6 +83,8 @@ export function registerRoutes(app: Express): Server {
   });
 
   app.post("/api/auth/logout", (req, res) => {
+    const userId = (req.user as any)?.id;
+    logAudit(req, "logout", { userId });
     req.logout(() => res.json({ message: "Uitgelogd." }));
   });
 
@@ -97,6 +106,7 @@ export function registerRoutes(app: Express): Server {
         .set({ password: hashPassword(newPassword), updatedAt: new Date() })
         .where(eq(users.id, uid(req)));
 
+      logAudit(req, "password_changed", { userId: uid(req) });
       res.json({ message: "Wachtwoord gewijzigd." });
     } catch (err: any) {
       console.error("Change password error:", err);
@@ -246,6 +256,7 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: parsed.error.errors[0].message });
 
       const [client] = await db.insert(clients).values(parsed.data).returning();
+      logAudit(req, "client_created", { userId: uid(req), resource: "client", resourceId: client.id });
       res.status(201).json(client);
     } catch (err: any) {
       console.error("Create client error:", err);
@@ -283,6 +294,7 @@ export function registerRoutes(app: Express): Server {
       if (!existing) return res.status(404).json({ message: "Klant niet gevonden." });
 
       await db.delete(clients).where(eq(clients.id, Number(req.params.id)));
+      logAudit(req, "client_deleted", { userId: uid(req), resource: "client", resourceId: existing.id });
       res.json({ message: "Klant verwijderd." });
     } catch (err: any) {
       res.status(500).json({ message: "Klant verwijderen mislukt." });
@@ -415,6 +427,7 @@ export function registerRoutes(app: Express): Server {
         )
         .returning();
 
+      logAudit(req, "invoice_created", { userId: uid(req), resource: "invoice", resourceId: invoice.id });
       res.status(201).json({ ...invoice, items: insertedItems });
     } catch (err: any) {
       console.error("Create invoice error:", err);
@@ -513,6 +526,7 @@ export function registerRoutes(app: Express): Server {
       if (!existing) return res.status(404).json({ message: "Factuur niet gevonden." });
 
       await db.delete(invoices).where(eq(invoices.id, existing.id));
+      logAudit(req, "invoice_deleted", { userId: uid(req), resource: "invoice", resourceId: existing.id });
       res.json({ message: "Factuur verwijderd." });
     } catch (err: any) {
       res.status(500).json({ message: "Factuur verwijderen mislukt." });
@@ -560,10 +574,30 @@ export function registerRoutes(app: Express): Server {
         return res.status(500).json({ message: error.message ?? "Versturen mislukt via Resend." });
       }
 
+      logAudit(req, "invoice_sent", { userId: uid(req), resource: "invoice", metadata: { to, invoiceNumber } });
       res.json({ message: "E-mail verzonden." });
     } catch (err: any) {
       console.error("Send invoice email error:", err);
       res.status(500).json({ message: "E-mail verzenden mislukt." });
+    }
+  });
+
+  // ══════════════════════════════════════════════════════════════════
+  // AUDIT LOG
+  // ══════════════════════════════════════════════════════════════════
+
+  app.get("/api/audit-log", requireAuth, async (req, res) => {
+    try {
+      const rows = await db
+        .select()
+        .from(auditLog)
+        .where(eq(auditLog.userId, uid(req)))
+        .orderBy(desc(auditLog.createdAt))
+        .limit(100);
+      res.json(rows);
+    } catch (err: any) {
+      console.error("Audit log error:", err);
+      res.status(500).json({ message: "Activiteitenlog ophalen mislukt." });
     }
   });
 

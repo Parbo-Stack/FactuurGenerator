@@ -143,6 +143,35 @@ export const selectInvoiceItemSchema = createSelectSchema(invoiceItems);
 export type InsertInvoiceItem = typeof invoiceItems.$inferInsert;
 export type SelectInvoiceItem = typeof invoiceItems.$inferSelect;
 
+// ── Audit Log ────────────────────────────────────────────────────────────────
+export const auditLog = pgTable("audit_log", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
+  action: text("action").notNull(),
+  resource: text("resource"),
+  resourceId: integer("resource_id"),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  metadata: text("metadata"), // JSON string
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type SelectAuditLog = typeof auditLog.$inferSelect;
+
+// ── Two Factor Auth ───────────────────────────────────────────────────────────
+export const twoFactorAuth = pgTable("two_factor_auth", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull()
+    .unique(),
+  secret: text("secret").notNull(),
+  enabled: boolean("enabled").default(false).notNull(),
+  backupCodes: text("backup_codes"), // JSON array of hashed codes
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // ── Products (catalogus) ──────────────────────────────────────────────────────
 export const products = pgTable("products", {
   id: serial("id").primaryKey(),

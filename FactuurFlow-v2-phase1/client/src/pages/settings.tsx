@@ -4,7 +4,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { fetchCurrentUser } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
-import { User, Building2, Bell, Shield, Check, Loader2, ImageIcon, X } from "lucide-react";
+import { User, Building2, Bell, Shield, Check, Loader2, ImageIcon, X, Activity } from "lucide-react";
+import { SecurityTab } from "@/components/SecurityTab";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const inputCls = `w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl
@@ -97,6 +98,7 @@ export default function SettingsPage() {
     { key: "company",       label: t("settings.tabs.company"),       icon: Building2 },
     { key: "notifications", label: t("settings.tabs.notifications"), icon: Bell },
     { key: "security",      label: t("settings.tabs.security"),      icon: Shield },
+    { key: "auditLog",      label: t("settings.tabs.auditLog"),      icon: Activity },
   ];
 
   const [activeTab, setActiveTab] = useState("profile");
@@ -523,6 +525,9 @@ export default function SettingsPage() {
               </div>
             </>
           )}
+
+          {/* ── Activiteitenlog ── */}
+          {activeTab === "auditLog" && <SecurityTab />}
         </div>
       </div>
     </AppLayout>
