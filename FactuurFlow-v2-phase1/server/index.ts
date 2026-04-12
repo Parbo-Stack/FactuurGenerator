@@ -1,10 +1,22 @@
 import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
+import { randomUUID } from "crypto";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { setupAuth } from "./auth";
+
+// ── Env validatie ──────────────────────────────────────────────────────────────
+const REQUIRED_ENV: string[] = ["DATABASE_URL", "SESSION_SECRET"];
+const missing = REQUIRED_ENV.filter((k) => !process.env[k]);
+if (missing.length > 0) {
+  console.error(
+    `[startup] Ontbrekende omgevingsvariabelen: ${missing.join(", ")}\n` +
+    `Kopieer .env.example naar .env en vul de waarden in.`
+  );
+  process.exit(1);
+}
 
 const app = express();
 
@@ -54,6 +66,32 @@ app.use("/api", apiLimiter);
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: false, limit: "10mb" }));
+
+// ── X-Request-ID ──────────────────────────────────────────────────────────────
+app.use((req, res, next) => {
+  const reqId = (req.headers["x-request-id"] as string) || randomUUID();
+  res.setHeader("X-Request-ID", reqId);
+  next();
+});
+
+// ── HTML sanitization (strip tags uit string inputs) ─────────────────────────
+function stripTags(value: unknown): unknown {
+  if (typeof value === "string") return value.replace(/<[^>]*>/g, "").trim();
+  if (Array.isArray(value)) return value.map(stripTags);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([k, v]) => [k, stripTags(v)])
+    );
+  }
+  return value;
+}
+
+app.use((req, _res, next) => {
+  if (req.body && typeof req.body === "object") {
+    req.body = stripTags(req.body);
+  }
+  next();
+});
 
 app.use((req, res, next) => {
   // CORS — alleen eigen domein + localhost in dev
