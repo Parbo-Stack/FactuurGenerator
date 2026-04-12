@@ -122,7 +122,7 @@ export default function SettingsPage() {
   const [invoicePrefix, setInvoicePrefix] = useState("FF");
   const [defaultPaymentDays, setDefaultPaymentDays] = useState("30");
   const [defaultTaxRate, setDefaultTaxRate] = useState("21");
-  const [defaultCurrency, setDefaultCurrency] = useState("EUR");
+  const [defaultCurrency, setDefaultCurrency] = useState("USD");
 
   // Notifications
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -153,7 +153,7 @@ export default function SettingsPage() {
     setInvoicePrefix(user.invoicePrefix ?? "FF");
     setDefaultPaymentDays(String(user.defaultPaymentDays ?? 30));
     setDefaultTaxRate(user.defaultTaxRate ?? "21");
-    setDefaultCurrency(user.defaultCurrency ?? "EUR");
+    setDefaultCurrency(user.defaultCurrency ?? "USD");
     setEmailNotifications(user.emailNotifications ?? true);
     setOverdueReminders(user.overdueReminders ?? true);
   }, [user]);

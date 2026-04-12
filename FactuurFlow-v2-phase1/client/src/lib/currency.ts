@@ -23,7 +23,7 @@ export const CURRENCIES = [
 
 export type CurrencyCode = typeof CURRENCIES[number]["code"];
 
-export function formatCurrency(amount: string | number, currency = "EUR"): string {
+export function formatCurrency(amount: string | number, currency = "USD"): string {
   const num = Number(amount);
   const entry = CURRENCIES.find((c) => c.code === currency);
   const locale = entry?.locale ?? "en-US";

@@ -196,7 +196,7 @@ export default function NewInvoicePage() {
   const [clientCity, setClientCity] = useState("");
   const [notes, setNotes] = useState("");
   const [taxRate, setTaxRate] = useState(Number(user?.defaultTaxRate ?? 21));
-  const [currency, setCurrency] = useState(user?.defaultCurrency ?? "EUR");
+  const [currency, setCurrency] = useState(user?.defaultCurrency ?? "USD");
   const [items, setItems] = useState<LineItem[]>([
     { id: 1, description: "", quantity: 1, unitPrice: 0 },
   ]);

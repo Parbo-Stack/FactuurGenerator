@@ -72,11 +72,11 @@ export interface InvoiceDetail extends Invoice {
 }
 
 export interface DashboardStats {
-  totalRevenue: number;
-  outstanding: number;
+  totalRevenue: Record<string, number>;   // { USD: 1000, EUR: 200 }
+  outstanding: Record<string, number>;    // { USD: 500 }
   invoiceCount: number;
   clientCount: number;
-  monthlyRevenue: { month: string; omzet: number }[];
+  monthlyRevenue: Record<string, { month: string; omzet: number }[]>; // { USD: [...] }
 }
 
 // ── Clients API ───────────────────────────────────────────────────────────────

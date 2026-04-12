@@ -57,17 +57,26 @@ function StatusBadge({ status }: { status: InvoiceStatus }) {
 // ── Stat card ─────────────────────────────────────────────────────────────────
 function StatCard({
   title,
-  value,
+  amounts,
+  simpleValue,
   icon,
   iconBg,
   loading,
 }: {
   title: string;
-  value: string;
+  amounts?: Record<string, number>;   // per-currency totals
+  simpleValue?: string;               // plain string for counts
   icon: React.ReactNode;
   iconBg: string;
   loading?: boolean;
 }) {
+  const lines = amounts
+    ? Object.entries(amounts)
+        .filter(([, v]) => v > 0)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([currency, value]) => formatCurrency(value, currency))
+    : null;
+
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col gap-4">
       <div className="flex items-start justify-between">
@@ -79,8 +88,20 @@ function StatCard({
       <div>
         {loading ? (
           <div className="h-8 w-24 bg-gray-100 rounded animate-pulse mb-1" />
+        ) : lines ? (
+          lines.length === 0 ? (
+            <p className="text-2xl font-bold text-gray-900">—</p>
+          ) : (
+            <div className="space-y-0.5">
+              {lines.map((line, i) => (
+                <p key={i} className={i === 0 ? "text-2xl font-bold text-gray-900" : "text-sm font-semibold text-gray-500"}>
+                  {line}
+                </p>
+              ))}
+            </div>
+          )
         ) : (
-          <p className="text-2xl font-bold text-gray-900">{value}</p>
+          <p className="text-2xl font-bold text-gray-900">{simpleValue ?? "—"}</p>
         )}
         <p className="text-sm text-gray-500 mt-0.5">{title}</p>
       </div>
@@ -136,13 +157,15 @@ export default function DashboardPage() {
   });
 
   const firstName = user?.name?.split(" ")[0] ?? "there";
-  const currency = user?.defaultCurrency ?? "EUR";
+  const currency = user?.defaultCurrency ?? "USD";
   const symbol = currencySymbol(currency);
 
-  const chartData =
-    stats?.monthlyRevenue && stats.monthlyRevenue.length > 0
-      ? stats.monthlyRevenue
-      : emptyChartData;
+  // Chart shows the user's default currency; fall back to first available, then empty
+  const chartData: { month: string; omzet: number }[] = (() => {
+    if (!stats?.monthlyRevenue) return emptyChartData;
+    const rows = stats.monthlyRevenue[currency] ?? Object.values(stats.monthlyRevenue)[0];
+    return rows && rows.length > 0 ? rows : emptyChartData;
+  })();
 
   return (
     <AppLayout>
@@ -159,28 +182,28 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
           <StatCard
             title={t("dashboard.stats.revenue")}
-            value={stats ? formatCurrency(stats.totalRevenue, currency) : "—"}
+            amounts={stats?.totalRevenue}
             loading={statsLoading}
             iconBg="bg-green-50"
             icon={<TrendingUp className="w-5 h-5 text-green-600" />}
           />
           <StatCard
             title={t("dashboard.stats.outstanding")}
-            value={stats ? formatCurrency(stats.outstanding, currency) : "—"}
+            amounts={stats?.outstanding}
             loading={statsLoading}
             iconBg="bg-orange-50"
             icon={<Clock className="w-5 h-5 text-orange-500" />}
           />
           <StatCard
             title={t("dashboard.stats.invoices")}
-            value={stats ? String(stats.invoiceCount) : "—"}
+            simpleValue={stats ? String(stats.invoiceCount) : "—"}
             loading={statsLoading}
             iconBg="bg-blue-50"
             icon={<FileText className="w-5 h-5 text-blue-500" />}
           />
           <StatCard
             title={t("dashboard.stats.clients")}
-            value={stats ? String(stats.clientCount) : "—"}
+            simpleValue={stats ? String(stats.clientCount) : "—"}
             loading={statsLoading}
             iconBg="bg-purple-50"
             icon={<Users className="w-5 h-5 text-purple-500" />}

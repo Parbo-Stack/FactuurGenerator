@@ -158,20 +158,30 @@ export function registerRoutes(app: Express): Server {
     try {
       const userId = uid(req);
 
-      const [totalRevenue] = await db
-        .select({ value: sql<string>`coalesce(sum(total), 0)` })
+      // Revenue grouped by currency (paid invoices)
+      const revenueRows = await db
+        .select({
+          currency: invoices.currency,
+          value: sql<string>`coalesce(sum(total), 0)`,
+        })
         .from(invoices)
-        .where(and(eq(invoices.userId, userId), eq(invoices.status, "paid")));
+        .where(and(eq(invoices.userId, userId), eq(invoices.status, "paid")))
+        .groupBy(invoices.currency);
 
-      const [outstanding] = await db
-        .select({ value: sql<string>`coalesce(sum(total), 0)` })
+      // Outstanding grouped by currency (sent + overdue)
+      const outstandingRows = await db
+        .select({
+          currency: invoices.currency,
+          value: sql<string>`coalesce(sum(total), 0)`,
+        })
         .from(invoices)
         .where(
           and(
             eq(invoices.userId, userId),
             inArray(invoices.status, ["sent", "overdue"])
           )
-        );
+        )
+        .groupBy(invoices.currency);
 
       const [invoiceCount] = await db
         .select({ value: sql<string>`count(*)` })
@@ -183,10 +193,11 @@ export function registerRoutes(app: Express): Server {
         .from(clients)
         .where(eq(clients.userId, userId));
 
-      // Maandomzet (afgelopen 6 maanden)
+      // Monthly revenue grouped by currency (last 6 months, paid)
       const monthlyRevenue = await db
         .select({
           month: sql<string>`to_char(created_at, 'Mon')`,
+          currency: invoices.currency,
           omzet: sql<string>`coalesce(sum(total), 0)`,
         })
         .from(invoices)
@@ -197,18 +208,22 @@ export function registerRoutes(app: Express): Server {
             sql`created_at >= now() - interval '6 months'`
           )
         )
-        .groupBy(sql`to_char(created_at, 'Mon'), date_trunc('month', created_at)`)
+        .groupBy(sql`to_char(created_at, 'Mon'), date_trunc('month', created_at)`, invoices.currency)
         .orderBy(sql`date_trunc('month', created_at)`);
 
+      // Build a per-currency monthly map: { USD: [{month, omzet}], EUR: [...] }
+      const monthlyByCurrency: Record<string, { month: string; omzet: number }[]> = {};
+      for (const r of monthlyRevenue) {
+        if (!monthlyByCurrency[r.currency]) monthlyByCurrency[r.currency] = [];
+        monthlyByCurrency[r.currency].push({ month: r.month, omzet: Number(r.omzet) });
+      }
+
       res.json({
-        totalRevenue: Number(totalRevenue.value),
-        outstanding: Number(outstanding.value),
+        totalRevenue: Object.fromEntries(revenueRows.map((r) => [r.currency, Number(r.value)])),
+        outstanding: Object.fromEntries(outstandingRows.map((r) => [r.currency, Number(r.value)])),
         invoiceCount: Number(invoiceCount.value),
         clientCount: Number(clientCount.value),
-        monthlyRevenue: monthlyRevenue.map((r) => ({
-          month: r.month,
-          omzet: Number(r.omzet),
-        })),
+        monthlyRevenue: monthlyByCurrency,
       });
     } catch (err: any) {
       console.error("Dashboard stats error:", err);
