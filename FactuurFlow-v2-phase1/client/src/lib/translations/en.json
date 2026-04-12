@@ -1,0 +1,62 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "preview": "Preview",
+    "download": "Download PDF",
+    "required": "Required",
+    "success": "Success",
+    "error": "Error"
+  },
+  "invoice": {
+    "title": "Invoice",
+    "name": "Name",
+    "company": {
+      "name": "Company Name",
+      "address": "Address",
+      "coc": "Chamber of Commerce Number",
+      "vat": "VAT Number",
+      "iban": "IBAN",
+      "logo": "Company Logo",
+      "uploadLogo": "Upload Logo"
+    },
+    "details": {
+      "date": "Date",
+      "number": "Invoice Number",
+      "notes": "Notes",
+      "paymentTerms": "Payment Terms",
+      "dueDate": "Due Date"
+    },
+    "products": {
+      "title": "Products/Services",
+      "description": "Description",
+      "quantity": "Quantity",
+      "price": "Price",
+      "total": "Total",
+      "add": "Add Item",
+      "remove": "Remove"
+    },
+    "vat": {
+      "rate": "VAT Rate",
+      "amount": "VAT Amount",
+      "total": "Total inc. VAT",
+      "subtotal": "Subtotal"
+    },
+    "payment": {
+      "scanQR": "Scan QR code for payment"
+    },
+    "email": {
+      "title": "Send Invoice",
+      "description": "Enter the recipient's email address to send the invoice",
+      "recipient": "Recipient Email",
+      "send": "Send Invoice",
+      "sending": "Sending...",
+      "sent": "Invoice sent successfully",
+      "error": "Failed to send invoice"
+    },
+    "pdfGenerated": "Invoice PDF has been generated",
+    "pdfError": "Failed to generate PDF",
+    "emailSent": "Invoice has been sent successfully",
+    "emailError": "Failed to send invoice email"
+  }
+}

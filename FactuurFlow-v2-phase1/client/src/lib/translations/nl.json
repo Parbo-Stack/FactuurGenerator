@@ -1,0 +1,62 @@
+{
+  "common": {
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "preview": "Voorbeeld",
+    "download": "PDF Downloaden",
+    "required": "Verplicht",
+    "success": "Succes",
+    "error": "Fout"
+  },
+  "invoice": {
+    "title": "Factuur",
+    "name": "Naam",
+    "company": {
+      "name": "Bedrijfsnaam",
+      "address": "Adres",
+      "coc": "KvK-nummer",
+      "vat": "BTW-nummer",
+      "iban": "IBAN",
+      "logo": "Bedrijfslogo",
+      "uploadLogo": "Logo Uploaden"
+    },
+    "details": {
+      "date": "Datum",
+      "number": "Factuurnummer",
+      "notes": "Opmerkingen",
+      "paymentTerms": "Betalingstermijn",
+      "dueDate": "Vervaldatum"
+    },
+    "products": {
+      "title": "Producten/Diensten",
+      "description": "Omschrijving",
+      "quantity": "Aantal",
+      "price": "Prijs",
+      "total": "Totaal",
+      "add": "Item Toevoegen",
+      "remove": "Verwijderen"
+    },
+    "vat": {
+      "rate": "BTW Tarief",
+      "amount": "BTW Bedrag",
+      "total": "Totaal incl. BTW",
+      "subtotal": "Subtotaal"
+    },
+    "payment": {
+      "scanQR": "Scan QR code voor betaling"
+    },
+    "email": {
+      "title": "Factuur Versturen",
+      "description": "Voer het e-mailadres van de ontvanger in",
+      "recipient": "E-mailadres Ontvanger",
+      "send": "Factuur Versturen",
+      "sending": "Versturen...",
+      "sent": "Factuur is succesvol verstuurd",
+      "error": "Kon de factuur niet versturen"
+    },
+    "pdfGenerated": "Factuur PDF is gegenereerd",
+    "pdfError": "Kon geen PDF genereren",
+    "emailSent": "Factuur is succesvol verstuurd",
+    "emailError": "Kon de factuur niet per e-mail versturen"
+  }
+}
