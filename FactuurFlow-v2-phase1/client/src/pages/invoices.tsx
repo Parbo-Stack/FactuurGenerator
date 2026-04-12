@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/AppLayout";
 import { useInvoices, useDeleteInvoice, useUpdateInvoiceStatus } from "@/hooks/useInvoices";
 import type { Invoice, InvoiceStatus } from "@/lib/api";
@@ -28,24 +29,25 @@ function formatEuro(amount: string | number) {
 }
 
 // ── Status config ─────────────────────────────────────────────────────────────
-const statusConfig: Record<InvoiceStatus, { label: string; classes: string; icon: React.ElementType }> = {
-  paid:    { label: "Betaald",   classes: "bg-green-50 text-green-700", icon: CheckCircle },
-  sent:    { label: "Verzonden", classes: "bg-blue-50 text-blue-700",   icon: Send },
-  overdue: { label: "Te laat",   classes: "bg-red-50 text-red-700",     icon: Clock },
-  draft:   { label: "Concept",   classes: "bg-gray-100 text-gray-600",  icon: FileEdit },
+const statusConfig: Record<InvoiceStatus, { classes: string; icon: React.ElementType }> = {
+  paid:    { classes: "bg-green-50 text-green-700", icon: CheckCircle },
+  sent:    { classes: "bg-blue-50 text-blue-700",   icon: Send },
+  overdue: { classes: "bg-red-50 text-red-700",     icon: Clock },
+  draft:   { classes: "bg-gray-100 text-gray-600",  icon: FileEdit },
 };
 
 function StatusBadge({ status }: { status: InvoiceStatus }) {
+  const { t } = useTranslation();
   const cfg = statusConfig[status] ?? statusConfig.draft;
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${cfg.classes}`}>
       <Circle className="w-1.5 h-1.5 fill-current" />
-      {cfg.label}
+      {t(`invoices.status.${status}`)}
     </span>
   );
 }
 
-// ── Status dropdown in rij ────────────────────────────────────────────────────
+// ── Status options ────────────────────────────────────────────────────────────
 const statusOptions: InvoiceStatus[] = ["draft", "sent", "paid", "overdue"];
 
 function StatusMenu({
@@ -57,6 +59,7 @@ function StatusMenu({
   current: InvoiceStatus;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const updateStatus = useUpdateInvoiceStatus();
   return (
     <div className="absolute right-8 top-8 z-30 bg-white border border-gray-100 rounded-xl shadow-lg w-40 overflow-hidden">
@@ -77,7 +80,7 @@ function StatusMenu({
               text-gray-700`}
           >
             <Icon className="w-3.5 h-3.5 text-gray-400" />
-            {cfg.label}
+            {t(`invoices.status.${s}`)}
           </button>
         );
       })}
@@ -85,14 +88,8 @@ function StatusMenu({
   );
 }
 
-// ── Filter tabs ───────────────────────────────────────────────────────────────
-const tabs: { key: string; label: string }[] = [
-  { key: "all",     label: "Alle" },
-  { key: "sent",    label: "Openstaand" },
-  { key: "paid",    label: "Betaald" },
-  { key: "overdue", label: "Te laat" },
-  { key: "draft",   label: "Concept" },
-];
+// ── Filter tabs (computed inside component via t()) ───────────────────────────
+const TAB_KEYS = ["all", "sent", "paid", "overdue", "draft"] as const;
 
 type SortKey = "invoiceNumber" | "clientName" | "issueDate" | "dueDate" | "total" | "status";
 type SortDir = "asc" | "desc";
@@ -100,7 +97,16 @@ type SortDir = "asc" | "desc";
 // ── Invoices page ─────────────────────────────────────────────────────────────
 export default function InvoicesPage() {
   const [, navigate] = useLocation();
+  const { t } = useTranslation();
   const { data: invoices = [], isLoading } = useInvoices();
+
+  const tabs = [
+    { key: "all",     label: t("invoices.tabs.all") },
+    { key: "sent",    label: t("invoices.tabs.open") },
+    { key: "paid",    label: t("invoices.tabs.paid") },
+    { key: "overdue", label: t("invoices.tabs.overdue") },
+    { key: "draft",   label: t("invoices.tabs.draft") },
+  ];
   const deleteInvoice = useDeleteInvoice();
   const updateStatus = useUpdateInvoiceStatus();
 
@@ -144,12 +150,12 @@ export default function InvoicesPage() {
   invoices.forEach((inv) => { counts[inv.status] = (counts[inv.status] ?? 0) + 1; });
 
   const columns: { key: SortKey; label: string }[] = [
-    { key: "invoiceNumber", label: "Factuurnr." },
-    { key: "clientName",    label: "Klant" },
-    { key: "issueDate",     label: "Datum" },
-    { key: "dueDate",       label: "Vervaldatum" },
-    { key: "total",         label: "Bedrag" },
-    { key: "status",        label: "Status" },
+    { key: "invoiceNumber", label: t("invoices.cols.number") },
+    { key: "clientName",    label: t("invoices.cols.client") },
+    { key: "issueDate",     label: t("invoices.cols.date") },
+    { key: "dueDate",       label: t("invoices.cols.dueDate") },
+    { key: "total",         label: t("invoices.cols.amount") },
+    { key: "status",        label: t("invoices.cols.status") },
   ];
 
   return (
@@ -158,8 +164,8 @@ export default function InvoicesPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Facturen</h1>
-            <p className="text-gray-500 text-sm mt-0.5">{invoices.length} facturen totaal</p>
+            <h1 className="text-2xl font-bold text-gray-900">{t("invoices.title")}</h1>
+            <p className="text-gray-500 text-sm mt-0.5">{t("invoices.count", { count: invoices.length })}</p>
           </div>
           <button
             onClick={() => navigate("/invoices/new")}
@@ -167,7 +173,7 @@ export default function InvoicesPage() {
                        text-sm font-medium py-2.5 px-4 rounded-xl transition"
           >
             <Plus className="w-4 h-4" />
-            Nieuwe factuur
+            {t("invoices.new")}
           </button>
         </div>
 
@@ -204,7 +210,7 @@ export default function InvoicesPage() {
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Zoek factuur of klant…"
+                  placeholder={t("invoices.search")}
                   className="pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg w-56
                              focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
@@ -243,8 +249,8 @@ export default function InvoicesPage() {
                     <tr>
                       <td colSpan={7} className="text-center py-12 text-gray-400 text-sm">
                         {invoices.length === 0
-                          ? "Nog geen facturen. Maak je eerste factuur aan."
-                          : "Geen facturen gevonden"}
+                          ? t("invoices.empty")
+                          : t("invoices.emptyFiltered")}
                       </td>
                     </tr>
                   ) : (
@@ -258,7 +264,7 @@ export default function InvoicesPage() {
                           {inv.invoiceNumber}
                         </td>
                         <td className="px-5 py-4 text-sm text-gray-700">
-                          {inv.clientName ?? <span className="text-gray-400 italic">Geen klant</span>}
+                          {inv.clientName ?? <span className="text-gray-400 italic">{t("invoices.noClient")}</span>}
                         </td>
                         <td className="px-5 py-4 text-sm text-gray-500">{inv.issueDate}</td>
                         <td className="px-5 py-4 text-sm text-gray-500">{inv.dueDate}</td>
@@ -287,7 +293,7 @@ export default function InvoicesPage() {
                                 />
                                 <div className="absolute right-0 top-8 z-30 bg-white border border-gray-100 rounded-xl shadow-lg w-44 overflow-hidden">
                                   <div className="px-3 py-2 text-xs font-medium text-gray-400 border-b border-gray-50">
-                                    Status wijzigen
+                                    {t("invoices.changeStatus")}
                                   </div>
                                   {statusOptions.map((s) => {
                                     const cfg = statusConfig[s];
@@ -308,7 +314,7 @@ export default function InvoicesPage() {
                                           text-gray-700`}
                                       >
                                         <Icon className="w-3.5 h-3.5 text-gray-400" />
-                                        {cfg.label}
+                                        {t(`invoices.status.${s}`)}
                                       </button>
                                     );
                                   })}
@@ -322,7 +328,7 @@ export default function InvoicesPage() {
                                       className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition"
                                     >
                                       <Trash2 className="w-3.5 h-3.5" />
-                                      Verwijderen
+                                      {t("common.delete")}
                                     </button>
                                   </div>
                                 </div>

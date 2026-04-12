@@ -1,12 +1,305 @@
 {
   "common": {
     "save": "Save",
+    "saving": "Saving…",
     "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "loading": "Loading…",
+    "search": "Search",
     "preview": "Preview",
     "download": "Download PDF",
     "required": "Required",
     "success": "Success",
-    "error": "Error"
+    "error": "Error",
+    "back": "Back",
+    "add": "Add",
+    "send": "Send",
+    "sending": "Sending…",
+    "noResults": "No results found"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "invoices": "Invoices",
+    "clients": "Clients",
+    "settings": "Settings",
+    "newInvoice": "New invoice",
+    "logout": "Log out"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in to FactuurFlow",
+      "subtitle": "Welcome back",
+      "email": "Email address",
+      "password": "Password",
+      "submit": "Sign in",
+      "loggingIn": "Signing in…",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Register here"
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Get started with FactuurFlow for free",
+      "name": "Full name",
+      "email": "Email address",
+      "password": "Password",
+      "passwordHint": "At least 8 characters",
+      "submit": "Create account",
+      "creating": "Creating account…",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Overview of your finances",
+    "stats": {
+      "revenue": "Total revenue",
+      "outstanding": "Outstanding",
+      "invoices": "Invoices",
+      "clients": "Clients"
+    },
+    "recentInvoices": "Recent invoices",
+    "viewAll": "View all invoices",
+    "noInvoices": "No invoices yet",
+    "noInvoicesHint": "Create your first invoice.",
+    "monthlyRevenue": "Monthly revenue (last 6 months)"
+  },
+  "invoices": {
+    "title": "Invoices",
+    "count": "{{count}} invoices total",
+    "new": "New invoice",
+    "search": "Search invoice or client…",
+    "tabs": {
+      "all": "All",
+      "open": "Outstanding",
+      "paid": "Paid",
+      "overdue": "Overdue",
+      "draft": "Draft"
+    },
+    "cols": {
+      "number": "Invoice no.",
+      "client": "Client",
+      "date": "Date",
+      "dueDate": "Due date",
+      "amount": "Amount",
+      "status": "Status"
+    },
+    "status": {
+      "draft": "Draft",
+      "sent": "Sent",
+      "paid": "Paid",
+      "overdue": "Overdue"
+    },
+    "noClient": "No client",
+    "empty": "No invoices yet. Create your first invoice.",
+    "emptyFiltered": "No invoices found",
+    "changeStatus": "Change status",
+    "deleteConfirm": "Delete invoice? This cannot be undone."
+  },
+  "clients": {
+    "title": "Clients",
+    "new": "New client",
+    "search": "Search client…",
+    "noClients": "No clients yet",
+    "noClientsHint": "Add your first client.",
+    "deleteConfirm": "Delete client? This cannot be undone.",
+    "invoiceCount": "{{count}} invoice",
+    "invoiceCount_plural": "{{count}} invoices",
+    "form": {
+      "title": "New client",
+      "name": "Name",
+      "email": "Email address",
+      "phone": "Phone number",
+      "address": "Address",
+      "city": "City",
+      "zip": "Postal code",
+      "country": "Country",
+      "kvk": "Chamber of Commerce",
+      "btw": "VAT number",
+      "notes": "Notes"
+    }
+  },
+  "newInvoice": {
+    "title": "New invoice",
+    "livePreview": "Live preview",
+    "sections": {
+      "invoiceData": "Invoice details",
+      "client": "Client",
+      "lines": "Line items",
+      "notes": "Notes"
+    },
+    "fields": {
+      "number": "Invoice number",
+      "issueDate": "Invoice date",
+      "dueDate": "Due date",
+      "selectClient": "Select a client…",
+      "noClients": "No clients yet",
+      "clientName": "Name",
+      "clientEmail": "Email",
+      "clientAddress": "Address",
+      "clientCity": "City",
+      "description": "Description",
+      "quantity": "Qty",
+      "priceExcl": "Price (excl. VAT)",
+      "priceIncl": "Price (incl. VAT)",
+      "lineTotal": "Total (excl.)",
+      "taxRate": "VAT rate",
+      "priceMode": "Enter prices",
+      "exclBtw": "Excl. VAT",
+      "inclBtw": "Incl. VAT",
+      "notes": "Payment instructions, project number, etc."
+    },
+    "addLine": "Add line",
+    "saveDraft": "Save draft",
+    "send": "Send",
+    "validationNumber": "Invoice number is required.",
+    "validationLines": "Please fill in a description for all line items.",
+    "yourCompany": "Your Company",
+    "clientPlaceholder": "Client name",
+    "descriptionPlaceholder": "Description…",
+    "subtotal": "Subtotal",
+    "tax": "VAT {{rate}}%",
+    "total": "Total"
+  },
+  "invoiceDetail": {
+    "back": "Back",
+    "send": "Send",
+    "pdf": "PDF",
+    "deleteConfirm": "Delete invoice? This cannot be undone.",
+    "notFound": "Invoice not found.",
+    "notFoundBack": "Back to invoices",
+    "noClient": "No client",
+    "createdOn": "Created {{date}}",
+    "inclBtw": "incl. VAT",
+    "statusMenu": "Change status",
+    "paidInfo": "Payment information",
+    "paidInfoText": "Please pay to {{iban}} quoting invoice number {{number}}.",
+    "notes": "Notes",
+    "sendModal": {
+      "title": "Send invoice",
+      "subtitle": "{{number}} as PDF attachment",
+      "recipient": "Recipient",
+      "pdfOnly": "PDF only",
+      "info": "The invoice will be sent as a PDF attachment via Resend.",
+      "sentSuccess": "Email sent",
+      "sentDesc": "Invoice sent to {{email}}",
+      "errorRecipient": "Please enter an email address."
+    },
+    "table": {
+      "description": "Description",
+      "quantity": "Qty",
+      "unitPrice": "Unit price",
+      "amount": "Amount"
+    },
+    "totals": {
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "tax": "VAT {{rate}}%",
+      "total": "Total due"
+    },
+    "factuurAan": "Invoice to",
+    "factuurdatum": "Invoice date",
+    "vervaldatum": "Due date"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your profile and account settings",
+    "tabs": {
+      "profile": "Profile",
+      "company": "Company",
+      "notifications": "Notifications",
+      "security": "Security",
+      "auditLog": "Activity log"
+    },
+    "profile": {
+      "title": "Personal details",
+      "subtitle": "Your name and email address",
+      "name": "Full name",
+      "namePlaceholder": "John Smith"
+    },
+    "company": {
+      "logoTitle": "Company logo",
+      "logoSubtitle": "Shown on your invoices instead of the company name",
+      "uploadLogo": "Upload logo",
+      "changeLogo": "Choose different logo",
+      "removeLogo": "Remove logo",
+      "logoHint": "PNG, JPG, SVG or WebP · max. 300 KB",
+      "logoTooBig": "File too large",
+      "logoTooBigDesc": "Logo must be max. 300 KB.",
+      "title": "Company details",
+      "subtitle": "Shown on your invoices",
+      "name": "Company name",
+      "address": "Address",
+      "city": "City",
+      "zip": "Postal code",
+      "phone": "Phone number",
+      "kvk": "Chamber of Commerce",
+      "btw": "VAT number",
+      "iban": "IBAN account number",
+      "invoiceTitle": "Invoice settings",
+      "invoiceSubtitle": "Defaults for new invoices",
+      "prefix": "Invoice prefix",
+      "paymentDays": "Payment terms (days)",
+      "taxRate": "Default VAT"
+    },
+    "notifications": {
+      "title": "Email notifications",
+      "subtitle": "Choose which notifications you want to receive",
+      "email": "Email notifications",
+      "emailDesc": "Receive notifications via email",
+      "overdue": "Late payment reminders",
+      "overdueDesc": "Automatic reminder for overdue invoices",
+      "paymentConfirmed": "Payment confirmation",
+      "paymentConfirmedDesc": "Notification when an invoice is marked as paid",
+      "weeklyReport": "Weekly report",
+      "weeklyReportDesc": "A financial overview every Monday"
+    },
+    "security": {
+      "title": "Change password",
+      "current": "Current password",
+      "new": "New password",
+      "newHint": "At least 8 characters",
+      "confirm": "Confirm",
+      "change": "Change password",
+      "mismatch": "Passwords do not match.",
+      "tooShort": "New password must be at least 8 characters.",
+      "changed": "Password changed"
+    },
+    "saved": "Saved",
+    "savedDesc": "Changes have been saved."
+  },
+  "auditLog": {
+    "title": "Activity log",
+    "subtitle": "Overview of all actions on your account",
+    "empty": "No activity recorded yet.",
+    "cols": {
+      "action": "Action",
+      "resource": "Resource",
+      "ip": "IP address",
+      "date": "Date"
+    },
+    "actions": {
+      "login": "Signed in",
+      "logout": "Signed out",
+      "login_failed": "Failed sign-in attempt",
+      "register": "Account created",
+      "password_changed": "Password changed",
+      "2fa_enabled": "2FA enabled",
+      "2fa_disabled": "2FA disabled",
+      "invoice_created": "Invoice created",
+      "invoice_updated": "Invoice updated",
+      "invoice_deleted": "Invoice deleted",
+      "invoice_sent": "Invoice sent",
+      "invoice_status_changed": "Invoice status changed",
+      "client_created": "Client created",
+      "client_updated": "Client updated",
+      "client_deleted": "Client deleted",
+      "settings_updated": "Settings updated",
+      "data_exported": "Data exported",
+      "account_deleted": "Account deleted"
+    }
   },
   "invoice": {
     "title": "Invoice",

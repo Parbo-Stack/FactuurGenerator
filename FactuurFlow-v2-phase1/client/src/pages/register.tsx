@@ -4,17 +4,18 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { register as registerUser } from "@/lib/auth";
 
 const schema = z
   .object({
-    name: z.string().min(2, "Naam moet minimaal 2 tekens bevatten"),
-    email: z.string().email("Ongeldig e-mailadres"),
-    password: z.string().min(8, "Wachtwoord moet minimaal 8 tekens bevatten"),
+    name: z.string().min(2, "Name must be at least 2 characters"),
+    email: z.string().email("Invalid email"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string(),
   })
   .refine((d) => d.password === d.confirmPassword, {
-    message: "Wachtwoorden komen niet overeen",
+    message: "Passwords do not match",
     path: ["confirmPassword"],
   });
 
@@ -23,6 +24,7 @@ type FormData = z.infer<typeof schema>;
 export default function RegisterPage() {
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {
@@ -42,6 +44,10 @@ export default function RegisterPage() {
     }
   }
 
+  const inputCls = `w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm
+    focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
+    placeholder-gray-400 transition`;
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -56,98 +62,78 @@ export default function RegisterPage() {
             </div>
             <span className="text-2xl font-bold text-gray-900">FactuurFlow</span>
           </div>
-          <p className="text-gray-500 text-sm">Start gratis — geen creditcard nodig</p>
+          <p className="text-gray-500 text-sm">{t("auth.register.subtitle")}</p>
         </div>
 
         {/* Card */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-          <h1 className="text-xl font-semibold text-gray-900 mb-6">Account aanmaken</h1>
+          <h1 className="text-xl font-semibold text-gray-900 mb-6">{t("auth.register.title")}</h1>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Naam */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Volledige naam
+                {t("auth.register.name")}
               </label>
               <input
                 {...register("name")}
                 type="text"
                 autoComplete="name"
                 placeholder="Jan de Vries"
-                className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm
-                           focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
-                           placeholder-gray-400 transition"
+                className={inputCls}
               />
-              {errors.name && (
-                <p className="mt-1 text-xs text-red-600">{errors.name.message}</p>
-              )}
+              {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name.message}</p>}
             </div>
 
-            {/* E-mail */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                E-mailadres
+                {t("auth.register.email")}
               </label>
               <input
                 {...register("email")}
                 type="email"
                 autoComplete="email"
                 placeholder="jij@bedrijf.nl"
-                className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm
-                           focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
-                           placeholder-gray-400 transition"
+                className={inputCls}
               />
-              {errors.email && (
-                <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>
-              )}
+              {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
             </div>
 
-            {/* Wachtwoord */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Wachtwoord
+                {t("auth.register.password")}
               </label>
               <input
                 {...register("password")}
                 type="password"
                 autoComplete="new-password"
-                placeholder="Minimaal 8 tekens"
-                className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm
-                           focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
-                           placeholder-gray-400 transition"
+                placeholder={t("auth.register.passwordHint")}
+                className={inputCls}
               />
-              {errors.password && (
-                <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
-              )}
+              {errors.password && <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>}
             </div>
 
-            {/* Bevestig wachtwoord */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Wachtwoord bevestigen
+                {t("auth.register.password")} (bevestigen)
               </label>
               <input
                 {...register("confirmPassword")}
                 type="password"
                 autoComplete="new-password"
                 placeholder="••••••••"
-                className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm
-                           focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
-                           placeholder-gray-400 transition"
+                className={inputCls}
               />
               {errors.confirmPassword && (
                 <p className="mt-1 text-xs text-red-600">{errors.confirmPassword.message}</p>
               )}
             </div>
 
-            {/* Server error */}
             {serverError && (
               <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">
                 {serverError}
               </div>
             )}
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={isSubmitting}
@@ -155,26 +141,30 @@ export default function RegisterPage() {
                          text-white font-medium py-2.5 px-4 rounded-lg text-sm transition
                          focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
             >
-              {isSubmitting ? "Account aanmaken…" : "Account aanmaken"}
+              {isSubmitting ? t("auth.register.creating") : t("auth.register.submit")}
             </button>
           </form>
 
           <p className="mt-6 text-center text-sm text-gray-500">
-            Al een account?{" "}
+            {t("auth.register.hasAccount")}{" "}
             <a
               href="/login"
               onClick={(e) => { e.preventDefault(); navigate("/login"); }}
               className="text-green-600 font-medium hover:underline"
             >
-              Inloggen
+              {t("auth.register.loginLink")}
             </a>
           </p>
         </div>
 
         <p className="mt-6 text-center text-xs text-gray-400">
-          Door je te registreren ga je akkoord met onze{" "}
-          <span className="underline cursor-pointer">algemene voorwaarden</span> en{" "}
-          <span className="underline cursor-pointer">privacybeleid</span>.
+          <a href="/algemene-voorwaarden" target="_blank" className="underline hover:text-gray-600">
+            {t("nav.settings")}
+          </a>
+          {" · "}
+          <a href="/privacybeleid" target="_blank" className="underline hover:text-gray-600">
+            Privacy
+          </a>
         </p>
       </div>
     </div>

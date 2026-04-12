@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
@@ -27,19 +28,14 @@ app.use(helmet({
     preload: true,
   },
   referrerPolicy: { policy: "strict-origin-when-cross-origin" },
-  permissionsPolicy: {
-    features: {
-      camera: [],
-      microphone: [],
-      geolocation: [],
-    }
-  }
 }));
 
-// ── Rate limiting (prevent abuse) ──
+// ── Rate limiting (alleen in productie) ──
+const isDev = process.env.NODE_ENV !== "production";
+
 const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minuten
-  max: 100,
+  windowMs: 15 * 60 * 1000,
+  max: isDev ? 10_000 : 100,
   message: { error: "Te veel verzoeken. Probeer het over 15 minuten opnieuw." },
   standardHeaders: true,
   legacyHeaders: false,
@@ -47,7 +43,7 @@ const generalLimiter = rateLimit({
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 30,
+  max: isDev ? 10_000 : 30,
   message: { error: "Te veel API verzoeken. Probeer het over 15 minuten opnieuw." },
   standardHeaders: true,
   legacyHeaders: false,

@@ -32,7 +32,7 @@ export default function EmailDialog({ open, onClose, invoiceData }: EmailDialogP
 
     try {
       // Generate PDF
-      const doc = generatePDF(invoiceData);
+      const doc = await generatePDF(invoiceData);
       const pdfDataUri = doc.output('datauristring');
       const base64Data = pdfDataUri.split(',')[1];
 

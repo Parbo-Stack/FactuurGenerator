@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/AppLayout";
 import { useClients, useCreateClient, useDeleteClient } from "@/hooks/useClients";
 import type { Client } from "@/lib/api";
@@ -77,6 +78,7 @@ function ClientCard({
   client: Client;
   onDelete: (id: number) => void;
 }) {
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const color = colorForName(client.name);
 
@@ -114,7 +116,7 @@ function ClientCard({
                 className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 transition"
               >
                 <Trash2 className="w-3.5 h-3.5" />
-                Verwijderen
+                {t("common.delete")}
               </button>
             </div>
           )}
@@ -162,6 +164,7 @@ function ClientCard({
 
 // ── Nieuw klant modal ─────────────────────────────────────────────────────────
 function NewClientModal({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation();
   const createClient = useCreateClient();
   const {
     register,
@@ -197,40 +200,39 @@ function NewClientModal({ onClose }: { onClose: () => void }) {
         className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-lg font-semibold text-gray-900 mb-5">Nieuwe klant</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-5">{t("clients.form.title")}</h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Naam */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Bedrijfsnaam *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("clients.form.name")} *</label>
             <input {...register("name")} className={inputCls} placeholder="Webbureau Janssen" />
             {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name.message}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("clients.form.email")}</label>
               <input {...register("email")} type="email" className={inputCls} placeholder="info@bedrijf.nl" />
               {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Telefoon</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("clients.form.phone")}</label>
               <input {...register("phone")} className={inputCls} placeholder="020 123 4567" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Adres</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("clients.form.address")}</label>
               <input {...register("address")} className={inputCls} placeholder="Straatnaam 10" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Stad</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("clients.form.city")}</label>
               <input {...register("city")} className={inputCls} placeholder="Amsterdam" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">KvK-nummer</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("clients.form.kvk")}</label>
               <input {...register("kvk")} className={inputCls} placeholder="12345678" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">BTW-nummer</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t("clients.form.btw")}</label>
               <input {...register("btw")} className={inputCls} placeholder="NL123456789B01" />
             </div>
           </div>
@@ -241,7 +243,7 @@ function NewClientModal({ onClose }: { onClose: () => void }) {
               onClick={onClose}
               className="flex-1 py-2.5 px-4 text-sm font-medium text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 transition"
             >
-              Annuleren
+              {t("common.cancel")}
             </button>
             <button
               type="submit"
@@ -250,7 +252,7 @@ function NewClientModal({ onClose }: { onClose: () => void }) {
                          text-white bg-green-600 hover:bg-green-700 rounded-xl transition disabled:opacity-60"
             >
               {createClient.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-              Opslaan
+              {t("common.save")}
             </button>
           </div>
         </form>
@@ -261,6 +263,7 @@ function NewClientModal({ onClose }: { onClose: () => void }) {
 
 // ── Clients page ──────────────────────────────────────────────────────────────
 export default function ClientsPage() {
+  const { t } = useTranslation();
   const { data: clients = [], isLoading } = useClients();
   const deleteClient = useDeleteClient();
   const [search, setSearch] = useState("");
@@ -280,8 +283,8 @@ export default function ClientsPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Klanten</h1>
-            <p className="text-gray-500 text-sm mt-0.5">{clients.length} klanten</p>
+            <h1 className="text-2xl font-bold text-gray-900">{t("clients.title")}</h1>
+            <p className="text-gray-500 text-sm mt-0.5">{clients.length} {t("nav.clients").toLowerCase()}</p>
           </div>
           <button
             onClick={() => setShowModal(true)}
@@ -289,7 +292,7 @@ export default function ClientsPage() {
                        text-sm font-medium py-2.5 px-4 rounded-xl transition"
           >
             <Plus className="w-4 h-4" />
-            Nieuwe klant
+            {t("clients.new")}
           </button>
         </div>
 
@@ -300,7 +303,7 @@ export default function ClientsPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Zoek op naam, stad of e-mail…"
+            placeholder={t("clients.search")}
             className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl
                        focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
           />
@@ -315,8 +318,8 @@ export default function ClientsPage() {
           <div className="text-center py-16">
             <p className="text-gray-400 text-sm">
               {clients.length === 0
-                ? "Nog geen klanten. Voeg je eerste klant toe."
-                : `Geen klanten gevonden voor "${search}"`}
+                ? t("clients.noClients")
+                : `${t("common.noResults")}: "${search}"`}
             </p>
           </div>
         ) : (

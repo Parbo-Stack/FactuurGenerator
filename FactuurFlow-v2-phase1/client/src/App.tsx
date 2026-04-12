@@ -1,13 +1,19 @@
+import { useEffect } from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
+import { I18nextProvider } from "react-i18next";
+import i18n from "./lib/i18n";
 import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { CookieBanner } from "@/components/CookieBanner";
 import NotFound from "@/pages/not-found";
 import LoginPage from "@/pages/login";
 import RegisterPage from "@/pages/register";
 import DashboardPage from "@/pages/dashboard";
 import InvoicesPage from "@/pages/invoices";
 import NewInvoicePage from "@/pages/new-invoice";
+import InvoiceDetailPage from "@/pages/invoice-detail";
 import ClientsPage from "@/pages/clients";
 import SettingsPage from "@/pages/settings";
 import { fetchCurrentUser } from "@/lib/auth";
@@ -22,6 +28,10 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
     staleTime: 5 * 60 * 1000,
   });
 
+  useEffect(() => {
+    if (!isLoading && !user) navigate("/login");
+  }, [isLoading, user, navigate]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -30,59 +40,55 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
     );
   }
 
-  if (!user) {
-    navigate("/login");
-    return null;
-  }
+  if (!user) return null;
 
   return <Component />;
 }
+
+// ── Root redirect ─────────────────────────────────────────────────────────────
+function RootRedirect() {
+  const [, navigate] = useLocation();
+  useEffect(() => { navigate("/login"); }, [navigate]);
+  return null;
+}
+
+// ── Named wrappers — voorkomt hooks-violation in anonieme arrow-functions ─────
+const ProtectedDashboard    = () => <ProtectedRoute component={DashboardPage} />;
+const ProtectedInvoices     = () => <ProtectedRoute component={InvoicesPage} />;
+const ProtectedNewInvoice   = () => <ProtectedRoute component={NewInvoicePage} />;
+const ProtectedInvoiceDetail = () => <ProtectedRoute component={InvoiceDetailPage} />;
+const ProtectedClients      = () => <ProtectedRoute component={ClientsPage} />;
+const ProtectedSettings     = () => <ProtectedRoute component={SettingsPage} />;
 
 // ── Router ────────────────────────────────────────────────────────────────────
 function Router() {
   return (
     <Switch>
-      {/* Publieke routes */}
-      <Route path="/login" component={LoginPage} />
-      <Route path="/register" component={RegisterPage} />
-
-      {/* Beveiligde routes */}
-      <Route path="/dashboard">
-        {() => <ProtectedRoute component={DashboardPage} />}
-      </Route>
-      <Route path="/invoices/new">
-        {() => <ProtectedRoute component={NewInvoicePage} />}
-      </Route>
-      <Route path="/invoices">
-        {() => <ProtectedRoute component={InvoicesPage} />}
-      </Route>
-      <Route path="/clients">
-        {() => <ProtectedRoute component={ClientsPage} />}
-      </Route>
-      <Route path="/settings">
-        {() => <ProtectedRoute component={SettingsPage} />}
-      </Route>
-
-      {/* Root → redirect naar login */}
-      <Route path="/">
-        {() => {
-          const [, navigate] = useLocation();
-          navigate("/login");
-          return null;
-        }}
-      </Route>
-
-      <Route component={NotFound} />
+      <Route path="/login"         component={LoginPage} />
+      <Route path="/register"      component={RegisterPage} />
+      <Route path="/dashboard"     component={ProtectedDashboard} />
+      <Route path="/invoices/new"  component={ProtectedNewInvoice} />
+      <Route path="/invoices/:id"  component={ProtectedInvoiceDetail} />
+      <Route path="/invoices"      component={ProtectedInvoices} />
+      <Route path="/clients"       component={ProtectedClients} />
+      <Route path="/settings"      component={ProtectedSettings} />
+      <Route path="/"              component={RootRedirect} />
+      <Route                       component={NotFound} />
     </Switch>
   );
 }
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router />
-      <Toaster />
-    </QueryClientProvider>
+    <I18nextProvider i18n={i18n}>
+      <ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <Router />
+          <CookieBanner />
+          <Toaster />
+        </QueryClientProvider>
+      </ThemeProvider>
+    </I18nextProvider>
   );
 }
 

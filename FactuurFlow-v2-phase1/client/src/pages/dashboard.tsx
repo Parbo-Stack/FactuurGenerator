@@ -1,5 +1,6 @@
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/AppLayout";
 import { fetchCurrentUser } from "@/lib/auth";
 import { dashboardApi, invoicesApi } from "@/lib/api";
@@ -35,20 +36,21 @@ function formatEuro(amount: number) {
   }).format(amount);
 }
 
-// ── Status config ─────────────────────────────────────────────────────────────
-const statusConfig: Record<InvoiceStatus, { label: string; classes: string }> = {
-  paid:    { label: "Betaald",   classes: "bg-green-50 text-green-700" },
-  sent:    { label: "Verzonden", classes: "bg-blue-50 text-blue-700" },
-  overdue: { label: "Te laat",   classes: "bg-red-50 text-red-700" },
-  draft:   { label: "Concept",   classes: "bg-gray-100 text-gray-600" },
+// ── Status badge ──────────────────────────────────────────────────────────────
+const statusClasses: Record<InvoiceStatus, string> = {
+  paid:    "bg-green-50 text-green-700",
+  sent:    "bg-blue-50 text-blue-700",
+  overdue: "bg-red-50 text-red-700",
+  draft:   "bg-gray-100 text-gray-600",
 };
 
 function StatusBadge({ status }: { status: InvoiceStatus }) {
-  const cfg = statusConfig[status] ?? statusConfig.draft;
+  const { t } = useTranslation();
+  const cls = statusClasses[status] ?? statusClasses.draft;
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.classes}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${cls}`}>
       <Circle className="w-1.5 h-1.5 fill-current" />
-      {cfg.label}
+      {t(`invoices.status.${status}`)}
     </span>
   );
 }
@@ -105,6 +107,7 @@ const emptyChartData = MONTHS.map((month) => ({ month, omzet: 0 }));
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 export default function DashboardPage() {
   const [, navigate] = useLocation();
+  const { t } = useTranslation();
 
   const { data: user } = useQuery({
     queryKey: ["auth-user"],
@@ -139,38 +142,36 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900">
-            Goedemorgen, {firstName} 👋
+            {t("dashboard.title")}, {firstName} 👋
           </h1>
-          <p className="text-gray-500 text-sm mt-1">
-            Hier is een overzicht van jouw financiën
-          </p>
+          <p className="text-gray-500 text-sm mt-1">{t("dashboard.subtitle")}</p>
         </div>
 
         {/* Stat cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
           <StatCard
-            title="Omzet (betaald)"
+            title={t("dashboard.stats.revenue")}
             value={stats ? formatEuro(stats.totalRevenue) : "—"}
             loading={statsLoading}
             iconBg="bg-green-50"
             icon={<TrendingUp className="w-5 h-5 text-green-600" />}
           />
           <StatCard
-            title="Openstaand"
+            title={t("dashboard.stats.outstanding")}
             value={stats ? formatEuro(stats.outstanding) : "—"}
             loading={statsLoading}
             iconBg="bg-orange-50"
             icon={<Clock className="w-5 h-5 text-orange-500" />}
           />
           <StatCard
-            title="Facturen totaal"
+            title={t("dashboard.stats.invoices")}
             value={stats ? String(stats.invoiceCount) : "—"}
             loading={statsLoading}
             iconBg="bg-blue-50"
             icon={<FileText className="w-5 h-5 text-blue-500" />}
           />
           <StatCard
-            title="Klanten"
+            title={t("dashboard.stats.clients")}
             value={stats ? String(stats.clientCount) : "—"}
             loading={statsLoading}
             iconBg="bg-purple-50"
@@ -229,12 +230,12 @@ export default function DashboardPage() {
           {/* Recente facturen */}
           <div className="xl:col-span-2 bg-white rounded-2xl border border-gray-100 p-6">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="font-semibold text-gray-900">Recente facturen</h2>
+              <h2 className="font-semibold text-gray-900">{t("dashboard.recentInvoices")}</h2>
               <button
                 onClick={() => navigate("/invoices")}
                 className="text-xs text-green-600 font-medium hover:underline"
               >
-                Alles zien
+                {t("dashboard.viewAll")}
               </button>
             </div>
 
@@ -244,12 +245,12 @@ export default function DashboardPage() {
               </div>
             ) : recentInvoices.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-gray-400 text-sm">Nog geen facturen</p>
+                <p className="text-gray-400 text-sm">{t("dashboard.noInvoices")}</p>
                 <button
                   onClick={() => navigate("/invoices/new")}
                   className="mt-3 text-xs text-green-600 font-medium hover:underline"
                 >
-                  Maak je eerste factuur →
+                  {t("dashboard.noInvoicesHint")} →
                 </button>
               </div>
             ) : (
@@ -262,7 +263,7 @@ export default function DashboardPage() {
                   >
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">
-                        {inv.clientName ?? "Geen klant"}
+                        {inv.clientName ?? t("invoices.noClient")}
                       </p>
                       <p className="text-xs text-gray-400">
                         {inv.invoiceNumber} · {inv.issueDate}

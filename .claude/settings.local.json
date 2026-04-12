@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "Bash(npm install:*)",
+      "Bash(ls -la /c/Users/emanu/Downloads/FactuurFlow_v2_phase1/FactuurFlow-v2-phase1/.env*)",
+      "Bash(timeout 8 npm run dev)",
+      "Bash(netstat -ano)",
+      "Bash(awk '{print $5}')",
+      "Bash(taskkill /PID 42232 /F)",
+      "Bash(cmd /c \"taskkill /PID 42232 /F\")",
+      "Bash(cmd /c \"taskkill /PID 42232 /F 2>&1\")",
+      "Bash(timeout 10 npm run dev)",
+      "Bash(cmd /c \"netstat -ano | findstr :5000\")",
+      "Bash(powershell -Command \"Get-NetTCPConnection -LocalPort 5000 -ErrorAction SilentlyContinue | Select-Object LocalAddress,LocalPort,OwningProcess\")",
+      "Bash(powershell -Command \"Stop-Process -Id 42232 -Force -ErrorAction SilentlyContinue; Start-Sleep 1; Get-NetTCPConnection -LocalPort 5000 -ErrorAction SilentlyContinue\")",
+      "Bash(powershell -Command \"Get-Process -Id 42232 | Select-Object Name,Id,Path\")",
+      "Bash(powershell -Command \"Get-NetTCPConnection -LocalPort 5000 -ErrorAction SilentlyContinue\")",
+      "Bash(npm run:*)",
+      "Bash(ping -n 3 192.168.0.142)",
+      "Bash(powershell -Command \"Stop-Process -Id \\(Get-NetTCPConnection -LocalPort 5000\\).OwningProcess -Force -ErrorAction SilentlyContinue\")"
+    ]
+  }
+}

@@ -1,12 +1,305 @@
 {
   "common": {
     "save": "Opslaan",
+    "saving": "Opslaan…",
     "cancel": "Annuleren",
+    "delete": "Verwijderen",
+    "edit": "Bewerken",
+    "close": "Sluiten",
+    "loading": "Laden…",
+    "search": "Zoeken",
     "preview": "Voorbeeld",
     "download": "PDF Downloaden",
     "required": "Verplicht",
-    "success": "Succes",
-    "error": "Fout"
+    "success": "Gelukt",
+    "error": "Fout",
+    "back": "Terug",
+    "add": "Toevoegen",
+    "send": "Versturen",
+    "sending": "Versturen…",
+    "noResults": "Geen resultaten gevonden"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "invoices": "Facturen",
+    "clients": "Klanten",
+    "settings": "Instellingen",
+    "newInvoice": "Nieuwe factuur",
+    "logout": "Uitloggen"
+  },
+  "auth": {
+    "login": {
+      "title": "Inloggen bij FactuurFlow",
+      "subtitle": "Welkom terug",
+      "email": "E-mailadres",
+      "password": "Wachtwoord",
+      "submit": "Inloggen",
+      "loggingIn": "Inloggen…",
+      "noAccount": "Nog geen account?",
+      "registerLink": "Registreer hier"
+    },
+    "register": {
+      "title": "Account aanmaken",
+      "subtitle": "Gratis starten met FactuurFlow",
+      "name": "Volledige naam",
+      "email": "E-mailadres",
+      "password": "Wachtwoord",
+      "passwordHint": "Minimaal 8 tekens",
+      "submit": "Account aanmaken",
+      "creating": "Account aanmaken…",
+      "hasAccount": "Al een account?",
+      "loginLink": "Inloggen"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Overzicht van je financiën",
+    "stats": {
+      "revenue": "Totale omzet",
+      "outstanding": "Openstaand",
+      "invoices": "Facturen",
+      "clients": "Klanten"
+    },
+    "recentInvoices": "Recente facturen",
+    "viewAll": "Bekijk alle facturen",
+    "noInvoices": "Nog geen facturen",
+    "noInvoicesHint": "Maak je eerste factuur aan.",
+    "monthlyRevenue": "Maandomzet (afgelopen 6 maanden)"
+  },
+  "invoices": {
+    "title": "Facturen",
+    "count": "{{count}} facturen totaal",
+    "new": "Nieuwe factuur",
+    "search": "Zoek factuur of klant…",
+    "tabs": {
+      "all": "Alle",
+      "open": "Openstaand",
+      "paid": "Betaald",
+      "overdue": "Te laat",
+      "draft": "Concept"
+    },
+    "cols": {
+      "number": "Factuurnr.",
+      "client": "Klant",
+      "date": "Datum",
+      "dueDate": "Vervaldatum",
+      "amount": "Bedrag",
+      "status": "Status"
+    },
+    "status": {
+      "draft": "Concept",
+      "sent": "Verzonden",
+      "paid": "Betaald",
+      "overdue": "Te laat"
+    },
+    "noClient": "Geen klant",
+    "empty": "Nog geen facturen. Maak je eerste factuur aan.",
+    "emptyFiltered": "Geen facturen gevonden",
+    "changeStatus": "Status wijzigen",
+    "deleteConfirm": "Factuur verwijderen? Dit kan niet ongedaan worden gemaakt."
+  },
+  "clients": {
+    "title": "Klanten",
+    "new": "Nieuwe klant",
+    "search": "Zoek klant…",
+    "noClients": "Nog geen klanten",
+    "noClientsHint": "Voeg je eerste klant toe.",
+    "deleteConfirm": "Klant verwijderen? Dit kan niet ongedaan worden gemaakt.",
+    "invoiceCount": "{{count}} factuur",
+    "invoiceCount_plural": "{{count}} facturen",
+    "form": {
+      "title": "Nieuwe klant",
+      "name": "Naam",
+      "email": "E-mailadres",
+      "phone": "Telefoonnummer",
+      "address": "Adres",
+      "city": "Stad",
+      "zip": "Postcode",
+      "country": "Land",
+      "kvk": "KvK-nummer",
+      "btw": "BTW-nummer",
+      "notes": "Notities"
+    }
+  },
+  "newInvoice": {
+    "title": "Nieuwe factuur",
+    "livePreview": "Live voorbeeld",
+    "sections": {
+      "invoiceData": "Factuurgegevens",
+      "client": "Klant",
+      "lines": "Regels",
+      "notes": "Opmerkingen"
+    },
+    "fields": {
+      "number": "Factuurnummer",
+      "issueDate": "Factuurdatum",
+      "dueDate": "Vervaldatum",
+      "selectClient": "Selecteer een klant…",
+      "noClients": "Nog geen klanten",
+      "clientName": "Naam",
+      "clientEmail": "E-mail",
+      "clientAddress": "Adres",
+      "clientCity": "Stad",
+      "description": "Omschrijving",
+      "quantity": "Aantal",
+      "priceExcl": "Prijs (excl. BTW)",
+      "priceIncl": "Prijs (incl. BTW)",
+      "lineTotal": "Totaal (excl.)",
+      "taxRate": "BTW tarief",
+      "priceMode": "Prijzen invoeren",
+      "exclBtw": "Excl. BTW",
+      "inclBtw": "Incl. BTW",
+      "notes": "Betalingsinstructies, projectnummer, etc."
+    },
+    "addLine": "Regel toevoegen",
+    "saveDraft": "Concept opslaan",
+    "send": "Versturen",
+    "validationNumber": "Factuurnummer is verplicht.",
+    "validationLines": "Vul een omschrijving in voor alle regels.",
+    "yourCompany": "Jouw Bedrijf",
+    "clientPlaceholder": "Klantnaam",
+    "descriptionPlaceholder": "Omschrijving…",
+    "subtotal": "Subtotaal",
+    "tax": "BTW {{rate}}%",
+    "total": "Totaal"
+  },
+  "invoiceDetail": {
+    "back": "Terug",
+    "send": "Versturen",
+    "pdf": "PDF",
+    "deleteConfirm": "Factuur verwijderen? Dit kan niet ongedaan worden gemaakt.",
+    "notFound": "Factuur niet gevonden.",
+    "notFoundBack": "Terug naar facturen",
+    "noClient": "Geen klant",
+    "createdOn": "Aangemaakt {{date}}",
+    "inclBtw": "incl. BTW",
+    "statusMenu": "Status wijzigen",
+    "paidInfo": "Betalingsinformatie",
+    "paidInfoText": "Gelieve te betalen op {{iban}} o.v.v. factuurnummer {{number}}.",
+    "notes": "Opmerkingen",
+    "sendModal": {
+      "title": "Factuur versturen",
+      "subtitle": "{{number}} als PDF bijlage",
+      "recipient": "Ontvanger",
+      "pdfOnly": "Alleen PDF",
+      "info": "De factuur wordt als PDF-bijlage verstuurd via Resend.",
+      "sentSuccess": "E-mail verzonden",
+      "sentDesc": "Factuur verstuurd naar {{email}}",
+      "errorRecipient": "Vul een e-mailadres in."
+    },
+    "table": {
+      "description": "Omschrijving",
+      "quantity": "Aantal",
+      "unitPrice": "Stukprijs",
+      "amount": "Bedrag"
+    },
+    "totals": {
+      "subtotal": "Subtotaal",
+      "discount": "Korting",
+      "tax": "BTW {{rate}}%",
+      "total": "Totaal te betalen"
+    },
+    "factuurAan": "Factuur aan",
+    "factuurdatum": "Factuurdatum",
+    "vervaldatum": "Vervaldatum"
+  },
+  "settings": {
+    "title": "Instellingen",
+    "subtitle": "Beheer je profiel en accountinstellingen",
+    "tabs": {
+      "profile": "Profiel",
+      "company": "Bedrijf",
+      "notifications": "Notificaties",
+      "security": "Beveiliging",
+      "auditLog": "Activiteitenlog"
+    },
+    "profile": {
+      "title": "Persoonlijke gegevens",
+      "subtitle": "Je naam en e-mailadres",
+      "name": "Volledige naam",
+      "namePlaceholder": "Jan de Vries"
+    },
+    "company": {
+      "logoTitle": "Bedrijfslogo",
+      "logoSubtitle": "Wordt weergegeven op je facturen in plaats van de bedrijfsnaam",
+      "uploadLogo": "Logo uploaden",
+      "changeLogo": "Ander logo kiezen",
+      "removeLogo": "Logo verwijderen",
+      "logoHint": "PNG, JPG, SVG of WebP · max. 300 KB",
+      "logoTooBig": "Bestand te groot",
+      "logoTooBigDesc": "Logo mag maximaal 300 KB zijn.",
+      "title": "Bedrijfsgegevens",
+      "subtitle": "Wordt weergegeven op je facturen",
+      "name": "Bedrijfsnaam",
+      "address": "Adres",
+      "city": "Stad",
+      "zip": "Postcode",
+      "phone": "Telefoonnummer",
+      "kvk": "KvK-nummer",
+      "btw": "BTW-nummer",
+      "iban": "IBAN rekeningnummer",
+      "invoiceTitle": "Factuurinstellingen",
+      "invoiceSubtitle": "Standaardwaarden voor nieuwe facturen",
+      "prefix": "Factuurprefix",
+      "paymentDays": "Betalingstermijn (dagen)",
+      "taxRate": "Standaard BTW"
+    },
+    "notifications": {
+      "title": "E-mailmeldingen",
+      "subtitle": "Kies welke meldingen je wilt ontvangen",
+      "email": "E-mailnotificaties",
+      "emailDesc": "Ontvang meldingen via e-mail",
+      "overdue": "Herinneringen te late betaling",
+      "overdueDesc": "Automatisch een herinnering bij achterstallige facturen",
+      "paymentConfirmed": "Betalingsbevestiging",
+      "paymentConfirmedDesc": "Melding wanneer een factuur als betaald wordt gemarkeerd",
+      "weeklyReport": "Wekelijks rapport",
+      "weeklyReportDesc": "Elke maandag een overzicht van je financiën"
+    },
+    "security": {
+      "title": "Wachtwoord wijzigen",
+      "current": "Huidig wachtwoord",
+      "new": "Nieuw wachtwoord",
+      "newHint": "Minimaal 8 tekens",
+      "confirm": "Bevestigen",
+      "change": "Wachtwoord wijzigen",
+      "mismatch": "Wachtwoorden komen niet overeen.",
+      "tooShort": "Nieuw wachtwoord minimaal 8 tekens.",
+      "changed": "Wachtwoord gewijzigd"
+    },
+    "saved": "Opgeslagen",
+    "savedDesc": "Wijzigingen zijn opgeslagen."
+  },
+  "auditLog": {
+    "title": "Activiteitenlog",
+    "subtitle": "Overzicht van alle acties op je account",
+    "empty": "Nog geen activiteiten geregistreerd.",
+    "cols": {
+      "action": "Actie",
+      "resource": "Resource",
+      "ip": "IP-adres",
+      "date": "Datum"
+    },
+    "actions": {
+      "login": "Ingelogd",
+      "logout": "Uitgelogd",
+      "login_failed": "Mislukte inlogpoging",
+      "register": "Account aangemaakt",
+      "password_changed": "Wachtwoord gewijzigd",
+      "2fa_enabled": "2FA ingeschakeld",
+      "2fa_disabled": "2FA uitgeschakeld",
+      "invoice_created": "Factuur aangemaakt",
+      "invoice_updated": "Factuur bijgewerkt",
+      "invoice_deleted": "Factuur verwijderd",
+      "invoice_sent": "Factuur verstuurd",
+      "invoice_status_changed": "Factuurstatus gewijzigd",
+      "client_created": "Klant aangemaakt",
+      "client_updated": "Klant bijgewerkt",
+      "client_deleted": "Klant verwijderd",
+      "settings_updated": "Instellingen bijgewerkt",
+      "data_exported": "Data geëxporteerd",
+      "account_deleted": "Account verwijderd"
+    }
   },
   "invoice": {
     "title": "Factuur",

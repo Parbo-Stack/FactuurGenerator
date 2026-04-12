@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import passport from "passport";
 import { db } from "@db";
 import {
@@ -13,7 +13,7 @@ import {
   insertInvoiceSchema,
 } from "@db/schema";
 import { eq, and, desc, sql, inArray } from "drizzle-orm";
-import { hashPassword } from "./auth";
+import { hashPassword, comparePassword } from "./auth";
 import { z } from "zod";
 
 // ── Auth guard ────────────────────────────────────────────────────────────────
@@ -77,6 +77,31 @@ export function registerRoutes(app: Express): Server {
 
   app.post("/api/auth/logout", (req, res) => {
     req.logout(() => res.json({ message: "Uitgelogd." }));
+  });
+
+  // POST /api/auth/change-password
+  app.post("/api/auth/change-password", requireAuth, async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      if (!currentPassword || !newPassword)
+        return res.status(400).json({ message: "Verplichte velden ontbreken." });
+      if (newPassword.length < 8)
+        return res.status(400).json({ message: "Nieuw wachtwoord minimaal 8 tekens." });
+
+      const [user] = await db.select().from(users).where(eq(users.id, uid(req)));
+      if (!comparePassword(currentPassword, user.password))
+        return res.status(401).json({ message: "Huidig wachtwoord is onjuist." });
+
+      await db
+        .update(users)
+        .set({ password: hashPassword(newPassword), updatedAt: new Date() })
+        .where(eq(users.id, uid(req)));
+
+      res.json({ message: "Wachtwoord gewijzigd." });
+    } catch (err: any) {
+      console.error("Change password error:", err);
+      res.status(500).json({ message: "Wachtwoord wijzigen mislukt." });
+    }
   });
 
   app.get("/api/auth/me", requireAuth, (req, res) => {
@@ -329,6 +354,12 @@ export function registerRoutes(app: Express): Server {
 
   // POST /api/invoices
   const createInvoiceSchema = insertInvoiceSchema.omit({ userId: true }).extend({
+    // numeric velden accepteren zowel string als number (coerce naar string voor DB)
+    taxRate: z.coerce.string().optional(),
+    discount: z.coerce.string().optional(),
+    subtotal: z.coerce.string().optional(),
+    taxAmount: z.coerce.string().optional(),
+    total: z.coerce.string().optional(),
     items: z
       .array(
         z.object({
@@ -494,37 +525,45 @@ export function registerRoutes(app: Express): Server {
 
   app.post("/api/send-invoice", requireAuth, async (req, res) => {
     try {
-      const { to, pdfBase64, invoiceNumber } = req.body;
+      const { to, pdfBase64, invoiceNumber, fromName } = req.body;
       if (!to || !pdfBase64 || !invoiceNumber)
-        throw new Error("Verplichte velden ontbreken: to, pdfBase64 of invoiceNumber");
+        return res.status(400).json({ message: "Verplichte velden ontbreken: to, pdfBase64 of invoiceNumber." });
 
-      if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-        return res.status(500).json({ message: "E-mailservice niet geconfigureerd." });
-      }
+      if (!process.env.RESEND_API_KEY)
+        return res.status(500).json({ message: "RESEND_API_KEY niet ingesteld in .env." });
 
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASSWORD },
-      });
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      const senderName = fromName || "FactuurFlow";
 
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to,
+      const { error } = await resend.emails.send({
+        from: `${senderName} <facturen@factuurflow.com>`,
+        to: [to],
         subject: `Factuur ${invoiceNumber}`,
-        html: `<p>Beste,</p><p>Hierbij ontvangt u uw factuur ${invoiceNumber}.</p><p>Met vriendelijke groet,</p>`,
+        html: `
+          <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#374151">
+            <p>Beste,</p>
+            <p>Hierbij ontvangt u factuur <strong>${invoiceNumber}</strong>.</p>
+            <p>De factuur is bijgevoegd als PDF. Heeft u vragen? Neem dan gerust contact op.</p>
+            <p style="margin-top:24px">Met vriendelijke groet,<br/><strong>${senderName}</strong></p>
+          </div>
+        `,
         attachments: [
           {
             filename: `factuur-${invoiceNumber}.pdf`,
-            content: Buffer.from(pdfBase64, "base64"),
-            contentType: "application/pdf",
+            content: pdfBase64,
           },
         ],
       });
 
+      if (error) {
+        console.error("Resend error:", error);
+        return res.status(500).json({ message: error.message ?? "Versturen mislukt via Resend." });
+      }
+
       res.json({ message: "E-mail verzonden." });
     } catch (err: any) {
       console.error("Send invoice email error:", err);
-      res.status(500).json({ message: "E-mail verzenden mislukt.", error: err.message });
+      res.status(500).json({ message: "E-mail verzenden mislukt." });
     }
   });
 

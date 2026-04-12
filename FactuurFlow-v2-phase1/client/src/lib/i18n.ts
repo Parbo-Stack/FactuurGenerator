@@ -3,13 +3,15 @@ import { initReactI18next } from "react-i18next";
 import en from "./translations/en.json";
 import nl from "./translations/nl.json";
 
+const savedLang = localStorage.getItem("factuurflow_lang");
+
 const initI18n = async () => {
   await i18n.use(initReactI18next).init({
     resources: {
       en: { translation: en },
       nl: { translation: nl },
     },
-    lng: "nl", // Default language
+    lng: savedLang ?? "nl",
     fallbackLng: "en",
     interpolation: {
       escapeValue: false,

@@ -4,11 +4,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { login } from "@/lib/auth";
 
 const schema = z.object({
-  email: z.string().email("Ongeldig e-mailadres"),
-  password: z.string().min(1, "Wachtwoord is verplicht"),
+  email: z.string().email("Invalid email"),
+  password: z.string().min(1, "Password is required"),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -16,6 +17,7 @@ type FormData = z.infer<typeof schema>;
 export default function LoginPage() {
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {
@@ -35,6 +37,10 @@ export default function LoginPage() {
     }
   }
 
+  const inputCls = `w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm
+    focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
+    placeholder-gray-400 transition`;
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -49,60 +55,48 @@ export default function LoginPage() {
             </div>
             <span className="text-2xl font-bold text-gray-900">FactuurFlow</span>
           </div>
-          <p className="text-gray-500 text-sm">Welkom terug</p>
+          <p className="text-gray-500 text-sm">{t("auth.login.subtitle")}</p>
         </div>
 
         {/* Card */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-          <h1 className="text-xl font-semibold text-gray-900 mb-6">Inloggen</h1>
+          <h1 className="text-xl font-semibold text-gray-900 mb-6">{t("auth.login.title")}</h1>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* E-mail */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                E-mailadres
+                {t("auth.login.email")}
               </label>
               <input
                 {...register("email")}
                 type="email"
                 autoComplete="email"
                 placeholder="jij@bedrijf.nl"
-                className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm
-                           focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
-                           placeholder-gray-400 transition"
+                className={inputCls}
               />
-              {errors.email && (
-                <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>
-              )}
+              {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
             </div>
 
-            {/* Wachtwoord */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Wachtwoord
+                {t("auth.login.password")}
               </label>
               <input
                 {...register("password")}
                 type="password"
                 autoComplete="current-password"
                 placeholder="••••••••"
-                className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm
-                           focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
-                           placeholder-gray-400 transition"
+                className={inputCls}
               />
-              {errors.password && (
-                <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
-              )}
+              {errors.password && <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>}
             </div>
 
-            {/* Server error */}
             {serverError && (
               <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">
                 {serverError}
               </div>
             )}
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={isSubmitting}
@@ -110,18 +104,18 @@ export default function LoginPage() {
                          text-white font-medium py-2.5 px-4 rounded-lg text-sm transition
                          focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
             >
-              {isSubmitting ? "Inloggen…" : "Inloggen"}
+              {isSubmitting ? t("auth.login.loggingIn") : t("auth.login.submit")}
             </button>
           </form>
 
           <p className="mt-6 text-center text-sm text-gray-500">
-            Nog geen account?{" "}
+            {t("auth.login.noAccount")}{" "}
             <a
               href="/register"
               onClick={(e) => { e.preventDefault(); navigate("/register"); }}
               className="text-green-600 font-medium hover:underline"
             >
-              Registreer gratis
+              {t("auth.login.registerLink")}
             </a>
           </p>
         </div>

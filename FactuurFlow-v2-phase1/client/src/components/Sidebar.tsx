@@ -1,6 +1,7 @@
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCurrentUser, logout } from "@/lib/auth";
+import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard,
   FileText,
@@ -9,26 +10,34 @@ import {
   Settings,
   LogOut,
   ChevronRight,
+  Languages,
 } from "lucide-react";
-
-const nav = [
-  { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
-  { label: "Facturen", icon: FileText, href: "/invoices" },
-  { label: "Klanten", icon: Users, href: "/clients" },
-  { label: "Instellingen", icon: Settings, href: "/settings" },
-];
 
 export function Sidebar() {
   const [location, navigate] = useLocation();
+  const { t, i18n } = useTranslation();
   const { data: user } = useQuery({
     queryKey: ["auth-user"],
     queryFn: fetchCurrentUser,
     staleTime: 5 * 60 * 1000,
   });
 
+  const nav = [
+    { label: t("nav.dashboard"), icon: LayoutDashboard, href: "/dashboard" },
+    { label: t("nav.invoices"),  icon: FileText,         href: "/invoices" },
+    { label: t("nav.clients"),   icon: Users,            href: "/clients" },
+    { label: t("nav.settings"),  icon: Settings,         href: "/settings" },
+  ];
+
   async function handleLogout() {
     await logout();
     navigate("/login");
+  }
+
+  function toggleLanguage() {
+    const next = i18n.language === "nl" ? "en" : "nl";
+    i18n.changeLanguage(next);
+    localStorage.setItem("factuurflow_lang", next);
   }
 
   return (
@@ -51,7 +60,7 @@ export function Sidebar() {
                      text-white text-sm font-medium py-2.5 px-4 rounded-xl transition"
         >
           <PlusCircle className="w-4 h-4" />
-          Nieuwe factuur
+          {t("nav.newInvoice")}
         </button>
       </div>
 
@@ -69,13 +78,30 @@ export function Sidebar() {
                   : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                 }`}
             >
-              <Icon className={`w-4.5 h-4.5 flex-shrink-0 ${active ? "text-green-600" : "text-gray-400"}`} strokeWidth={active ? 2.5 : 2} />
+              <Icon
+                className={`w-4 h-4 flex-shrink-0 ${active ? "text-green-600" : "text-gray-400"}`}
+                strokeWidth={active ? 2.5 : 2}
+              />
               {label}
               {active && <ChevronRight className="ml-auto w-3.5 h-3.5 text-green-500" />}
             </button>
           );
         })}
       </nav>
+
+      {/* Taalwissel */}
+      <div className="px-4 pb-2">
+        <button
+          onClick={toggleLanguage}
+          title={i18n.language === "nl" ? "Switch to English" : "Schakel naar Nederlands"}
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium
+                     text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition"
+        >
+          <Languages className="w-3.5 h-3.5 text-gray-400" />
+          <span>{i18n.language === "nl" ? "🇳🇱 Nederlands" : "🇬🇧 English"}</span>
+          <span className="ml-auto text-gray-300">→ {i18n.language === "nl" ? "EN" : "NL"}</span>
+        </button>
+      </div>
 
       {/* Gebruiker */}
       <div className="border-t border-gray-100 p-3">
@@ -91,7 +117,7 @@ export function Sidebar() {
           </div>
           <button
             onClick={handleLogout}
-            title="Uitloggen"
+            title={t("nav.logout")}
             className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition"
           >
             <LogOut className="w-4 h-4" />
