@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import { setupAuth } from "./auth";
 
 const app = express();
 
@@ -108,6 +109,9 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Auth (session + passport) — vóór routes registreren
+  setupAuth(app);
+
   const server = registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

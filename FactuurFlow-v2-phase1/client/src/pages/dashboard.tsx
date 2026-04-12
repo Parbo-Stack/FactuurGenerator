@@ -1,0 +1,286 @@
+import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { AppLayout } from "@/components/AppLayout";
+import { fetchCurrentUser } from "@/lib/auth";
+import { dashboardApi, invoicesApi } from "@/lib/api";
+import type { InvoiceStatus } from "@/lib/api";
+import {
+  TrendingUp,
+  Clock,
+  FileText,
+  Users,
+  ArrowUpRight,
+  ArrowDownRight,
+  MoreHorizontal,
+  Circle,
+  Loader2,
+} from "lucide-react";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function formatEuro(amount: number) {
+  return new Intl.NumberFormat("nl-NL", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+// ── Status config ─────────────────────────────────────────────────────────────
+const statusConfig: Record<InvoiceStatus, { label: string; classes: string }> = {
+  paid:    { label: "Betaald",   classes: "bg-green-50 text-green-700" },
+  sent:    { label: "Verzonden", classes: "bg-blue-50 text-blue-700" },
+  overdue: { label: "Te laat",   classes: "bg-red-50 text-red-700" },
+  draft:   { label: "Concept",   classes: "bg-gray-100 text-gray-600" },
+};
+
+function StatusBadge({ status }: { status: InvoiceStatus }) {
+  const cfg = statusConfig[status] ?? statusConfig.draft;
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.classes}`}>
+      <Circle className="w-1.5 h-1.5 fill-current" />
+      {cfg.label}
+    </span>
+  );
+}
+
+// ── Stat card ─────────────────────────────────────────────────────────────────
+function StatCard({
+  title,
+  value,
+  icon,
+  iconBg,
+  loading,
+}: {
+  title: string;
+  value: string;
+  icon: React.ReactNode;
+  iconBg: string;
+  loading?: boolean;
+}) {
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col gap-4">
+      <div className="flex items-start justify-between">
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${iconBg}`}>
+          {icon}
+        </div>
+        <ArrowUpRight className="w-4 h-4 text-green-500 opacity-0" />
+      </div>
+      <div>
+        {loading ? (
+          <div className="h-8 w-24 bg-gray-100 rounded animate-pulse mb-1" />
+        ) : (
+          <p className="text-2xl font-bold text-gray-900">{value}</p>
+        )}
+        <p className="text-sm text-gray-500 mt-0.5">{title}</p>
+      </div>
+    </div>
+  );
+}
+
+// ── Custom Tooltip ────────────────────────────────────────────────────────────
+function CustomTooltip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="bg-white border border-gray-100 rounded-xl shadow-lg px-4 py-3">
+      <p className="text-xs text-gray-500 mb-1">{label}</p>
+      <p className="text-sm font-semibold text-gray-900">{formatEuro(payload[0].value)}</p>
+    </div>
+  );
+}
+
+// ── Fallback grafiekdata (lege staat) ─────────────────────────────────────────
+const MONTHS = ["Nov", "Dec", "Jan", "Feb", "Mrt", "Apr"];
+const emptyChartData = MONTHS.map((month) => ({ month, omzet: 0 }));
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+export default function DashboardPage() {
+  const [, navigate] = useLocation();
+
+  const { data: user } = useQuery({
+    queryKey: ["auth-user"],
+    queryFn: fetchCurrentUser,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: stats, isLoading: statsLoading } = useQuery({
+    queryKey: ["dashboard-stats"],
+    queryFn: dashboardApi.stats,
+    staleTime: 60_000,
+  });
+
+  const { data: recentInvoices = [], isLoading: invoicesLoading } = useQuery({
+    queryKey: ["invoices"],
+    queryFn: invoicesApi.list,
+    staleTime: 30_000,
+    select: (data) => data.slice(0, 5),
+  });
+
+  const firstName = user?.name?.split(" ")[0] ?? "daar";
+
+  // Grafiek: gebruik echte data of lege staat
+  const chartData =
+    stats?.monthlyRevenue && stats.monthlyRevenue.length > 0
+      ? stats.monthlyRevenue
+      : emptyChartData;
+
+  return (
+    <AppLayout>
+      <div className="p-8 max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-gray-900">
+            Goedemorgen, {firstName} 👋
+          </h1>
+          <p className="text-gray-500 text-sm mt-1">
+            Hier is een overzicht van jouw financiën
+          </p>
+        </div>
+
+        {/* Stat cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+          <StatCard
+            title="Omzet (betaald)"
+            value={stats ? formatEuro(stats.totalRevenue) : "—"}
+            loading={statsLoading}
+            iconBg="bg-green-50"
+            icon={<TrendingUp className="w-5 h-5 text-green-600" />}
+          />
+          <StatCard
+            title="Openstaand"
+            value={stats ? formatEuro(stats.outstanding) : "—"}
+            loading={statsLoading}
+            iconBg="bg-orange-50"
+            icon={<Clock className="w-5 h-5 text-orange-500" />}
+          />
+          <StatCard
+            title="Facturen totaal"
+            value={stats ? String(stats.invoiceCount) : "—"}
+            loading={statsLoading}
+            iconBg="bg-blue-50"
+            icon={<FileText className="w-5 h-5 text-blue-500" />}
+          />
+          <StatCard
+            title="Klanten"
+            value={stats ? String(stats.clientCount) : "—"}
+            loading={statsLoading}
+            iconBg="bg-purple-50"
+            icon={<Users className="w-5 h-5 text-purple-500" />}
+          />
+        </div>
+
+        {/* Grafiek + recente facturen */}
+        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+          {/* Omzetgrafiek */}
+          <div className="xl:col-span-3 bg-white rounded-2xl border border-gray-100 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="font-semibold text-gray-900">Omzet overzicht</h2>
+                <p className="text-xs text-gray-400 mt-0.5">Afgelopen 6 maanden</p>
+              </div>
+              <button className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50">
+                <MoreHorizontal className="w-4 h-4" />
+              </button>
+            </div>
+            <ResponsiveContainer width="100%" height={220}>
+              <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="omzetGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#16a34a" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="#16a34a" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 12, fill: "#9ca3af" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 12, fill: "#9ca3af" }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(v) => v === 0 ? "€0" : `€${(v / 1000).toFixed(0)}k`}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Area
+                  type="monotone"
+                  dataKey="omzet"
+                  stroke="#16a34a"
+                  strokeWidth={2.5}
+                  fill="url(#omzetGradient)"
+                  dot={false}
+                  activeDot={{ r: 5, fill: "#16a34a", strokeWidth: 0 }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Recente facturen */}
+          <div className="xl:col-span-2 bg-white rounded-2xl border border-gray-100 p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="font-semibold text-gray-900">Recente facturen</h2>
+              <button
+                onClick={() => navigate("/invoices")}
+                className="text-xs text-green-600 font-medium hover:underline"
+              >
+                Alles zien
+              </button>
+            </div>
+
+            {invoicesLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-5 h-5 text-green-600 animate-spin" />
+              </div>
+            ) : recentInvoices.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-400 text-sm">Nog geen facturen</p>
+                <button
+                  onClick={() => navigate("/invoices/new")}
+                  className="mt-3 text-xs text-green-600 font-medium hover:underline"
+                >
+                  Maak je eerste factuur →
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {recentInvoices.map((inv) => (
+                  <div
+                    key={inv.id}
+                    onClick={() => navigate(`/invoices/${inv.id}`)}
+                    className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {inv.clientName ?? "Geen klant"}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {inv.invoiceNumber} · {inv.issueDate}
+                      </p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-sm font-semibold text-gray-900">
+                        {formatEuro(Number(inv.total))}
+                      </p>
+                      <StatusBadge status={inv.status} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </AppLayout>
+  );
+}
