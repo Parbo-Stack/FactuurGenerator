@@ -119,6 +119,16 @@ export default function LoginPage() {
             </a>
           </p>
         </div>
+
+        <p className="mt-6 text-center text-xs text-gray-400">
+          <a href="/privacybeleid" target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-600">
+            Privacy
+          </a>
+          {" · "}
+          <a href="/algemene-voorwaarden" target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-600">
+            {t("nav.settings")}
+          </a>
+        </p>
       </div>
     </div>
   );
