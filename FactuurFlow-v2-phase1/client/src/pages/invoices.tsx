@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/AppLayout";
 import { useInvoices, useDeleteInvoice, useUpdateInvoiceStatus } from "@/hooks/useInvoices";
 import type { Invoice, InvoiceStatus } from "@/lib/api";
-import { formatCurrency } from "@/lib/currency";
+import { formatCurrency } from "@/lib/currencies";
 import {
   Search,
   Plus,

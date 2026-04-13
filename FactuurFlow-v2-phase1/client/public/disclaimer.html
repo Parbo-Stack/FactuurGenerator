@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Disclaimer — FactuurFlow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: #f9fafb;
+      color: #111827;
+      line-height: 1.7;
+    }
+    header {
+      background: #fff;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .logo {
+      width: 2rem; height: 2rem;
+      background: #16a34a;
+      border-radius: 0.5rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo svg { width: 1rem; height: 1rem; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    header span { font-weight: 700; font-size: 1.1rem; }
+    .lang-toggle {
+      margin-left: auto;
+      display: flex; gap: 0.5rem;
+    }
+    .lang-toggle button {
+      padding: 0.25rem 0.75rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 9999px;
+      background: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .lang-toggle button.active { background: #16a34a; color: #fff; border-color: #16a34a; }
+    main { max-width: 760px; margin: 3rem auto; padding: 0 1.5rem 4rem; }
+    .badge {
+      display: inline-block;
+      background: #dcfce7;
+      color: #15803d;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.7rem;
+      border-radius: 9999px;
+      margin-bottom: 1rem;
+    }
+    h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .meta { font-size: 0.85rem; color: #6b7280; margin-bottom: 2.5rem; }
+    h2 { font-size: 1.15rem; font-weight: 600; margin: 2rem 0 0.5rem; color: #111827; }
+    p { color: #374151; margin-bottom: 0.75rem; }
+    a { color: #16a34a; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #9ca3af;
+      padding: 2rem 1rem;
+      border-top: 1px solid #e5e7eb;
+    }
+    [lang-section] { display: none; }
+    [lang-section].visible { display: block; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    </div>
+    <span>FactuurFlow</span>
+    <div class="lang-toggle">
+      <button class="active" onclick="setLang('en')">EN</button>
+      <button onclick="setLang('nl')">NL</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- English -->
+    <div lang-section="en" class="visible">
+      <span class="badge">Legal</span>
+      <h1>Disclaimer</h1>
+      <p class="meta">Last updated: April 2026 &nbsp;·&nbsp; FactuurFlow</p>
+
+      <h2>1. General</h2>
+      <p>The information and functionality provided by FactuurFlow are for general informational and administrative purposes only. While we strive to keep the information accurate and up to date, we make no warranties of any kind, express or implied, about the completeness, accuracy, reliability, or suitability of the application.</p>
+
+      <h2>2. No financial or legal advice</h2>
+      <p>FactuurFlow is a tool to help you create invoices and track expenses. Nothing in this application constitutes financial, tax, or legal advice. For advice on tax obligations, accounting, or legal matters, please consult a qualified professional.</p>
+
+      <h2>3. Limitation of liability</h2>
+      <p>FactuurFlow shall not be liable for any direct, indirect, incidental, or consequential loss or damage arising from the use of, or inability to use, this application — including but not limited to loss of data, revenue, or business opportunity.</p>
+
+      <h2>4. Third-party services</h2>
+      <p>FactuurFlow may integrate with third-party services (such as email delivery providers). We are not responsible for the availability, accuracy, or content of those services.</p>
+
+      <h2>5. Changes</h2>
+      <p>We reserve the right to modify this disclaimer at any time. Continued use of FactuurFlow after changes are published constitutes acceptance of the updated disclaimer.</p>
+
+      <h2>6. Governing law</h2>
+      <p>This disclaimer is governed by Dutch law. Any disputes shall be submitted to the competent court in the Netherlands.</p>
+
+      <h2>7. Contact</h2>
+      <p>Questions about this disclaimer? Email us at <a href="mailto:legal@factuurflow.nl">legal@factuurflow.nl</a>.</p>
+    </div>
+
+    <!-- Dutch -->
+    <div lang-section="nl">
+      <span class="badge">Juridisch</span>
+      <h1>Disclaimer</h1>
+      <p class="meta">Laatst bijgewerkt: april 2026 &nbsp;·&nbsp; FactuurFlow</p>
+
+      <h2>1. Algemeen</h2>
+      <p>De informatie en functionaliteit die FactuurFlow biedt, zijn uitsluitend bedoeld voor algemene informatieve en administratieve doeleinden. Hoewel wij ernaar streven de informatie actueel en correct te houden, geven wij geen garanties van welke aard dan ook over de volledigheid, nauwkeurigheid, betrouwbaarheid of geschiktheid van de applicatie.</p>
+
+      <h2>2. Geen financieel of juridisch advies</h2>
+      <p>FactuurFlow is een hulpmiddel om facturen te maken en uitgaven bij te houden. Niets in deze applicatie vormt financieel, fiscaal of juridisch advies. Voor advies over belastingverplichtingen, boekhouding of juridische zaken raadpleeg je een gekwalificeerde professional.</p>
+
+      <h2>3. Beperking van aansprakelijkheid</h2>
+      <p>FactuurFlow is niet aansprakelijk voor directe, indirecte, incidentele of gevolgschade die voortvloeit uit het gebruik van, of het niet kunnen gebruiken van, deze applicatie — inclusief maar niet beperkt tot verlies van gegevens, omzet of zakelijke kansen.</p>
+
+      <h2>4. Diensten van derden</h2>
+      <p>FactuurFlow kan integreren met diensten van derden (zoals e-mailverzendproviders). Wij zijn niet verantwoordelijk voor de beschikbaarheid, nauwkeurigheid of inhoud van die diensten.</p>
+
+      <h2>5. Wijzigingen</h2>
+      <p>Wij behouden ons het recht voor deze disclaimer op elk moment aan te passen. Voortgezet gebruik van FactuurFlow na publicatie van wijzigingen betekent aanvaarding van de bijgewerkte disclaimer.</p>
+
+      <h2>6. Toepasselijk recht</h2>
+      <p>Op deze disclaimer is Nederlands recht van toepassing. Eventuele geschillen worden voorgelegd aan de bevoegde rechter in Nederland.</p>
+
+      <h2>7. Contact</h2>
+      <p>Vragen over deze disclaimer? Stuur een e-mail naar <a href="mailto:legal@factuurflow.nl">legal@factuurflow.nl</a>.</p>
+    </div>
+  </main>
+
+  <footer>© 2026 FactuurFlow &nbsp;·&nbsp; <a href="/privacy.html">Privacy Policy</a></footer>
+
+  <script>
+    function setLang(lang) {
+      document.querySelectorAll('[lang-section]').forEach(el => {
+        el.classList.toggle('visible', el.getAttribute('lang-section') === lang);
+      });
+      document.querySelectorAll('.lang-toggle button').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.trim().toLowerCase() === lang);
+      });
+    }
+    const browserLang = navigator.language?.startsWith('nl') ? 'nl' : 'en';
+    setLang(browserLang);
+  </script>
+</body>
+</html>

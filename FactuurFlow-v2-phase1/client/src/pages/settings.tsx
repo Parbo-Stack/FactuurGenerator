@@ -3,7 +3,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { fetchCurrentUser } from "@/lib/auth";
-import { CURRENCIES } from "@/lib/currency";
+import { CURRENCIES } from "@/lib/currencies";
 import { useToast } from "@/hooks/use-toast";
 import { User, Building2, Bell, Shield, Check, Loader2, ImageIcon, X, Activity } from "lucide-react";
 import { SecurityTab } from "@/components/SecurityTab";
@@ -424,7 +424,7 @@ export default function SettingsPage() {
                     <label className={labelCls}>{t("settings.company.currency")}</label>
                     <select className={inputCls} value={defaultCurrency} onChange={(e) => setDefaultCurrency(e.target.value)}>
                       {CURRENCIES.map((c) => (
-                        <option key={c.code} value={c.code}>{c.label}</option>
+                        <option key={c.code} value={c.code}>{c.name} ({c.symbol})</option>
                       ))}
                     </select>
                   </div>

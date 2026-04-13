@@ -11,6 +11,7 @@ import {
   LogOut,
   ChevronRight,
   Languages,
+  Receipt,
 } from "lucide-react";
 
 export function Sidebar() {
@@ -25,6 +26,7 @@ export function Sidebar() {
   const nav = [
     { label: t("nav.dashboard"), icon: LayoutDashboard, href: "/dashboard" },
     { label: t("nav.invoices"),  icon: FileText,         href: "/invoices" },
+    { label: t("nav.expenses"),  icon: Receipt,          href: "/expenses" },
     { label: t("nav.clients"),   icon: Users,            href: "/clients" },
     { label: t("nav.settings"),  icon: Settings,         href: "/settings" },
   ];

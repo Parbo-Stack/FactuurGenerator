@@ -22,6 +22,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "invoices": "Facturen",
+    "expenses": "Uitgaven",
     "clients": "Klanten",
     "settings": "Instellingen",
     "newInvoice": "Nieuwe factuur",
@@ -58,12 +59,21 @@
       "revenue": "Totale omzet",
       "outstanding": "Openstaand",
       "invoices": "Facturen",
-      "clients": "Klanten"
+      "clients": "Klanten",
+      "totalExpenses": "Totale uitgaven",
+      "pendingBills": "Openstaande rekeningen"
     },
     "recentInvoices": "Recente facturen",
+    "recentExpenses": "Recente uitgaven",
+    "viewAllInvoices": "Bekijk alle facturen",
+    "viewAllExpenses": "Bekijk alle uitgaven",
     "viewAll": "Bekijk alle facturen",
     "noInvoices": "Nog geen facturen",
     "noInvoicesHint": "Maak je eerste factuur aan.",
+    "noExpenses": "Nog geen uitgaven",
+    "noExpensesHint": "Voeg je eerste uitgave toe.",
+    "netProfit": "Netto winst",
+    "plSummary": "W&V overzicht",
     "monthlyRevenue": "Maandomzet (afgelopen 6 maanden)",
     "revenueChartTitle": "Omzet overzicht",
     "revenueChartPeriod": "Afgelopen 6 maanden"

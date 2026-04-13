@@ -6,11 +6,11 @@ function PrivacyFooter() {
   const isNL = i18n.language === "nl";
   return (
     <footer className="px-8 py-4 border-t border-gray-100 text-xs text-gray-400 flex gap-4">
-      <a href="/privacybeleid" target="_blank" rel="noopener noreferrer" className="hover:text-gray-600 underline">
+      <a href="/privacy.html" target="_blank" rel="noopener noreferrer" className="hover:text-gray-600 underline">
         {isNL ? "Privacybeleid" : "Privacy policy"}
       </a>
-      <a href="/algemene-voorwaarden" target="_blank" rel="noopener noreferrer" className="hover:text-gray-600 underline">
-        {isNL ? "Algemene voorwaarden" : "Terms of service"}
+      <a href="/disclaimer.html" target="_blank" rel="noopener noreferrer" className="hover:text-gray-600 underline">
+        {isNL ? "Disclaimer" : "Disclaimer"}
       </a>
       <span>© {new Date().getFullYear()} FactuurFlow</span>
     </footer>

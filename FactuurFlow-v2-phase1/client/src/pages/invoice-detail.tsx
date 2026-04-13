@@ -6,7 +6,7 @@ import { useInvoice, useUpdateInvoiceStatus, useDeleteInvoice } from "@/hooks/us
 import { useQuery } from "@tanstack/react-query";
 import { fetchCurrentUser, type AuthUser } from "@/lib/auth";
 import type { InvoiceStatus, InvoiceDetail } from "@/lib/api";
-import { formatCurrency } from "@/lib/currency";
+import { formatCurrency } from "@/lib/currencies";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";

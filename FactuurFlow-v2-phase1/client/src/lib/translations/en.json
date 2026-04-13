@@ -22,6 +22,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "invoices": "Invoices",
+    "expenses": "Expenses",
     "clients": "Clients",
     "settings": "Settings",
     "newInvoice": "New invoice",
@@ -58,12 +59,21 @@
       "revenue": "Total revenue",
       "outstanding": "Outstanding",
       "invoices": "Invoices",
-      "clients": "Clients"
+      "clients": "Clients",
+      "totalExpenses": "Total expenses",
+      "pendingBills": "Pending bills"
     },
     "recentInvoices": "Recent invoices",
+    "recentExpenses": "Recent expenses",
+    "viewAllInvoices": "View all invoices",
+    "viewAllExpenses": "View all expenses",
     "viewAll": "View all invoices",
     "noInvoices": "No invoices yet",
     "noInvoicesHint": "Create your first invoice.",
+    "noExpenses": "No expenses yet",
+    "noExpensesHint": "Add your first expense.",
+    "netProfit": "Net profit",
+    "plSummary": "P&L summary",
     "monthlyRevenue": "Monthly revenue (last 6 months)",
     "revenueChartTitle": "Revenue overview",
     "revenueChartPeriod": "Last 6 months"

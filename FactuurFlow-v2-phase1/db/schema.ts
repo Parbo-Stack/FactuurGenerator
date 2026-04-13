@@ -174,6 +174,45 @@ export const twoFactorAuth = pgTable("two_factor_auth", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// ── Expenses (inkomende facturen) ────────────────────────────────────────────
+export const expenseStatusEnum = pgEnum("expense_status", [
+  "pending",
+  "paid",
+  "overdue",
+]);
+
+export const expenses = pgTable("expenses", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  vendorName: text("vendor_name").notNull(),
+  vendorEmail: text("vendor_email"),
+  invoiceNumber: text("invoice_number"),
+  status: expenseStatusEnum("status").default("pending").notNull(),
+  issueDate: text("issue_date").notNull(),
+  dueDate: text("due_date"),
+  currency: text("currency").default("USD").notNull(),
+  subtotal: numeric("subtotal", { precision: 12, scale: 2 }).default("0").notNull(),
+  taxAmount: numeric("tax_amount", { precision: 12, scale: 2 }).default("0").notNull(),
+  total: numeric("total", { precision: 12, scale: 2 }).default("0").notNull(),
+  category: text("category"),
+  notes: text("notes"),
+  pdfUrl: text("pdf_url"),
+  pdfData: text("pdf_data"),
+  paidAt: timestamp("paid_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertExpenseSchema = createInsertSchema(expenses, {
+  vendorName: z.string().min(1, "Vendor name is required"),
+  issueDate: z.string().min(1, "Issue date is required"),
+}).omit({ id: true, createdAt: true, updatedAt: true });
+
+export type InsertExpense = typeof expenses.$inferInsert;
+export type SelectExpense = typeof expenses.$inferSelect;
+
 // ── Products (catalogus) ──────────────────────────────────────────────────────
 export const products = pgTable("products", {
   id: serial("id").primaryKey(),

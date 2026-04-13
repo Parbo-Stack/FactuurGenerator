@@ -3,11 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/AppLayout";
 import { fetchCurrentUser } from "@/lib/auth";
-import { dashboardApi, invoicesApi } from "@/lib/api";
+import { dashboardApi, invoicesApi, expensesApi } from "@/lib/api";
 import type { InvoiceStatus } from "@/lib/api";
-import { formatCurrency, CURRENCIES } from "@/lib/currency";
+import { formatCurrency, getCurrencySymbol } from "@/lib/currencies";
 import {
   TrendingUp,
+  TrendingDown,
   Clock,
   FileText,
   Users,
@@ -15,6 +16,7 @@ import {
   MoreHorizontal,
   Circle,
   Loader2,
+  Receipt,
 } from "lucide-react";
 import {
   AreaChart,
@@ -27,13 +29,6 @@ import {
 } from "recharts";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function currencySymbol(currency: string) {
-  const entry = CURRENCIES.find((c) => c.code === currency);
-  // Get the symbol from Intl (e.g. "€", "$", "£")
-  return new Intl.NumberFormat(entry?.locale ?? "en-US", { style: "currency", currency })
-    .formatToParts(0)
-    .find((p) => p.type === "currency")?.value ?? currency;
-}
 
 // ── Status badge ──────────────────────────────────────────────────────────────
 const statusClasses: Record<InvoiceStatus, string> = {
@@ -156,9 +151,22 @@ export default function DashboardPage() {
     select: (data) => data.slice(0, 5),
   });
 
+  const { data: expenseStats, isLoading: expenseStatsLoading } = useQuery({
+    queryKey: ["expense-stats"],
+    queryFn: expensesApi.stats,
+    staleTime: 60_000,
+  });
+
+  const { data: recentExpenses = [], isLoading: expensesLoading } = useQuery({
+    queryKey: ["expenses"],
+    queryFn: expensesApi.list,
+    staleTime: 30_000,
+    select: (data: any[]) => data.slice(0, 5),
+  });
+
   const firstName = user?.name?.split(" ")[0] ?? "there";
   const currency = user?.defaultCurrency ?? "USD";
-  const symbol = currencySymbol(currency);
+  const symbol = getCurrencySymbol(currency);
 
   // Chart shows the user's default currency; fall back to first available, then empty
   const chartData: { month: string; omzet: number }[] = (() => {
@@ -178,8 +186,8 @@ export default function DashboardPage() {
           <p className="text-gray-500 text-sm mt-1">{t("dashboard.subtitle")}</p>
         </div>
 
-        {/* Stat cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+        {/* Stat cards — row 1: revenue + expenses */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
           <StatCard
             title={t("dashboard.stats.revenue")}
             amounts={stats?.totalRevenue}
@@ -194,6 +202,24 @@ export default function DashboardPage() {
             iconBg="bg-orange-50"
             icon={<Clock className="w-5 h-5 text-orange-500" />}
           />
+          <StatCard
+            title={t("dashboard.stats.totalExpenses")}
+            amounts={expenseStats?.totalExpenses}
+            loading={expenseStatsLoading}
+            iconBg="bg-red-50"
+            icon={<TrendingDown className="w-5 h-5 text-red-500" />}
+          />
+          <StatCard
+            title={t("dashboard.stats.pendingBills")}
+            amounts={expenseStats?.pendingBills}
+            loading={expenseStatsLoading}
+            iconBg="bg-yellow-50"
+            icon={<Receipt className="w-5 h-5 text-yellow-600" />}
+          />
+        </div>
+
+        {/* Stat cards — row 2: counts */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
           <StatCard
             title={t("dashboard.stats.invoices")}
             simpleValue={stats ? String(stats.invoiceCount) : "—"}
@@ -210,8 +236,8 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* Grafiek + recente facturen */}
-        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+        {/* Chart + recent invoices */}
+        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 mb-6">
           {/* Revenue chart */}
           <div className="xl:col-span-3 bg-white rounded-2xl border border-gray-100 p-6">
             <div className="flex items-center justify-between mb-6">
@@ -258,7 +284,7 @@ export default function DashboardPage() {
             </ResponsiveContainer>
           </div>
 
-          {/* Recente facturen */}
+          {/* Recent invoices */}
           <div className="xl:col-span-2 bg-white rounded-2xl border border-gray-100 p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-semibold text-gray-900">{t("dashboard.recentInvoices")}</h2>
@@ -311,6 +337,63 @@ export default function DashboardPage() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Recent expenses */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="font-semibold text-gray-900">{t("dashboard.recentExpenses")}</h2>
+            <button
+              onClick={() => navigate("/expenses")}
+              className="text-xs text-green-600 font-medium hover:underline"
+            >
+              {t("dashboard.viewAllExpenses")}
+            </button>
+          </div>
+
+          {expensesLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-5 h-5 text-green-600 animate-spin" />
+            </div>
+          ) : recentExpenses.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-400 text-sm">{t("dashboard.noExpenses")}</p>
+              <button
+                onClick={() => navigate("/expenses/new")}
+                className="mt-3 text-xs text-green-600 font-medium hover:underline"
+              >
+                {t("dashboard.noExpensesHint")} →
+              </button>
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-50">
+              {recentExpenses.map((exp: any) => (
+                <div key={exp.id} className="flex items-center gap-4 py-3">
+                  <div className="w-8 h-8 bg-red-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Receipt className="w-4 h-4 text-red-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{exp.vendorName}</p>
+                    <p className="text-xs text-gray-400">
+                      {exp.category || "—"} · {exp.issueDate}
+                    </p>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-sm font-semibold text-red-600">
+                      -{formatCurrency(Number(exp.total), exp.currency)}
+                    </p>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      exp.status === "paid"    ? "bg-green-50 text-green-700" :
+                      exp.status === "overdue" ? "bg-red-50 text-red-700" :
+                                                 "bg-yellow-50 text-yellow-700"
+                    }`}>
+                      {exp.status}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </AppLayout>

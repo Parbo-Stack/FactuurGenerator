@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { Resend } from "resend";
 import passport from "passport";
+import multer from "multer";
 import { db } from "@db";
 import {
   users,
@@ -9,14 +10,18 @@ import {
   invoices,
   invoiceItems,
   auditLog,
+  expenses,
   insertUserSchema,
   insertClientSchema,
   insertInvoiceSchema,
+  insertExpenseSchema,
 } from "@db/schema";
-import { eq, and, desc, sql, inArray } from "drizzle-orm";
+import { eq, and, desc, sql, inArray, gte } from "drizzle-orm";
 import { hashPassword, comparePassword } from "./auth";
 import { logAudit } from "./audit";
 import { z } from "zod";
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 // ── Auth guard ────────────────────────────────────────────────────────────────
 function requireAuth(req: any, res: any, next: any) {
@@ -614,6 +619,189 @@ export function registerRoutes(app: Express): Server {
     } catch (err: any) {
       console.error("Audit log error:", err);
       res.status(500).json({ message: "Activiteitenlog ophalen mislukt." });
+    }
+  });
+
+  // ══════════════════════════════════════════════════════════════════
+  // EXPENSES
+  // ══════════════════════════════════════════════════════════════════
+
+  // GET /api/expenses/stats — must come before /:id
+  app.get("/api/expenses/stats", requireAuth, async (req, res) => {
+    try {
+      const userId = uid(req);
+      const now = new Date();
+      const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+      const [totalRow] = await db
+        .select({ value: sql<string>`coalesce(sum(total), 0)` })
+        .from(expenses)
+        .where(eq(expenses.userId, userId));
+
+      const [pendingRow] = await db
+        .select({ count: sql<string>`count(*)` })
+        .from(expenses)
+        .where(and(eq(expenses.userId, userId), eq(expenses.status, "pending")));
+
+      const [paidMonthRow] = await db
+        .select({ value: sql<string>`coalesce(sum(total), 0)` })
+        .from(expenses)
+        .where(
+          and(
+            eq(expenses.userId, userId),
+            eq(expenses.status, "paid"),
+            gte(expenses.createdAt, new Date(firstOfMonth))
+          )
+        );
+
+      const [overdueRow] = await db
+        .select({ count: sql<string>`count(*)` })
+        .from(expenses)
+        .where(and(eq(expenses.userId, userId), eq(expenses.status, "overdue")));
+
+      res.json({
+        totalExpenses: Number(totalRow.value),
+        pendingCount: Number(pendingRow.count),
+        paidThisMonth: Number(paidMonthRow.value),
+        overdueCount: Number(overdueRow.count),
+      });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // GET /api/expenses
+  app.get("/api/expenses", requireAuth, async (req, res) => {
+    try {
+      const rows = await db
+        .select()
+        .from(expenses)
+        .where(eq(expenses.userId, uid(req)))
+        .orderBy(desc(expenses.createdAt));
+      res.json(rows);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // GET /api/expenses/:id
+  app.get("/api/expenses/:id", requireAuth, async (req, res) => {
+    try {
+      const [row] = await db
+        .select()
+        .from(expenses)
+        .where(and(eq(expenses.id, Number(req.params.id)), eq(expenses.userId, uid(req))));
+      if (!row) return res.status(404).json({ message: "Expense not found." });
+      res.json(row);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // POST /api/expenses
+  app.post("/api/expenses", requireAuth, async (req, res) => {
+    try {
+      const parsed = insertExpenseSchema.safeParse({ ...req.body, userId: uid(req) });
+      if (!parsed.success) return res.status(400).json({ message: parsed.error.errors[0].message });
+      const [row] = await db.insert(expenses).values(parsed.data).returning();
+      logAudit(req, "expense_created", { userId: uid(req), resourceId: row.id });
+      res.status(201).json(row);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // PUT /api/expenses/:id
+  app.put("/api/expenses/:id", requireAuth, async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      const [existing] = await db
+        .select()
+        .from(expenses)
+        .where(and(eq(expenses.id, id), eq(expenses.userId, uid(req))));
+      if (!existing) return res.status(404).json({ message: "Expense not found." });
+
+      const allowed = ["vendorName","vendorEmail","invoiceNumber","status","issueDate","dueDate",
+        "currency","subtotal","taxAmount","total","category","notes","pdfUrl","pdfData"] as const;
+      const update: Record<string, any> = { updatedAt: new Date() };
+      for (const key of allowed) {
+        if (req.body[key] !== undefined) update[key] = req.body[key];
+      }
+      const [row] = await db.update(expenses).set(update).where(eq(expenses.id, id)).returning();
+      res.json(row);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // PATCH /api/expenses/:id/status
+  app.patch("/api/expenses/:id/status", requireAuth, async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      const { status } = req.body;
+      if (!["pending","paid","overdue"].includes(status))
+        return res.status(400).json({ message: "Invalid status." });
+      const [existing] = await db
+        .select()
+        .from(expenses)
+        .where(and(eq(expenses.id, id), eq(expenses.userId, uid(req))));
+      if (!existing) return res.status(404).json({ message: "Expense not found." });
+      const [row] = await db
+        .update(expenses)
+        .set({ status, paidAt: status === "paid" ? new Date() : null, updatedAt: new Date() })
+        .where(eq(expenses.id, id))
+        .returning();
+      res.json(row);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // DELETE /api/expenses/:id
+  app.delete("/api/expenses/:id", requireAuth, async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      const [existing] = await db
+        .select()
+        .from(expenses)
+        .where(and(eq(expenses.id, id), eq(expenses.userId, uid(req))));
+      if (!existing) return res.status(404).json({ message: "Expense not found." });
+      await db.delete(expenses).where(eq(expenses.id, id));
+      logAudit(req, "expense_deleted", { userId: uid(req), resourceId: id });
+      res.json({ ok: true });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // POST /api/expenses/parse-pdf
+  app.post("/api/expenses/parse-pdf", requireAuth, upload.single("pdf"), async (req, res) => {
+    try {
+      if (!req.file) return res.status(400).json({ message: "No PDF file uploaded." });
+      const pdfData = req.file.buffer.toString("base64");
+      // Best-effort text extraction from PDF binary
+      const raw = req.file.buffer.toString("latin1");
+
+      // Extract total amount
+      const totalMatch = raw.match(/(?:total|totaal|amount due|bedrag)[^\d]*(\d[\d.,]+)/i);
+      const total = totalMatch ? totalMatch[1].replace(",", ".") : "";
+
+      // Extract invoice number
+      const numMatch = raw.match(/(?:invoice\s*(?:no|number|nr|#)|factuurnummer?)[^\w]*([A-Z0-9][\w-]{2,20})/i);
+      const invoiceNumber = numMatch ? numMatch[1] : "";
+
+      // Extract date (YYYY-MM-DD or DD/MM/YYYY or DD-MM-YYYY)
+      const dateMatch = raw.match(/(\d{4}-\d{2}-\d{2}|\d{2}[\/\-]\d{2}[\/\-]\d{4})/);
+      let issueDate = dateMatch ? dateMatch[1] : "";
+      // Normalise DD/MM/YYYY → YYYY-MM-DD
+      if (issueDate.match(/^\d{2}[\/\-]\d{2}[\/\-]\d{4}$/)) {
+        const parts = issueDate.split(/[\/\-]/);
+        issueDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      }
+
+      res.json({ vendorName: "", invoiceNumber, total, issueDate, pdfData });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
     }
   });
 

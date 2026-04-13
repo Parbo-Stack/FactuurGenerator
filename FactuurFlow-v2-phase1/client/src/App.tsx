@@ -16,6 +16,8 @@ import NewInvoicePage from "@/pages/new-invoice";
 import InvoiceDetailPage from "@/pages/invoice-detail";
 import ClientsPage from "@/pages/clients";
 import SettingsPage from "@/pages/settings";
+import ExpensesPage from "@/pages/expenses";
+import NewExpensePage from "@/pages/new-expense";
 import { fetchCurrentUser } from "@/lib/auth";
 
 // ── Auth guard ────────────────────────────────────────────────────────────────
@@ -59,6 +61,8 @@ const ProtectedNewInvoice   = () => <ProtectedRoute component={NewInvoicePage} /
 const ProtectedInvoiceDetail = () => <ProtectedRoute component={InvoiceDetailPage} />;
 const ProtectedClients      = () => <ProtectedRoute component={ClientsPage} />;
 const ProtectedSettings     = () => <ProtectedRoute component={SettingsPage} />;
+const ProtectedExpenses     = () => <ProtectedRoute component={ExpensesPage} />;
+const ProtectedNewExpense   = () => <ProtectedRoute component={NewExpensePage} />;
 
 // ── Router ────────────────────────────────────────────────────────────────────
 function Router() {
@@ -70,6 +74,8 @@ function Router() {
       <Route path="/invoices/new"  component={ProtectedNewInvoice} />
       <Route path="/invoices/:id"  component={ProtectedInvoiceDetail} />
       <Route path="/invoices"      component={ProtectedInvoices} />
+      <Route path="/expenses/new"  component={ProtectedNewExpense} />
+      <Route path="/expenses"      component={ProtectedExpenses} />
       <Route path="/clients"       component={ProtectedClients} />
       <Route path="/settings"      component={ProtectedSettings} />
       <Route path="/"              component={RootRedirect} />

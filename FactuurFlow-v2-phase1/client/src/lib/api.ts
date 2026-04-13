@@ -134,3 +134,14 @@ export const invoicesApi = {
 export const dashboardApi = {
   stats: () => apiFetch<DashboardStats>("/api/dashboard/stats"),
 };
+
+// ── Expenses API ──────────────────────────────────────────────────────────────
+export interface ExpenseStats {
+  totalExpenses: Record<string, number>;  // per-currency totals
+  pendingBills: Record<string, number>;   // per-currency pending
+}
+
+export const expensesApi = {
+  stats: () => apiFetch<ExpenseStats>("/api/expenses/stats"),
+  list:  () => apiFetch<any[]>("/api/expenses"),
+};

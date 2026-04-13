@@ -14,7 +14,9 @@ export type AuditAction =
   | "invoice_status_changed"
   | "client_created"
   | "client_deleted"
-  | "settings_updated";
+  | "settings_updated"
+  | "expense_created"
+  | "expense_deleted";
 
 export async function logAudit(
   req: Request,

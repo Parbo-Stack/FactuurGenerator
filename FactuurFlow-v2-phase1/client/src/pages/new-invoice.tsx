@@ -7,7 +7,7 @@ import { useCreateInvoice } from "@/hooks/useInvoices";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { fetchCurrentUser } from "@/lib/auth";
-import { formatCurrency, CURRENCIES } from "@/lib/currency";
+import { formatCurrency, CURRENCIES } from "@/lib/currencies";
 import { Plus, Trash2, ChevronDown, Loader2 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -469,7 +469,7 @@ export default function NewInvoicePage() {
                       onChange={(e) => setCurrency(e.target.value)}
                     >
                       {CURRENCIES.map((c) => (
-                        <option key={c.code} value={c.code}>{c.label}</option>
+                        <option key={c.code} value={c.code}>{c.name} ({c.symbol})</option>
                       ))}
                     </select>
                   </div>

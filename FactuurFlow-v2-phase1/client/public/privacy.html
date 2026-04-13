@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — FactuurFlow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: #f9fafb;
+      color: #111827;
+      line-height: 1.7;
+    }
+    header {
+      background: #fff;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .logo {
+      width: 2rem; height: 2rem;
+      background: #16a34a;
+      border-radius: 0.5rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo svg { width: 1rem; height: 1rem; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    header span { font-weight: 700; font-size: 1.1rem; }
+    .lang-toggle {
+      margin-left: auto;
+      display: flex; gap: 0.5rem;
+    }
+    .lang-toggle button {
+      padding: 0.25rem 0.75rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 9999px;
+      background: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .lang-toggle button.active { background: #16a34a; color: #fff; border-color: #16a34a; }
+    main { max-width: 760px; margin: 3rem auto; padding: 0 1.5rem 4rem; }
+    .badge {
+      display: inline-block;
+      background: #dcfce7;
+      color: #15803d;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.7rem;
+      border-radius: 9999px;
+      margin-bottom: 1rem;
+    }
+    h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .meta { font-size: 0.85rem; color: #6b7280; margin-bottom: 2.5rem; }
+    h2 { font-size: 1.15rem; font-weight: 600; margin: 2rem 0 0.5rem; color: #111827; }
+    p { color: #374151; margin-bottom: 0.75rem; }
+    ul { color: #374151; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+    ul li { margin-bottom: 0.25rem; }
+    a { color: #16a34a; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #9ca3af;
+      padding: 2rem 1rem;
+      border-top: 1px solid #e5e7eb;
+    }
+    [lang-section] { display: none; }
+    [lang-section].visible { display: block; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    </div>
+    <span>FactuurFlow</span>
+    <div class="lang-toggle">
+      <button class="active" onclick="setLang('en')">EN</button>
+      <button onclick="setLang('nl')">NL</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- English -->
+    <div lang-section="en" class="visible">
+      <span class="badge">Legal</span>
+      <h1>Privacy Policy</h1>
+      <p class="meta">Last updated: April 2026 &nbsp;·&nbsp; FactuurFlow</p>
+
+      <h2>1. Who we are</h2>
+      <p>FactuurFlow is an invoicing and expense management application. We take the privacy of our users seriously and process personal data in accordance with the General Data Protection Regulation (GDPR).</p>
+
+      <h2>2. Data we collect</h2>
+      <p>We collect the following personal data when you use FactuurFlow:</p>
+      <ul>
+        <li>Name and email address (used for your account)</li>
+        <li>Company details you enter (name, address, VAT/CoC numbers, IBAN)</li>
+        <li>Invoice, client, and expense data you create</li>
+        <li>IP address and browser type (for security logging)</li>
+      </ul>
+
+      <h2>3. How we use your data</h2>
+      <p>Your data is used exclusively to provide the FactuurFlow service:</p>
+      <ul>
+        <li>Authenticating your account and keeping it secure</li>
+        <li>Storing and displaying your invoices and expenses</li>
+        <li>Sending invoices via email on your behalf</li>
+        <li>Maintaining an activity log for your security</li>
+      </ul>
+      <p>We do not sell your data, nor do we share it with third parties for marketing purposes.</p>
+
+      <h2>4. Data retention</h2>
+      <p>We retain your data for as long as your account is active. Upon account deletion, all personal data is permanently removed within 30 days.</p>
+
+      <h2>5. Your rights</h2>
+      <p>Under the GDPR you have the right to access, rectify, or erase your personal data. You may also request data portability or object to processing. To exercise these rights, contact us at the address below.</p>
+
+      <h2>6. Cookies</h2>
+      <p>FactuurFlow uses a strictly necessary session cookie for authentication. No tracking or advertising cookies are used.</p>
+
+      <h2>7. Security</h2>
+      <p>All data is transmitted over HTTPS. Passwords are hashed using bcrypt. We maintain an audit log to detect and respond to suspicious activity.</p>
+
+      <h2>8. Contact</h2>
+      <p>For privacy-related questions or requests, email us at <a href="mailto:privacy@factuurflow.nl">privacy@factuurflow.nl</a>.</p>
+    </div>
+
+    <!-- Dutch -->
+    <div lang-section="nl">
+      <span class="badge">Juridisch</span>
+      <h1>Privacybeleid</h1>
+      <p class="meta">Laatst bijgewerkt: april 2026 &nbsp;·&nbsp; FactuurFlow</p>
+
+      <h2>1. Wie zijn wij</h2>
+      <p>FactuurFlow is een applicatie voor facturatie en onkostenbeheer. Wij nemen de privacy van onze gebruikers serieus en verwerken persoonsgegevens conform de Algemene Verordening Gegevensbescherming (AVG).</p>
+
+      <h2>2. Welke gegevens verzamelen wij</h2>
+      <p>Wij verzamelen de volgende persoonsgegevens bij gebruik van FactuurFlow:</p>
+      <ul>
+        <li>Naam en e-mailadres (voor je account)</li>
+        <li>Bedrijfsgegevens die je invoert (naam, adres, BTW/KvK-nummer, IBAN)</li>
+        <li>Factuur-, klant- en uitgavengegevens die je aanmaakt</li>
+        <li>IP-adres en browsertype (voor beveiligingslogging)</li>
+      </ul>
+
+      <h2>3. Hoe wij je gegevens gebruiken</h2>
+      <p>Je gegevens worden uitsluitend gebruikt om de FactuurFlow-service te leveren:</p>
+      <ul>
+        <li>Authenticatie en beveiliging van je account</li>
+        <li>Opslaan en tonen van je facturen en uitgaven</li>
+        <li>Versturen van facturen via e-mail namens jou</li>
+        <li>Bijhouden van een activiteitenlog voor je veiligheid</li>
+      </ul>
+      <p>Wij verkopen je gegevens niet en delen deze niet met derden voor marketingdoeleinden.</p>
+
+      <h2>4. Bewaartermijn</h2>
+      <p>Wij bewaren je gegevens zolang je account actief is. Bij verwijdering van je account worden alle persoonsgegevens binnen 30 dagen permanent gewist.</p>
+
+      <h2>5. Jouw rechten</h2>
+      <p>Op grond van de AVG heb je het recht op inzage, rectificatie of verwijdering van je persoonsgegevens. Je kunt ook dataportabiliteit verzoeken of bezwaar maken tegen verwerking. Neem hiervoor contact met ons op via onderstaand adres.</p>
+
+      <h2>6. Cookies</h2>
+      <p>FactuurFlow gebruikt uitsluitend een strikt noodzakelijke sessiecookie voor authenticatie. Er worden geen tracking- of advertentiecookies gebruikt.</p>
+
+      <h2>7. Beveiliging</h2>
+      <p>Alle gegevens worden verstuurd via HTTPS. Wachtwoorden worden gehasht met bcrypt. Wij houden een activiteitenlog bij om verdachte activiteiten te detecteren en op te volgen.</p>
+
+      <h2>8. Contact</h2>
+      <p>Voor privacygerelateerde vragen of verzoeken kun je ons mailen via <a href="mailto:privacy@factuurflow.nl">privacy@factuurflow.nl</a>.</p>
+    </div>
+  </main>
+
+  <footer>© 2026 FactuurFlow &nbsp;·&nbsp; <a href="/disclaimer.html">Disclaimer</a></footer>
+
+  <script>
+    function setLang(lang) {
+      document.querySelectorAll('[lang-section]').forEach(el => {
+        el.classList.toggle('visible', el.getAttribute('lang-section') === lang);
+      });
+      document.querySelectorAll('.lang-toggle button').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.trim().toLowerCase() === lang);
+      });
+    }
+    // Auto-detect browser language
+    const browserLang = navigator.language?.startsWith('nl') ? 'nl' : 'en';
+    setLang(browserLang);
+  </script>
+</body>
+</html>
