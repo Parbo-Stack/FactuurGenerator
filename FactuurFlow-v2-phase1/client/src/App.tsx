@@ -18,6 +18,7 @@ import ClientsPage from "@/pages/clients";
 import SettingsPage from "@/pages/settings";
 import ExpensesPage from "@/pages/expenses";
 import NewExpensePage from "@/pages/new-expense";
+import AccountingPage from "@/pages/accounting";
 import { fetchCurrentUser } from "@/lib/auth";
 
 // ── Auth guard ────────────────────────────────────────────────────────────────
@@ -63,6 +64,7 @@ const ProtectedClients      = () => <ProtectedRoute component={ClientsPage} />;
 const ProtectedSettings     = () => <ProtectedRoute component={SettingsPage} />;
 const ProtectedExpenses     = () => <ProtectedRoute component={ExpensesPage} />;
 const ProtectedNewExpense   = () => <ProtectedRoute component={NewExpensePage} />;
+const ProtectedAccounting   = () => <ProtectedRoute component={AccountingPage} />;
 
 // ── Router ────────────────────────────────────────────────────────────────────
 function Router() {
@@ -76,6 +78,7 @@ function Router() {
       <Route path="/invoices"      component={ProtectedInvoices} />
       <Route path="/expenses/new"  component={ProtectedNewExpense} />
       <Route path="/expenses"      component={ProtectedExpenses} />
+      <Route path="/accounting"    component={ProtectedAccounting} />
       <Route path="/clients"       component={ProtectedClients} />
       <Route path="/settings"      component={ProtectedSettings} />
       <Route path="/"              component={RootRedirect} />

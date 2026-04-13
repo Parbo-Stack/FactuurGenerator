@@ -5,7 +5,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { fetchCurrentUser } from "@/lib/auth";
 import { dashboardApi, invoicesApi, expensesApi } from "@/lib/api";
 import type { InvoiceStatus } from "@/lib/api";
-import { formatCurrency, getCurrencySymbol } from "@/lib/currencies";
+import { formatCurrency } from "@/lib/currencies";
 import {
   TrendingUp,
   TrendingDown,
@@ -13,20 +13,10 @@ import {
   FileText,
   Users,
   ArrowUpRight,
-  MoreHorizontal,
   Circle,
   Loader2,
   Receipt,
 } from "lucide-react";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -104,28 +94,6 @@ function StatCard({
   );
 }
 
-// ── Custom Tooltip ────────────────────────────────────────────────────────────
-function CustomTooltip({ active, payload, label, currency }: any) {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="bg-white border border-gray-100 rounded-xl shadow-lg px-4 py-3">
-      <p className="text-xs text-gray-500 mb-1">{label}</p>
-      <p className="text-sm font-semibold text-gray-900">{formatCurrency(payload[0].value, currency)}</p>
-    </div>
-  );
-}
-
-// ── Fallback chart data (empty state) ─────────────────────────────────────────
-function getLastSixMonths() {
-  const months = [];
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date();
-    d.setMonth(d.getMonth() - i);
-    months.push(d.toLocaleString("en-US", { month: "short" }));
-  }
-  return months;
-}
-const emptyChartData = getLastSixMonths().map((month) => ({ month, omzet: 0 }));
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 export default function DashboardPage() {
@@ -165,15 +133,6 @@ export default function DashboardPage() {
   });
 
   const firstName = user?.name?.split(" ")[0] ?? "there";
-  const currency = user?.defaultCurrency ?? "USD";
-  const symbol = getCurrencySymbol(currency);
-
-  // Chart shows the user's default currency; fall back to first available, then empty
-  const chartData: { month: string; omzet: number }[] = (() => {
-    if (!stats?.monthlyRevenue) return emptyChartData;
-    const rows = stats.monthlyRevenue[currency] ?? Object.values(stats.monthlyRevenue)[0];
-    return rows && rows.length > 0 ? rows : emptyChartData;
-  })();
 
   return (
     <AppLayout>
@@ -236,56 +195,10 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* Chart + recent invoices */}
-        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 mb-6">
-          {/* Revenue chart */}
-          <div className="xl:col-span-3 bg-white rounded-2xl border border-gray-100 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="font-semibold text-gray-900">{t("dashboard.revenueChartTitle")}</h2>
-                <p className="text-xs text-gray-400 mt-0.5">{t("dashboard.revenueChartPeriod")}</p>
-              </div>
-              <button className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50">
-                <MoreHorizontal className="w-4 h-4" />
-              </button>
-            </div>
-            <ResponsiveContainer width="100%" height={220}>
-              <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="omzetGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#16a34a" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="#16a34a" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-                <XAxis
-                  dataKey="month"
-                  tick={{ fontSize: 12, fill: "#9ca3af" }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  tick={{ fontSize: 12, fill: "#9ca3af" }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickFormatter={(v) => v === 0 ? `${symbol}0` : `${symbol}${(v / 1000).toFixed(0)}k`}
-                />
-                <Tooltip content={<CustomTooltip currency={currency} />} />
-                <Area
-                  type="monotone"
-                  dataKey="omzet"
-                  stroke="#16a34a"
-                  strokeWidth={2.5}
-                  fill="url(#omzetGradient)"
-                  dot={false}
-                  activeDot={{ r: 5, fill: "#16a34a", strokeWidth: 0 }}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-
+        {/* Recent invoices + recent expenses side by side */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
           {/* Recent invoices */}
-          <div className="xl:col-span-2 bg-white rounded-2xl border border-gray-100 p-6">
+          <div className="bg-white rounded-2xl border border-gray-100 p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-semibold text-gray-900">{t("dashboard.recentInvoices")}</h2>
               <button
@@ -337,63 +250,63 @@ export default function DashboardPage() {
               </div>
             )}
           </div>
-        </div>
 
-        {/* Recent expenses */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="font-semibold text-gray-900">{t("dashboard.recentExpenses")}</h2>
-            <button
-              onClick={() => navigate("/expenses")}
-              className="text-xs text-green-600 font-medium hover:underline"
-            >
-              {t("dashboard.viewAllExpenses")}
-            </button>
-          </div>
-
-          {expensesLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-5 h-5 text-green-600 animate-spin" />
-            </div>
-          ) : recentExpenses.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-gray-400 text-sm">{t("dashboard.noExpenses")}</p>
+          {/* Recent expenses */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="font-semibold text-gray-900">{t("dashboard.recentExpenses")}</h2>
               <button
-                onClick={() => navigate("/expenses/new")}
-                className="mt-3 text-xs text-green-600 font-medium hover:underline"
+                onClick={() => navigate("/expenses")}
+                className="text-xs text-green-600 font-medium hover:underline"
               >
-                {t("dashboard.noExpensesHint")} →
+                {t("dashboard.viewAllExpenses")}
               </button>
             </div>
-          ) : (
-            <div className="divide-y divide-gray-50">
-              {recentExpenses.map((exp: any) => (
-                <div key={exp.id} className="flex items-center gap-4 py-3">
-                  <div className="w-8 h-8 bg-red-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Receipt className="w-4 h-4 text-red-400" />
+
+            {expensesLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-5 h-5 text-green-600 animate-spin" />
+              </div>
+            ) : recentExpenses.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-400 text-sm">{t("dashboard.noExpenses")}</p>
+                <button
+                  onClick={() => navigate("/expenses/new")}
+                  className="mt-3 text-xs text-green-600 font-medium hover:underline"
+                >
+                  {t("dashboard.noExpensesHint")} →
+                </button>
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-50">
+                {recentExpenses.map((exp: any) => (
+                  <div key={exp.id} className="flex items-center gap-4 py-3">
+                    <div className="w-8 h-8 bg-red-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Receipt className="w-4 h-4 text-red-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{exp.vendorName}</p>
+                      <p className="text-xs text-gray-400">
+                        {exp.category || "—"} · {exp.issueDate}
+                      </p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-sm font-semibold text-red-600">
+                        -{formatCurrency(Number(exp.total), exp.currency)}
+                      </p>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                        exp.status === "paid"    ? "bg-green-50 text-green-700" :
+                        exp.status === "overdue" ? "bg-red-50 text-red-700" :
+                                                   "bg-yellow-50 text-yellow-700"
+                      }`}>
+                        {exp.status}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{exp.vendorName}</p>
-                    <p className="text-xs text-gray-400">
-                      {exp.category || "—"} · {exp.issueDate}
-                    </p>
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className="text-sm font-semibold text-red-600">
-                      -{formatCurrency(Number(exp.total), exp.currency)}
-                    </p>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                      exp.status === "paid"    ? "bg-green-50 text-green-700" :
-                      exp.status === "overdue" ? "bg-red-50 text-red-700" :
-                                                 "bg-yellow-50 text-yellow-700"
-                    }`}>
-                      {exp.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </AppLayout>

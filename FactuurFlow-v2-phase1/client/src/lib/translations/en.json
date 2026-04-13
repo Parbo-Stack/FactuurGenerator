@@ -23,6 +23,7 @@
     "dashboard": "Dashboard",
     "invoices": "Invoices",
     "expenses": "Expenses",
+    "accounting": "Accounting",
     "clients": "Clients",
     "settings": "Settings",
     "newInvoice": "New invoice",

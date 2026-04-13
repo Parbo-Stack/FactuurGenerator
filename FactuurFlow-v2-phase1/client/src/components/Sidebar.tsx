@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Languages,
   Receipt,
+  BarChart2,
 } from "lucide-react";
 
 export function Sidebar() {
@@ -24,11 +25,12 @@ export function Sidebar() {
   });
 
   const nav = [
-    { label: t("nav.dashboard"), icon: LayoutDashboard, href: "/dashboard" },
-    { label: t("nav.invoices"),  icon: FileText,         href: "/invoices" },
-    { label: t("nav.expenses"),  icon: Receipt,          href: "/expenses" },
-    { label: t("nav.clients"),   icon: Users,            href: "/clients" },
-    { label: t("nav.settings"),  icon: Settings,         href: "/settings" },
+    { label: t("nav.dashboard"),   icon: LayoutDashboard, href: "/dashboard" },
+    { label: t("nav.invoices"),    icon: FileText,         href: "/invoices" },
+    { label: t("nav.expenses"),    icon: Receipt,          href: "/expenses" },
+    { label: t("nav.accounting"),  icon: BarChart2,        href: "/accounting" },
+    { label: t("nav.clients"),     icon: Users,            href: "/clients" },
+    { label: t("nav.settings"),    icon: Settings,         href: "/settings" },
   ];
 
   async function handleLogout() {

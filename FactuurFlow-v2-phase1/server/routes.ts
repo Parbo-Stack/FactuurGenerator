@@ -16,7 +16,7 @@ import {
   insertInvoiceSchema,
   insertExpenseSchema,
 } from "@db/schema";
-import { eq, and, desc, sql, inArray, gte } from "drizzle-orm";
+import { eq, and, desc, sql, inArray } from "drizzle-orm";
 import { hashPassword, comparePassword } from "./auth";
 import { logAudit } from "./audit";
 import { z } from "zod";
@@ -630,40 +630,30 @@ export function registerRoutes(app: Express): Server {
   app.get("/api/expenses/stats", requireAuth, async (req, res) => {
     try {
       const userId = uid(req);
-      const now = new Date();
-      const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 
-      const [totalRow] = await db
-        .select({ value: sql<string>`coalesce(sum(total), 0)` })
+      // Total expenses grouped by currency
+      const totalRows = await db
+        .select({
+          currency: expenses.currency,
+          value: sql<string>`coalesce(sum(total), 0)`,
+        })
         .from(expenses)
-        .where(eq(expenses.userId, userId));
+        .where(eq(expenses.userId, userId))
+        .groupBy(expenses.currency);
 
-      const [pendingRow] = await db
-        .select({ count: sql<string>`count(*)` })
+      // Pending bills grouped by currency
+      const pendingRows = await db
+        .select({
+          currency: expenses.currency,
+          value: sql<string>`coalesce(sum(total), 0)`,
+        })
         .from(expenses)
-        .where(and(eq(expenses.userId, userId), eq(expenses.status, "pending")));
-
-      const [paidMonthRow] = await db
-        .select({ value: sql<string>`coalesce(sum(total), 0)` })
-        .from(expenses)
-        .where(
-          and(
-            eq(expenses.userId, userId),
-            eq(expenses.status, "paid"),
-            gte(expenses.createdAt, new Date(firstOfMonth))
-          )
-        );
-
-      const [overdueRow] = await db
-        .select({ count: sql<string>`count(*)` })
-        .from(expenses)
-        .where(and(eq(expenses.userId, userId), eq(expenses.status, "overdue")));
+        .where(and(eq(expenses.userId, userId), eq(expenses.status, "pending")))
+        .groupBy(expenses.currency);
 
       res.json({
-        totalExpenses: Number(totalRow.value),
-        pendingCount: Number(pendingRow.count),
-        paidThisMonth: Number(paidMonthRow.value),
-        overdueCount: Number(overdueRow.count),
+        totalExpenses: Object.fromEntries(totalRows.map((r) => [r.currency, Number(r.value)])),
+        pendingBills: Object.fromEntries(pendingRows.map((r) => [r.currency, Number(r.value)])),
       });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
