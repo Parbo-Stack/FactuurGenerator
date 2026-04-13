@@ -18,6 +18,7 @@ import {
   insertClientSchema,
   insertInvoiceSchema,
   insertExpenseSchema,
+  feedback,
 } from "@db/schema";
 import { eq, and, desc, sql, inArray } from "drizzle-orm";
 import { hashPassword, comparePassword } from "./auth";
@@ -857,6 +858,22 @@ export function registerRoutes(app: Express): Server {
       });
     } catch (err: any) {
       console.error("parse-pdf error:", err);
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ══════════════════════════════════════════════════════════════════
+  // FEEDBACK
+  // ══════════════════════════════════════════════════════════════════
+
+  app.post("/api/feedback", async (req, res) => {
+    try {
+      const message = (req.body?.message ?? "").toString().trim();
+      if (!message) return res.status(400).json({ message: "Message is required" });
+      const userId = req.isAuthenticated() ? uid(req) : null;
+      await db.insert(feedback).values({ message, userId });
+      res.status(201).json({ ok: true });
+    } catch (err: any) {
       res.status(500).json({ message: err.message });
     }
   });

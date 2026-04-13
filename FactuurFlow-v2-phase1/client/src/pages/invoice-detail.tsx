@@ -24,6 +24,7 @@ import {
   Loader2,
   X,
 } from "lucide-react";
+import { FeedbackModal } from "@/components/FeedbackModal";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function formatDate(str: string | null | undefined) {
@@ -328,6 +329,7 @@ export default function InvoiceDetailPage() {
   const [sendModal, setSendModal]     = useState(false);
   const [recipientEmail, setRecipientEmail] = useState("");
   const [isSending, setIsSending]     = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
 
   if (isLoading) {
     return (
@@ -366,6 +368,7 @@ export default function InvoiceDetailPage() {
     const doc = generatePdf(invoice!, user, invoice!.currency);
     doc.save(`factuur-${invoice!.invoiceNumber}.pdf`);
     (window as any).gtag?.("event", "invoice_downloaded", { invoice_number: invoice!.invoiceNumber });
+    setShowFeedback(true);
   }
 
   async function handleSendEmail() {
@@ -398,6 +401,7 @@ export default function InvoiceDetailPage() {
       });
       setSendModal(false);
       setRecipientEmail("");
+      setShowFeedback(true);
 
       if (invoice!.status === "draft") {
         await updateStatus.mutateAsync({ id: invoice!.id, status: "sent" });
@@ -606,6 +610,8 @@ export default function InvoiceDetailPage() {
           </div>
         </div>
       )}
+
+      {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} />}
     </AppLayout>
   );
 }
