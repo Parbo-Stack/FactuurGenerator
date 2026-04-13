@@ -280,13 +280,20 @@ export default function AccountingPage() {
                 Expenses ({filteredExpenses.length})
               </button>
             </div>
-            <div className="pb-3">
+            <div className="flex items-center gap-2 pb-3">
               <button
-                onClick={tab === "revenue" ? exportRevenueCsv : exportExpensesCsv}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
+                onClick={exportRevenueCsv}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-green-700 border border-green-200 bg-green-50 rounded-lg hover:bg-green-100 transition"
               >
                 <Download className="w-3.5 h-3.5" />
-                Export CSV
+                Revenue CSV
+              </button>
+              <button
+                onClick={exportExpensesCsv}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-700 border border-red-200 bg-red-50 rounded-lg hover:bg-red-100 transition"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Expenses CSV
               </button>
             </div>
           </div>
