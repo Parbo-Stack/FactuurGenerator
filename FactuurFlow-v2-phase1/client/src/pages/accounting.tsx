@@ -28,19 +28,27 @@ async function fetchExpenses(): Promise<Expense[]> {
 }
 
 // ── CSV helpers ───────────────────────────────────────────────────────────────
+// Use semicolons — European Excel (Dutch, German, French…) treats ; as the
+// CSV column separator. Commas produce a single-column result on these systems.
+const SEP = ";";
+
 function escapeCsv(val: string | null | undefined): string {
   const s = String(val ?? "");
-  return s.includes(",") || s.includes('"') || s.includes("\n")
+  // Quote any value that contains the separator, a quote, or a newline
+  return s.includes(SEP) || s.includes('"') || s.includes("\n")
     ? `"${s.replace(/"/g, '""')}"`
     : s;
 }
 
 function downloadCsv(filename: string, headers: string[], rows: (string | null | undefined)[][]) {
-  const csv = [
-    headers.map(escapeCsv).join(","),
-    ...rows.map((r) => r.map(escapeCsv).join(",")),
+  const lines = [
+    headers.map(escapeCsv).join(SEP),
+    ...rows.map((r) => r.map(escapeCsv).join(SEP)),
   ].join("\r\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  // UTF-8 BOM (\uFEFF) tells Excel to use UTF-8 encoding — prevents € and
+  // special characters from showing as garbage.
+  const bom = "\uFEFF";
+  const blob = new Blob([bom + lines], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
