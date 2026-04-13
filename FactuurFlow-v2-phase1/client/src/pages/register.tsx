@@ -223,7 +223,14 @@ export default function RegisterPage() {
           </div>
 
           <p className="mt-6 text-center text-xs text-gray-400">
-            &copy; {new Date().getFullYear()} FactuurFlow. All rights reserved.
+            &copy; {new Date().getFullYear()} FactuurFlow. All rights reserved. ·{" "}
+            <a
+              href="/pricing"
+              onClick={(e) => { e.preventDefault(); navigate("/pricing"); }}
+              className="hover:text-gray-600 underline underline-offset-2"
+            >
+              Pricing
+            </a>
           </p>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/AppLayout";
 import { fetchCurrentUser } from "@/lib/auth";
 import { dashboardApi, invoicesApi, expensesApi } from "@/lib/api";
+import { UsageBar } from "@/components/UsageBar";
 import type { InvoiceStatus } from "@/lib/api";
 import { formatCurrency } from "@/lib/currencies";
 import {
@@ -132,6 +133,16 @@ export default function DashboardPage() {
     select: (data: any[]) => data.slice(0, 5),
   });
 
+  const { data: subUsage } = useQuery({
+    queryKey: ["subscription-usage"],
+    queryFn: async () => {
+      const res = await fetch("/api/subscription/usage", { credentials: "include" });
+      if (!res.ok) throw new Error("Failed");
+      return res.json();
+    },
+    staleTime: 60_000,
+  });
+
   const firstName = user?.name?.split(" ")[0] ?? "there";
 
   return (
@@ -194,6 +205,29 @@ export default function DashboardPage() {
             icon={<Users className="w-5 h-5 text-purple-500" />}
           />
         </div>
+
+        {/* Your plan card */}
+        {subUsage && (
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="font-semibold text-gray-900">Your plan</h2>
+                <p className="text-xs text-gray-400 mt-0.5">{subUsage.tierName} · {subUsage.tierPrice === 0 ? "Free" : `$${subUsage.tierPrice}/mo`}</p>
+              </div>
+              <button
+                onClick={() => navigate("/pricing")}
+                className="text-xs text-green-600 font-medium hover:underline"
+              >
+                {subUsage.tier !== "business" ? "Upgrade" : "View plans"}
+              </button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <UsageBar label="Clients" current={subUsage.usage.totalClients} limit={subUsage.limits.clients} />
+              <UsageBar label="Invoices this month" current={subUsage.usage.invoicesThisMonth} limit={subUsage.limits.invoicesPerMonth} />
+              <UsageBar label="Expenses this month" current={subUsage.usage.expensesThisMonth} limit={subUsage.limits.expensesPerMonth} />
+            </div>
+          </div>
+        )}
 
         {/* Recent invoices + recent expenses side by side */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">

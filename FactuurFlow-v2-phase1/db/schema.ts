@@ -45,6 +45,10 @@ export const users = pgTable("users", {
   // Notificaties
   emailNotifications: boolean("email_notifications").default(true),
   overdueReminders: boolean("overdue_reminders").default(true),
+  // Subscription
+  subscriptionTier: text("subscription_tier").default("free").notNull(),
+  subscriptionStarted: timestamp("subscription_started"),
+  subscriptionEnds: timestamp("subscription_ends"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -212,6 +216,18 @@ export const insertExpenseSchema = createInsertSchema(expenses, {
 
 export type InsertExpense = typeof expenses.$inferInsert;
 export type SelectExpense = typeof expenses.$inferSelect;
+
+// ── Usage Tracking ───────────────────────────────────────────────────────────
+export const usageTracking = pgTable("usage_tracking", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  month: text("month").notNull(),          // "2026-04" format
+  invoicesCreated: integer("invoices_created").default(0).notNull(),
+  expensesCreated: integer("expenses_created").default(0).notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
 
 // ── Products (catalogus) ──────────────────────────────────────────────────────
 export const products = pgTable("products", {

@@ -19,6 +19,7 @@ import SettingsPage from "@/pages/settings";
 import ExpensesPage from "@/pages/expenses";
 import NewExpensePage from "@/pages/new-expense";
 import AccountingPage from "@/pages/accounting";
+import PricingPage from "@/pages/pricing";
 import { fetchCurrentUser } from "@/lib/auth";
 
 // ── Auth guard ────────────────────────────────────────────────────────────────
@@ -81,6 +82,7 @@ function Router() {
       <Route path="/accounting"    component={ProtectedAccounting} />
       <Route path="/clients"       component={ProtectedClients} />
       <Route path="/settings"      component={ProtectedSettings} />
+      <Route path="/pricing"       component={PricingPage} />
       <Route path="/"              component={RootRedirect} />
       <Route                       component={NotFound} />
     </Switch>
