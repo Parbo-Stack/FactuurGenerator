@@ -3,6 +3,9 @@ import { createServer, type Server } from "http";
 import { Resend } from "resend";
 import passport from "passport";
 import multer from "multer";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const pdfParse = require("pdf-parse") as (buffer: Buffer) => Promise<{ text: string }>;
 import { db } from "@db";
 import {
   users,
@@ -769,28 +772,91 @@ export function registerRoutes(app: Express): Server {
     try {
       if (!req.file) return res.status(400).json({ message: "No PDF file uploaded." });
       const pdfData = req.file.buffer.toString("base64");
-      // Best-effort text extraction from PDF binary
-      const raw = req.file.buffer.toString("latin1");
 
-      // Extract total amount
-      const totalMatch = raw.match(/(?:total|totaal|amount due|bedrag)[^\d]*(\d[\d.,]+)/i);
-      const total = totalMatch ? totalMatch[1].replace(",", ".") : "";
-
-      // Extract invoice number
-      const numMatch = raw.match(/(?:invoice\s*(?:no|number|nr|#)|factuurnummer?)[^\w]*([A-Z0-9][\w-]{2,20})/i);
-      const invoiceNumber = numMatch ? numMatch[1] : "";
-
-      // Extract date (YYYY-MM-DD or DD/MM/YYYY or DD-MM-YYYY)
-      const dateMatch = raw.match(/(\d{4}-\d{2}-\d{2}|\d{2}[\/\-]\d{2}[\/\-]\d{4})/);
-      let issueDate = dateMatch ? dateMatch[1] : "";
-      // Normalise DD/MM/YYYY → YYYY-MM-DD
-      if (issueDate.match(/^\d{2}[\/\-]\d{2}[\/\-]\d{4}$/)) {
-        const parts = issueDate.split(/[\/\-]/);
-        issueDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      // Extract real text with pdf-parse
+      let text = "";
+      try {
+        const parsed = await pdfParse(req.file.buffer);
+        text = parsed.text ?? "";
+      } catch {
+        return res.status(422).json({ message: "Could not read PDF text. The file may be scanned or image-only." });
       }
 
-      res.json({ vendorName: "", invoiceNumber, total, issueDate, pdfData });
+      // ── Invoice number ────────────────────────────────────────────────
+      const numMatch = text.match(
+        /(?:invoice\s*(?:no|number|nr|#)|factuurnummer?|inv\.?\s*no\.?|bill\s*(?:no|number))[^\w\n]*([A-Z0-9][\w\-]{1,25})/i
+      );
+      const invoiceNumber = numMatch ? numMatch[1].trim() : "";
+
+      // ── Total amount ──────────────────────────────────────────────────
+      // Try specific "due" labels first, then generic "total"
+      const totalPatterns = [
+        /(?:total\s+due|amount\s+due|grand\s+total|totaal\s+te\s+betalen|te\s+betalen)[^\d€$£\n]*([€$£]?\s*[\d]{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?)/i,
+        /(?:total|totaal|bedrag)[^\d€$£\n]{0,20}([€$£]?\s*[\d]{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?)/i,
+      ];
+      let rawTotal = "";
+      for (const pat of totalPatterns) {
+        const m = text.match(pat);
+        if (m) { rawTotal = m[1]; break; }
+      }
+      // Strip currency symbols, normalise European "1.234,56" → "1234.56"
+      let total = rawTotal.replace(/[€$£\s]/g, "");
+      if (/^\d{1,3}(?:\.\d{3})+(,\d{2})$/.test(total)) {
+        // European: dots as thousands, comma as decimal
+        total = total.replace(/\./g, "").replace(",", ".");
+      } else if (/^\d{1,3}(?:,\d{3})+(.\d{2})$/.test(total)) {
+        // US: commas as thousands, dot as decimal
+        total = total.replace(/,/g, "");
+      } else {
+        // Simple: just replace comma with dot for decimal
+        total = total.replace(",", ".");
+      }
+
+      // ── Issue date ────────────────────────────────────────────────────
+      const labelledDate = text.match(
+        /(?:invoice\s+date|issue\s+date|factuurdatum|datum|date)[:\s]+(\d{1,2}[\s\/\-\.]\w{2,9}[\s\/\-\.]\d{2,4}|\d{4}-\d{2}-\d{2}|\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/i
+      );
+      const anyDate = text.match(/(\d{4}-\d{2}-\d{2}|\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{4})/);
+      const rawDate = (labelledDate ? labelledDate[1] : anyDate?.[1]) ?? "";
+      let issueDate = "";
+      if (/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
+        issueDate = rawDate;
+      } else if (rawDate) {
+        const parts = rawDate.split(/[\-\/\.]/);
+        if (parts.length === 3) {
+          const [a, b, c] = parts;
+          issueDate = a.length === 4
+            ? `${a}-${b.padStart(2, "0")}-${c.padStart(2, "0")}`
+            : `${c.length === 2 ? "20" + c : c}-${b.padStart(2, "0")}-${a.padStart(2, "0")}`;
+        }
+      }
+
+      // ── Vendor name ───────────────────────────────────────────────────
+      const vendorPatterns = [
+        /(?:from|bill\s+from|issued\s+by|vendor|supplier|leverancier|van|afzender)[:\s]+([^\n]{2,80})/i,
+        /(?:company|bedrijf|naam|name)[:\s]+([^\n]{2,80})/i,
+      ];
+      let vendorName = "";
+      for (const pat of vendorPatterns) {
+        const m = text.match(pat);
+        if (m) { vendorName = m[1].trim(); break; }
+      }
+      if (!vendorName) {
+        // Fallback: first meaningful line that doesn't look like a label/number/address
+        const skipLine = /^(invoice|factuur|receipt|bon|date|datum|tel|phone|email|btw|kvk|iban|www\.|http|\d)/i;
+        const lines = text.split("\n").map((l) => l.trim()).filter((l) => l.length > 2 && !skipLine.test(l));
+        vendorName = lines[0] ?? "";
+      }
+
+      res.json({
+        vendorName: vendorName.slice(0, 100).trim(),
+        invoiceNumber,
+        total,
+        issueDate,
+        pdfData,
+      });
     } catch (err: any) {
+      console.error("parse-pdf error:", err);
       res.status(500).json({ message: err.message });
     }
   });
