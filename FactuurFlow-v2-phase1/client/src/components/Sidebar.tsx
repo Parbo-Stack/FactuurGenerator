@@ -13,7 +13,6 @@ import {
   Languages,
   Receipt,
   BarChart2,
-  CreditCard,
 } from "lucide-react";
 
 export function Sidebar() {
@@ -93,18 +92,6 @@ export function Sidebar() {
           );
         })}
       </nav>
-
-      {/* Pricing link */}
-      <div className="px-4 pb-1">
-        <button
-          onClick={() => navigate("/pricing")}
-          className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium
-                     text-gray-500 hover:bg-gray-50 hover:text-green-600 transition"
-        >
-          <CreditCard className="w-3.5 h-3.5 text-gray-400" />
-          <span>View pricing</span>
-        </button>
-      </div>
 
       {/* Taalwissel */}
       <div className="px-4 pb-2">

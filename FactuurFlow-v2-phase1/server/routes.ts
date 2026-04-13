@@ -59,7 +59,7 @@ export function registerRoutes(app: Express): Server {
 
       const [user] = await db
         .insert(users)
-        .values({ email: email.toLowerCase(), name, password: hashPassword(password) })
+        .values({ email: email.toLowerCase(), name, password: hashPassword(password), subscriptionTier: "pro" })
         .returning();
 
       req.login(user, (err) => {
@@ -859,6 +859,14 @@ export function registerRoutes(app: Express): Server {
       console.error("parse-pdf error:", err);
       res.status(500).json({ message: err.message });
     }
+  });
+
+  // ══════════════════════════════════════════════════════════════════
+  // HEALTH
+  // ══════════════════════════════════════════════════════════════════
+
+  app.get("/health", (_req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 
   // ══════════════════════════════════════════════════════════════════

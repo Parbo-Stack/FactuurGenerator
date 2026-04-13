@@ -38,6 +38,7 @@ export default function RegisterPage() {
     try {
       const user = await registerUser(data.name, data.email, data.password);
       queryClient.setQueryData(["auth-user"], user);
+      (window as any).gtag?.("event", "sign_up", { method: "email" });
       navigate("/dashboard");
     } catch (err: any) {
       setServerError(err.message);
@@ -223,14 +224,7 @@ export default function RegisterPage() {
           </div>
 
           <p className="mt-6 text-center text-xs text-gray-400">
-            &copy; {new Date().getFullYear()} FactuurFlow. All rights reserved. ·{" "}
-            <a
-              href="/pricing"
-              onClick={(e) => { e.preventDefault(); navigate("/pricing"); }}
-              className="hover:text-gray-600 underline underline-offset-2"
-            >
-              Pricing
-            </a>
+            &copy; {new Date().getFullYear()} FactuurFlow. All rights reserved.
           </p>
         </div>
       </div>

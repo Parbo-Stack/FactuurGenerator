@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
 import { AppLayout } from "@/components/AppLayout";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { fetchCurrentUser } from "@/lib/auth";
 import { CURRENCIES } from "@/lib/currencies";
 import { useToast } from "@/hooks/use-toast";
-import { User, Building2, Bell, Shield, Check, Loader2, ImageIcon, X, Activity, CreditCard } from "lucide-react";
+import { User, Building2, Bell, Shield, Check, Loader2, ImageIcon, X, Activity } from "lucide-react";
 import { SecurityTab } from "@/components/SecurityTab";
-import { UsageBar } from "@/components/UsageBar";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const inputCls = `w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl
@@ -88,20 +86,10 @@ function useUpdateMe() {
 // ── Settings page ─────────────────────────────────────────────────────────────
 export default function SettingsPage() {
   const { t } = useTranslation();
-  const [, navigate] = useLocation();
   const { data: user } = useQuery({
     queryKey: ["auth-user"],
     queryFn: fetchCurrentUser,
     staleTime: 5 * 60 * 1000,
-  });
-  const { data: subUsage } = useQuery({
-    queryKey: ["subscription-usage"],
-    queryFn: async () => {
-      const res = await fetch("/api/subscription/usage", { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch usage");
-      return res.json();
-    },
-    staleTime: 60_000,
   });
   const updateMe = useUpdateMe();
   const { toast } = useToast();
@@ -112,7 +100,6 @@ export default function SettingsPage() {
     { key: "notifications", label: t("settings.tabs.notifications"), icon: Bell },
     { key: "security",      label: t("settings.tabs.security"),      icon: Shield },
     { key: "auditLog",      label: t("settings.tabs.auditLog"),      icon: Activity },
-    { key: "subscription",  label: "Subscription",                   icon: CreditCard },
   ];
 
   const [activeTab, setActiveTab] = useState("profile");
@@ -553,65 +540,6 @@ export default function SettingsPage() {
 
           {/* ── Activiteitenlog ── */}
           {activeTab === "auditLog" && <SecurityTab />}
-
-          {/* ── Subscription ── */}
-          {activeTab === "subscription" && (
-            <div className="space-y-5">
-              <SectionCard title="Current plan" description="Your subscription and usage overview">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {subUsage ? subUsage.tierName : "—"}
-                    </p>
-                    <p className="text-sm text-gray-500 mt-0.5">
-                      {subUsage?.tierPrice === 0
-                        ? "Free forever"
-                        : `$${subUsage?.tierPrice}/month`}
-                    </p>
-                    {subUsage?.subscriptionStarted && (
-                      <p className="text-xs text-gray-400 mt-1">
-                        Active since {new Date(subUsage.subscriptionStarted).toLocaleDateString()}
-                      </p>
-                    )}
-                  </div>
-                  <div className="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center">
-                    <CreditCard className="w-6 h-6 text-green-600" />
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <UsageBar
-                    label="Clients"
-                    current={subUsage?.usage?.totalClients ?? 0}
-                    limit={subUsage?.limits?.clients ?? 3}
-                  />
-                  <UsageBar
-                    label="Invoices this month"
-                    current={subUsage?.usage?.invoicesThisMonth ?? 0}
-                    limit={subUsage?.limits?.invoicesPerMonth ?? 5}
-                  />
-                  <UsageBar
-                    label="Expenses this month"
-                    current={subUsage?.usage?.expensesThisMonth ?? 0}
-                    limit={subUsage?.limits?.expensesPerMonth ?? 5}
-                  />
-                </div>
-              </SectionCard>
-
-              {subUsage?.tier !== "business" && (
-                <div className="flex justify-end">
-                  <button
-                    onClick={() => navigate("/pricing")}
-                    className="flex items-center gap-2 py-2.5 px-6 text-sm font-medium
-                      bg-green-600 hover:bg-green-700 text-white rounded-xl transition"
-                  >
-                    <CreditCard className="w-4 h-4" />
-                    Upgrade plan
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </div>
     </AppLayout>

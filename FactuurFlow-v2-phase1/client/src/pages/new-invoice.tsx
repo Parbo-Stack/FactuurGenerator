@@ -248,6 +248,7 @@ export default function NewInvoicePage() {
 
     setSaveMode(status);
     try {
+      (window as any).gtag?.("event", "invoice_created", { invoice_status: status });
       await createInvoice.mutateAsync({
         clientId: selectedClientId,
         invoiceNumber,

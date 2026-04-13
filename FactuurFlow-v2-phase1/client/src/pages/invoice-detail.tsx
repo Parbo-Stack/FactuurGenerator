@@ -365,6 +365,7 @@ export default function InvoiceDetailPage() {
   function handleDownloadPdf() {
     const doc = generatePdf(invoice!, user, invoice!.currency);
     doc.save(`factuur-${invoice!.invoiceNumber}.pdf`);
+    (window as any).gtag?.("event", "invoice_downloaded", { invoice_number: invoice!.invoiceNumber });
   }
 
   async function handleSendEmail() {

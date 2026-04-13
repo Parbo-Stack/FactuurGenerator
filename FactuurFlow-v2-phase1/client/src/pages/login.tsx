@@ -74,6 +74,7 @@ export default function LoginPage() {
     try {
       const user = await login(data.email, data.password);
       queryClient.setQueryData(["auth-user"], user);
+      (window as any).gtag?.("event", "login", { method: "email" });
       navigate("/dashboard");
     } catch (err: any) {
       setServerError(err.message);
@@ -109,12 +110,19 @@ export default function LoginPage() {
 
           {/* Hero text */}
           <h1 className="text-4xl font-bold text-white leading-tight mb-4">
-            Invoice smarter.<br />
-            Get paid faster.
+            Create a professional invoice in 60 seconds
           </h1>
-          <p className="text-green-100 text-lg leading-relaxed mb-12 max-w-sm">
-            The clean, modern invoicing tool for freelancers and small businesses worldwide.
+          <p className="text-green-100 text-lg leading-relaxed mb-8 max-w-sm">
+            Free forever. No accounting knowledge needed.
           </p>
+
+          {/* CTA */}
+          <button
+            onClick={() => navigate("/register")}
+            className="inline-flex items-center gap-2 bg-white text-green-700 font-bold px-6 py-3 rounded-xl text-sm hover:bg-green-50 transition mb-12"
+          >
+            Create Free Invoice →
+          </button>
 
           {/* Features */}
           <div className="space-y-5">
@@ -230,14 +238,7 @@ export default function LoginPage() {
           </div>
 
           <p className="mt-6 text-center text-xs text-gray-400">
-            &copy; {new Date().getFullYear()} FactuurFlow. All rights reserved. ·{" "}
-            <a
-              href="/pricing"
-              onClick={(e) => { e.preventDefault(); navigate("/pricing"); }}
-              className="hover:text-gray-600 underline underline-offset-2"
-            >
-              Pricing
-            </a>
+            &copy; {new Date().getFullYear()} FactuurFlow. All rights reserved.
           </p>
         </div>
       </div>
